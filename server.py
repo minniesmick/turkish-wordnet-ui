@@ -1309,7 +1309,7 @@ def ud_sents():
         if _UD or not os.path.exists(UD_FILE):
             return _UD
         with open(UD_FILE, encoding="utf-8") as f:
-            blocks = f.read().split(NL * 2)
+            blocks = f.read().replace(chr(13), "").split(NL * 2)   # git autocrlf CRLF yapsa da çalışsın
         for blk in blocks:
             lines = [l for l in blk.strip().split(NL) if l]
             if not lines:
