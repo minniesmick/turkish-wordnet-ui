@@ -662,3 +662,21 @@ button.mp-ch:hover{border-color:var(--spot)}
 .mp-alts{margin-top:4px;font-size:.84rem}
 .mp-alts summary{cursor:pointer;color:var(--ink-3)}
 .mp-fsm{margin:6px 0;padding:10px 12px;border:1px solid var(--rule);border-radius:var(--r);background:var(--sunk);font:500 .8rem/1.55 var(--font-mono);white-space:pre-wrap;word-break:break-word}
+
+/* Korpus gezgini */
+.cp-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+@media(max-width:900px){.cp-two{grid-template-columns:1fr}}
+.cp-tbl tr[data-act]{cursor:pointer}
+.cp-tbl tr[data-act]:hover td{background:var(--sunk)}
+svg.zipf{width:100%;height:auto;display:block}
+svg.zipf text{font:500 10px var(--font-mono);fill:var(--ink-3);text-anchor:middle}
+svg.zipf .g{stroke:var(--rule);stroke-width:1}
+svg.zipf .ref{stroke:var(--spot);stroke-width:1.4;stroke-dasharray:5 4}
+svg.zipf circle{fill:var(--ink-2)}
+.kwic{font:500 .86rem/1.6 var(--font-mono);border:1px solid var(--rule);border-radius:var(--r);background:var(--page);overflow-x:auto}
+.kwic>div{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;padding:3px 12px;border-bottom:1px solid var(--rule);white-space:nowrap}
+.kwic>div:last-child{border-bottom:0}
+.kwic .l{text-align:right;overflow:hidden;text-overflow:ellipsis;direction:rtl;color:var(--ink-2)}
+.kwic .r{overflow:hidden;text-overflow:ellipsis;color:var(--ink-2)}
+.kwic b{color:var(--spot)}
+

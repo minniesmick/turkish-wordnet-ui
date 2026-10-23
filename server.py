@@ -1360,6 +1360,39 @@ def ud_word(w):
     return {"form": w, "results": [{"lemma": k[0], "upos": k[1], "feats": k[2], "n": n} for k, n in sorted(f.items(), key=lambda x: -x[1])]}
 
 
+_CORP = {}
+
+
+def corpus_boun():
+    """BOUN: [{id, f: biçimler, l: lemmalar, p: UPOS}] (çok sözcüklü belirteç ve boş düğümler atlanır)."""
+    if "boun" not in _CORP:
+        out = []
+        for s in ud_sents():
+            f, l, p = [], [], []
+            for line in s["conllu"].split(NL):
+                if not line or not line[0].isdigit():
+                    continue
+                c = line.split(TAB)
+                if len(c) < 4 or not c[0].isdigit():
+                    continue
+                f.append(c[1]); l.append(c[2]); p.append(c[3])
+            out.append({"id": s["id"], "f": f, "l": l, "p": p})
+        _CORP["boun"] = out
+    return _CORP["boun"]
+
+
+def corpus_get(name, n):
+    """name=boun: tüm cümleler; name=brown: SemCor'daki (Brown Corpus) İngilizce cümleler, n tanesi eşit aralıkla seçilir."""
+    if name == "boun":
+        return {"name": "boun", "total": len(corpus_boun()), "sents": corpus_boun()}
+    sents = SEMCOR.get("sents") or []
+    total = len(sents)
+    if n and n < total:
+        step = total / n
+        sents = [sents[int(i * step)] for i in range(n)]
+    return {"name": "brown", "total": total, "sents": sents}
+
+
 def ud_search(q, lo, hi, limit):
     q = norm(q, True).strip()
     out = [s for s in ud_sents() if lo <= s["n"] <= hi and (not q or q in norm(s["text"], True))]
@@ -1445,8 +1478,13 @@ class Handler(SimpleHTTPRequestHandler):
 
     def send_json(self, obj, code=200):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
+        gz = len(body) > 50000 and "gzip" in (self.headers.get("Accept-Encoding") or "")
+        if gz:
+            body = gzip.compress(body, 5)
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
+        if gz:
+            self.send_header("Content-Encoding", "gzip")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
@@ -1496,6 +1534,8 @@ class Handler(SimpleHTTPRequestHandler):
                 self.send_json(nb_eval(p))
             elif u.path == "/api/nblemmas":
                 self.send_json({"lemmas": nb_lemmas(_q(p, "corpus", "semcor"))})
+            elif u.path == "/api/corpus":
+                self.send_json(corpus_get(p.get("name", ["boun"])[0], int(p.get("n", ["0"])[0] or 0)))
             elif u.path == "/api/zemberek":
                 st = ZEM["state"]
                 if st == "starting":

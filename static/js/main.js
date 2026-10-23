@@ -11,6 +11,7 @@ import "./frames.js";
 import "./morph.js";
 import "./parse.js";
 import "./deps.js";
+import "./corpus.js";
 import "./ngram.js";
 import "./learn.js";
 
