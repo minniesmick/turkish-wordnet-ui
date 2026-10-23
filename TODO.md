@@ -13,8 +13,10 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [x] Cümle olasılığı adım adım, log₂, 0 çarpan uyarısı, OOV uyarısı, perplexity.
 - [x] Laplace (add-one) yumuşatma.
 - [x] InClass 5 korpusu hazır örnek (`PRESETS.inclass5`); 4/6, 2/6, 3/7, 2/7, 2/7 PDF'deki tabloyla doğrulandı, "the cat X" cevabı X = cat (2/6).
-- [ ] Backoff ve interpolation (slayt 32), UNK / kapalı-açık sözcük dağarcığı (slayt 33).
-- [ ] PMI (slayt 34–39): pencere ±k birlikte geçiş sayımı, PMI tablosu.
+- [x] Backoff ve interpolation (slayt 32), UNK / açık sözcük dağarcığı (slayt 33): `static/js/lm.js` (test: `node scripts/test_lm.mjs`).
+- [x] PMI (slayt 34–39): pencere ±k, en yüksek çiftler, kolokasyonlar, PPMI kosinüs benzerliği. Rastgele cümle üretimi (slayt 28–29) ve eğitim/test perplexity karşılaştırması da var.
+- [x] Korpus gezgini (`static/js/corpus.js`, `g o`): BOUN ve Brown, sıklık, Zipf, KWIC; `/api/corpus` (gzip).
+- [ ] N-gram: Katz / Kneser-Ney (normalize edilmiş backoff), λ'ları held-out veriden öğrenme (deleted interpolation), SemCor dışı İngilizce korpus.
 
 ## Kullanım kipi ve morfoloji (Lecture 2)
 

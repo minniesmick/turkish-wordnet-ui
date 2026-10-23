@@ -680,3 +680,12 @@ svg.zipf circle{fill:var(--ink-2)}
 .kwic .r{overflow:hidden;text-overflow:ellipsis;color:var(--ink-2)}
 .kwic b{color:var(--spot)}
 
+/* N-gram: üretim, karşılaştırma, açıklama */
+.gen-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media(max-width:900px){.gen-grid{grid-template-columns:1fr}}
+.gen-col h4{margin:0 0 8px;font:600 .72rem var(--font-ui);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.gen-col p{margin:0 0 10px;padding:8px 10px;border:1px solid var(--rule);border-radius:var(--r);background:var(--page);font:400 1rem/1.4 var(--font-text)}
+.ng-expl{margin:10px 0 0;padding:10px 14px;border-left:3px solid var(--spot);background:var(--wash);border-radius:0 var(--r) var(--r) 0;font-size:.92rem;color:var(--ink-2)}
+.ng-expl p{margin:2px 0}
+.ng-cmp td.best{font-weight:700;color:var(--spot)}
+.ng-cmp td{font-variant-numeric:tabular-nums}

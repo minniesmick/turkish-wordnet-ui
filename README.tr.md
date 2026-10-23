@@ -120,8 +120,9 @@ Türkçe iki XML dosyasını indirmek için:
   PCFG en olası ağacı ve cümle olasılığını bulur (Lecture 3, InClass 2 ve 3). Tarayıcıda çalışır.
 - **Bağımlılık**: UD Turkish-BOUN (test kümesi, 979 cümle) cümlesi seç ya da CoNLL-U yapıştır; bağımlılık okları ve baş–bağımlı ağacı çizilir,
   ağaç özellikleri (tek kök, bağlı, tek başlı, döngüsüz, projektif) kontrol edilir, ilişkiler açıklanır, etiketler gizlenip kendin deneyebilirsin (Lecture 3, InClass 4).
-- **N-gram**: korpustan unigram / bigram / trigram sayımları, koşullu olasılık tabloları (kesir + ondalık, satır toplamı 1),
-  sonraki sözcük tahmini, log uzayında adım adım cümle olasılığı, Laplace (add-one) yumuşatma ve perplexity (Lecture 5). Tarayıcıda çalışır.
+- **Korpus**: UD Turkish-BOUN (lemma ve UPOS destekli) ya da Brown cümleleri üzerinde sözcük ve n-gram sıklık listeleri, Zipf grafiği, type/token oranı ve bağlam satırları (KWIC) (Lecture 5).
+- **N-gram**: kendi metnin, BOUN ya da Brown üzerinde unigram / bigram / trigram tabloları, sonraki sözcük tahmini, adım adım cümle olasılığı ve perplexity,
+  **Laplace, backoff ve interpolation** yumuşatma, bilinmeyen sözcük için **UNK**, rastgele cümle üretimi, eğitim/test perplexity karşılaştırması ve **PMI** (birlikte geçiş, benzer bağlamlı sözcükler) (Lecture 5).
 - **Kullanım kipi**: üst çubuktaki **Araç / Öğrenci** anahtarı normal kullanımı çalışmadan ayırır. Araç kipi yalnızca sonuç verir; Öğrenci kipi ders bağlantıları,
   formüller, adım adım açıklama, kural izi, alıştırma ve sınavları (ve Ders sekmesini) açar. Öğretici öğeler `.stu` sınıfıyla işaretlidir.
 - **Ders**: slayt kavramları (homonymy, polysemy, synonymy, antonymy, hypernym/hyponym, ilişki tabloları, bass yolları,
