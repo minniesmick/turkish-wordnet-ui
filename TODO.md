@@ -26,7 +26,7 @@ Rakamlar 2026-10-23'te 500 gerçek BOUN sözcüğü ve 400 rastgele üretimle ö
 **Genel**
 - İndirilen SVG / PNG sitenin yazı tiplerini taşımaz, açıldığı bilgisayarın yazı tipiyle çizilir.
 - Ders sayfaları ve soruları ders slaytlarının metninden yazıldı; slayt görselleri (şekiller, tablolar) tek tek taranmadı.
-- Testler: `scripts/test_*.mjs` (turkish 43, fsm 4 yol, lm 41, mle 19, parsers 13, md 34 denetim); arayüz otomatik test edilmiyor, preview'da elle denendi.
+- Testler: `scripts/test_*.mjs` (turkish 43, fsm 4 yol, lm 41, mle 19, parsers 13, md 34, fsm alıştırma denetimi dahil); arayüz otomatik test edilmiyor, preview'da elle denendi.
 
 ## N-gram dil modeli laboratuvarı (InClass 5, Güz 2026)
 
@@ -61,7 +61,8 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [ ] Belirsizlik: aday kümesini Zemberek çözümlemelerinden al ve Zemberek'in kendi seçimiyle karşılaştır (etiket eşlemesi gerekir); BOUN train/dev kümesiyle eğit; lemma de seçilsin; sinir ağı yöntemi (slayt 32'deki üçüncü yöntem).
 - [x] "Kendin doldur, kontrol et": CKY tablosu (Ayrıştırma, hücre hücre kontrol, ipucu) ve n-gram (tek olasılık, tablo satırı).
 - [x] Ders sekmesi Lecture 1, 2, 3 ve 5 için genişletildi (`static/js/lessons.js`: bölümler + 38 çoktan seçmeli soru; düğmeler `act: go` ile araçları hazır örnekle açar).
-- [ ] Kendin-doldur'u bağımlılık ağacına (kenar ekleme) ve Morfoloji FSM yoluna da taşı; Ders sorularını slayt görsellerinden ek sorularla zenginleştir.
+- [x] "FSM yolunu kendin yaz" (`static/js/fsmquiz.js`, Morfoloji sekmesi bölüm 7, yalnızca Öğrenci kipi): 22 hazır çözümleme ya da kendi çözümlemen, durum dizisini yaz, kontrol et, ipucu, cevap (Sample.pdf biçimi), şekil yerine durum haritası. Cevap anahtarı elle kodlanan kenarlardan çıkar; PDF'le birebir doğrulananlar 3 yol.
+- [ ] Kendin-doldur'u bağımlılık ağacına (kenar ekleme) taşı; Ders sorularını slayt görsellerinden ek sorularla zenginleştir.
 
 ## Ayrıştırma laboratuvarı (InClass 2, 3, 4; Lecture 3)
 
