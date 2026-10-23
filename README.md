@@ -1,115 +1,79 @@
-# Türkçe WordNet arayüzü
+<h1 align="center">Turkish WordNet · PropBank · FrameNet UI</h1>
 
-Starlang `TurkishWordNet` reposundaki verilerle çalışan yerel arama arayüzü.
-Bağımlılık yok, sadece Python 3 gerekir.
+<p align="center">
+<a href="README.md"><img alt="English" src="https://img.shields.io/badge/English-active-2b3bd6?style=for-the-badge"></a> <a href="README.tr.md"><img alt="Türkçe" src="https://img.shields.io/badge/T%C3%BCrk%C3%A7e-oku-6b7280?style=for-the-badge"></a>
+</p>
 
-    python3 server.py        # sonra http://127.0.0.1:8770
+<p align="center">
+<a href="https://www.mef.edu.tr/"><img alt="MEF University" src="https://img.shields.io/badge/MEF%20University-COMP%20451-b42318?style=for-the-badge"></a>
+<a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/code-MIT-2b3bd6?style=for-the-badge"></a>
+<a href="data/README.md"><img alt="Data licenses" src="https://img.shields.io/badge/data-CC%20BY--SA%204.0%20%2B%20others-6b7280?style=for-the-badge"></a>
+</p>
 
-İlk açılışta veri ~5 sn içinde belleğe yüklenir.
+> **Made for studying.** This repository was built as a study aid for **COMP 451 – Introduction to Natural Language Processing** at **MEF University** (Fall 2026). It is a student project, not official course material, and is not affiliated with the university.
 
-## Veri (data/)
+A local, dependency-free web app (Python 3 standard library + vanilla JS) for exploring the lexical-semantics resources from the course: Turkish and English WordNet, PropBank, FrameNet and VerbNet, with similarity measures, word sense disambiguation and a concept map.
 
-| Dosya | Repodaki yeri | İçerik |
-|---|---|---|
-| `turkish_wordnet.xml` | `src/main/resources/` | Güncel KeNet: 78.327 synset, ilişkiler, İngilizce bağlantılar (ILR), örnekler |
-| `english_wordnet_version_31.xml` | `src/main/resources/` | Princeton WordNet 3.1: 117.791 synset, ilişkiler |
-| `turkish1998_wordnet.xml` | repo kökü | 1998 sözlük sürümü: 67.897 synset (ilişki yok) |
+<p align="center">
+  <img src="docs/screenshots/graph.png" width="49%" alt="Concept map">
+  <img src="docs/screenshots/search.png" width="49%" alt="Dictionary and side sheet">
+</p>
+<p align="center"><img src="docs/screenshots/graph-dark.png" width="98%" alt="Dark theme"></p>
 
-Veriyi yeniden indirmek için:
+## Quick start
 
-    B=https://raw.githubusercontent.com/StarlangSoftware/TurkishWordNet/master
-    curl -L -o data/turkish_wordnet.xml $B/src/main/resources/turkish_wordnet.xml
-    curl -L -o data/english_wordnet_version_31.xml $B/src/main/resources/english_wordnet_version_31.xml
-    curl -L -o data/turkish1998_wordnet.xml $B/turkish1998_wordnet.xml
+```bash
+git clone https://github.com/minniesmick/turkish-wordnet-ui
+cd turkish-wordnet-ui
+python3 server.py        # then open http://127.0.0.1:8770
+```
 
-Veri CC BY-SA 4.0 lisanslıdır (Starlang Software). Tüm veri kaynakları, bağlantıları ve lisansları için bkz. [data/README.md](data/README.md).
+The data (about 116 MB) is already in `data/`. The first start takes a few seconds while it loads into memory. No `pip install` needed.
 
-### NLTK veri deposundan gelen ek veriler
+## Data sources
 
-Elimizdeki Starlang verisinde olmayan ama derse gereken şeyler `nltk_data` paketlerinden üretilir (`python3 scripts/build_nltk.py`,
-kaynakları kendisi indirir; ~120 MB indirme, birkaç dakika). Paketler: `wordnet31`, `semcor`, `senseval`, `verbnet3`, `framenet_v17`.
+All data is open source. The files are included in `data/`; click a button to open the original.
 
-| Çıktı (`data/`) | NLTK paketi | Ne sağlıyor |
-|---|---|---|
-| `wn31_extra.json.gz` | wordnet31 | İngilizce anlam numarası = sıklık sırası + SemCor sayısı, örnek cümleler, lexname kategorisi, fiil cümle kalıpları |
-| `semcor.json.gz` | semcor | 35.795 cümle / 224.149 anlam etiketi: denetimli WSD (Naive Bayes) ve bilgi içeriği (IC) tabanlı benzerlik |
-| `senseval.json.gz` | senseval | SENSEVAL-2 `hard`, `interest`, `line`, `serve` (slayttaki *interest* örneği) |
-| `verbnet.json` | verbnet3 | VerbNet 3.3: 594 sınıf, üyeler, tematik roller, çerçeveler, anlam yüklemleri |
-| `framenet_lu_ex.json.gz` | framenet_v17 | Sözcük birimi başına anotasyonlu örnek cümleler (16.686 örnek) |
+<p>
+<a href="https://github.com/StarlangSoftware/TurkishWordNet"><img alt="KeNet" src="https://img.shields.io/badge/KeNet-TurkishWordNet-2b3bd6?style=for-the-badge&logo=github&logoColor=white"></a>
+<a href="https://github.com/StarlangSoftware/TurkishPropBank"><img alt="TRopBank" src="https://img.shields.io/badge/TRopBank-TurkishPropBank-2b3bd6?style=for-the-badge&logo=github&logoColor=white"></a>
+<a href="https://github.com/StarlangSoftware/TurkishFrameNet"><img alt="Turkish FrameNet" src="https://img.shields.io/badge/Turkish%20FrameNet-TurkishFrameNet-2b3bd6?style=for-the-badge&logo=github&logoColor=white"></a>
+<a href="https://github.com/propbank/propbank-frames"><img alt="PropBank" src="https://img.shields.io/badge/PropBank-propbank--frames-2b3bd6?style=for-the-badge&logo=github&logoColor=white"></a>
+<a href="https://github.com/nltk/nltk_data"><img alt="NLTK" src="https://img.shields.io/badge/NLTK-nltk_data-2b3bd6?style=for-the-badge&logo=github&logoColor=white"></a>
+<a href="https://framenet.icsi.berkeley.edu/"><img alt="FrameNet" src="https://img.shields.io/badge/FrameNet-ICSI%20Berkeley-0d1220?style=for-the-badge"></a>
+<a href="https://wordnet.princeton.edu/"><img alt="WordNet" src="https://img.shields.io/badge/WordNet-Princeton-0d1220?style=for-the-badge"></a>
+<a href="https://verbs.colorado.edu/verbnet/"><img alt="VerbNet" src="https://img.shields.io/badge/VerbNet-CU%20Boulder-0d1220?style=for-the-badge"></a>
+<a href="https://propbank.github.io/"><img alt="PropBank" src="https://img.shields.io/badge/PropBank-propbank.github.io-0d1220?style=for-the-badge"></a>
+</p>
 
-Sunucu bu dosyalar yoksa yine çalışır; ilgili özellikler devre dışı kalır.
+Per-file sources, licenses and re-download commands: **[data/README.md](data/README.md)**.
 
-### Roller ve çerçeveler (PropBank / FrameNet)
+## What is inside
 
-| Dosya | Kaynak | İçerik |
-|---|---|---|
-| `turkish-propbank.xml` | Starlang `TurkishPropBank` (`src/main/resources/`) | TRopBank: 17.526 KeNet fiil synset'i için ARG0–ARG4, işlev etiketi, durum eki, açıklama |
-| `framenet.xml` | Starlang `TurkishFrameNet` (`src/main/resources/`) | Türkçe FrameNet: 809 çerçeve, KeNet synset'leri olarak sözcük birimleri |
-| `propbank_en.json` | PropBank 3.4 frame dosyaları (propbank/propbank-frames, CC BY-SA 4.0) | 11.198 roleset, örnek cümleler, FrameNet/VerbNet bağlantıları |
-| `framenet_en.json` | FrameNet 1.7 (ICSI, CC BY 3.0; NLTK veri deposu üzerinden) | 1.221 çerçeve: tanım, elemanlar, sözcük birimleri, çerçeve ilişkileri |
+| Tab | What it does |
+|---|---|
+| **Search** | Word, definition, example and ID search in KeNet (Turkish), Princeton WordNet 3.1 and the 1998 dictionary. Click a sense and the others fade while a side sheet opens (definition, hierarchy, relations, translation, roles, notes). |
+| **Map** | The concept's hierarchy and links as a relational tree. Click a node to highlight its path and see the relation, distance and similarity (path, Wu-Palmer, Lin) to the centre. Double-click to re-centre. Siblings, line-style filters, **Diagram / Tree** views. |
+| **Similarity** | Relation between two words (synonym, antonym, hypernym, hyponym, common ancestor) with path, Wu-Palmer, and information-content measures (Resnik, Lin, Jiang-Conrath) for English. |
+| **WSD** | Simplified and extended **Lesk**, and a supervised **Naive Bayes** classifier trained on SemCor and SENSEVAL-2 with 5-fold cross-validation, compared with the most-frequent-sense baseline. |
+| **Roles** | PropBank rolesets, Turkish PropBank (TRopBank), VerbNet 3.3, a rule-based Turkish sentence labeller (case suffixes to ARG0/ARG1) and a role quiz. |
+| **Frames** | FrameNet 1.7 and Turkish FrameNet: frames, frame elements, lexical units with annotated examples, frame relations. |
+| **Lesson** | Lecture concepts (homonymy, polysemy, hypernymy, ...) as ready-made queries, plus quizzes generated from the data. |
 
-İngilizce iki JSON dosyası bir kez üretilir (kaynakları kendisi indirir; ~100 MB, birkaç dakika):
+Extras: **⌘K** command palette, favourites / notes / trail saved in the browser (no account), Markdown export, presentation mode (`P`), keyboard shortcuts (`?`), light/dark theme (`?theme=dark`), and a shareable URL for every view.
 
-    python3 scripts/build_srl.py
+Design direction: *İki Renkli Sözlük* (a two-colour dictionary): cool paper, blue-black ink, a single ultramarine accent, categories told apart by line style instead of colour. See [DESIGN.md](DESIGN.md) and [PRODUCT.md](PRODUCT.md).
 
-Türkçe iki XML dosyasını indirmek için:
+## Project layout
 
-    B=https://raw.githubusercontent.com/StarlangSoftware
-    curl -L -o data/turkish-propbank.xml $B/TurkishPropBank/master/src/main/resources/turkish-propbank.xml
-    curl -L -o data/framenet.xml $B/TurkishFrameNet/master/src/main/resources/framenet.xml
+```
+server.py            stdlib HTTP server + JSON API
+static/              index.html, css/app.css, js/*.js (ES modules, no build step), fonts/
+data/                lexical resources (see data/README.md)
+scripts/             build_srl.py (PropBank/FrameNet), build_nltk.py (SemCor, SENSEVAL, VerbNet, ...)
+TODO.md              what is planned next
+```
 
-## Özellikler
+## License
 
-- Kelime / tanım / örnek / ID araması; tam, başlar, biter, içerir, "ifade içinde sözcük" eşleşmeleri
-- Tür (POS) süzgeci (sayılarla), anlam numarası süzgeci, "örnek cümlesi olanlar"
-- ç/ğ/ı/ö/ş/ü farkını yok sayma seçeneği
-- Kartta **İlişkiler**: üst kavram zinciri, alt kavramlar, zıt anlamlılar, parça-bütün vb.
-- Türkçe ↔ İngilizce karşılıklar (mavi EN / TR etiketleri)
-- Arama durumu URL'de saklanır, geri tuşu ve paylaşım çalışır
-
-### Ders sekmeleri (COMP 451 · Lecture 4 slaytlarına göre)
-
-- **Benzerlik**: iki sözcük arasında eş anlamlı / zıt anlamlı / alt-üst kavram / ortak üst kavram (LCS) ilişkisi,
-  yol uzunluğu, path benzerliği (1/(yol+1)) ve Wu-Palmer; hiyerarşi yolu görsel olarak çizilir.
-- **Anlam seçimi (WSD)**: basitleştirilmiş / genişletilmiş **Lesk** (bağlam–tanım örtüşmesi, idf ağırlıklı).
-  Doğruluğu sınırlıdır; yöntemin zayıf yanlarını görmek için tasarlandı.
-- **Ders**: slayt kavramları (homonymy, polysemy, synonymy, antonymy, hypernym/hyponym, ilişki tabloları, bass yolları,
-  ID alıştırması, Q/A zorlukları) hazır sorgularla; veriden otomatik üretilen quiz (üst kavram / ilişki türü).
-- Kartlarda **↑ üst kavram** ipucu, çoklu hypernym yolları ve sözcük başlığında çok anlamlılık özeti.
-- ID alanı KeNet'te bağlı İngilizce `ENG31-…` kimliklerini de arar (slayttaki alıştırma).
-- **Roller (PropBank)**: İngilizce roleset sözlüğü (fiil / rol tanımı / FrameNet / VerbNet ile arama, işlev süzgeci, renkli örnek
-  cümleler) ve TRopBank (durum eki ve işlev süzgeçli); **Cümle etiketle**: Türkçe cümlede yüklemi bulur, KeNet+Lesk ile aday
-  çerçeve seçer, durum eklerine bakarak ARG0/ARG1'i yerleştirir (kural tabanlı, durum eki tahmini elle düzeltilebilir);
-  **Rol sınavı**: PropBank altın örneklerinden rol bulma.
-- **Çerçeveler (FrameNet)**: çerçeve adı / sözcük birimi (agree.v) / eleman / tanım ile arama, renkli FE örnekleri,
-  çerçeve ilişkileri, bağlı PropBank roleset'leri ve Türkçe karşılık sözcük birimleri.
-- WordNet kartlarında **ROLLER** ve FrameNet çerçeve çipleri, ilişkiler panelinde TRopBank argüman tablosu.
-- **WSD → Naive Bayes**: SemCor / SENSEVAL-2 üzerinde denetimli anlam seçimi (bağlam torbası + yan sözcükler), kararı belirleyen
-  özellikler, 5-kat çapraz doğrulama ve MFS / Lesk ile karşılaştırma (interest: NB ≈ %91, MFS ≈ %53).
-- **Benzerlik** sekmesinde İngilizce için IC tabanlı Resnik / Lin / Jiang-Conrath.
-- **Roller → VerbNet 3.3**: sınıf / üye / tematik rol / yüklem araması; PropBank kartlarındaki VN etiketleri sınıfa, sınıftaki
-  üyeler PropBank rolesetine bağlanır.
-- **Çerçeveler**: sözcük birimine tıklayınca FrameNet anotasyonlu örnekler (FE renkli).
-- Ara sekmesi İngilizce: anlam numarası/sıklık, lexname süzgeci, örnek cümleler, fiil kalıpları.
-
-
-## Arayüz (yeniden tasarım)
-
-Tasarım yönü **İki Renkli Sözlük**: baskı sözlüğünün sayfa dili, modern bir SaaS çalışma alanına çevrildi. Soğuk ince kâğıt, mavi-siyah mürekkep,
-tek leke renk (ultramarin; yalnızca tıklanabilir ve odaktaki şeylerde). Kategori renkle değil çizgi biçimiyle ayrılır.
-Yazı tipleri `static/fonts/` altında yerel (Schibsted Grotesk, Spectral, JetBrains Mono).
-
-- **Odaklanma**: Ara'da bir anlama tıkla; diğer anlamlar söner, sağda kenar kâğıdı açılır (tanım, hiyerarşi yolları, ilişkiler, karşılık, roller, not).
-- **Harita** (`v=graph`): kavramın hiyerarşisi ve bağları ilişkisel ağaç olarak. Düğüme tıkla → yol vurgulanır, kâğıtta bağ türü, uzaklık ve benzerlik
-  (path, Wu-Palmer, Lin) görünür; çift tıkla → merkeze al; iz (breadcrumb), kardeş kavramlar, çizgi biçimine göre süzme, **Şema / Ağaç** görünümü.
-- **⌘K komut paleti**: sözcük, çerçeve, roleset, VerbNet sınıfı ve komutlar. `?` tüm kısayolları gösterir (`g s/h/b/w/r/f/d`, `j/k`, `m`, `f`, `p`, `t`).
-- **Çalışma listem**: favoriler, notlar, gezi izi tarayıcıda (localStorage) saklanır; Markdown olarak kopyalanabilir.
-- **Sunum modu** (`P`): büyük yazı, kenar çubukları sönük. Her ekranın bağlantısı (`link` düğmesi) aynı durumu açar; `?theme=dark|light` temayı seçer.
-
-Kaynak yapı: `static/index.html` (kabuk), `static/css/app.css`, `static/js/*.js` (ES modülleri; derleme adımı yok).
-
-## Lisans
-
-Kod: [MIT](LICENSE). Veri: her kaynağın kendi lisansı, ayrıntı [data/README.md](data/README.md) içinde.
-Yapılacaklar: [TODO.md](TODO.md).
-Yazı tipleri (`static/fonts/`): Schibsted Grotesk, Spectral ve JetBrains Mono, üçü de SIL Open Font License 1.1.
+Code: [MIT](LICENSE). Data: each source keeps its own license, listed in [data/README.md](data/README.md). Fonts (Schibsted Grotesk, Spectral, JetBrains Mono): SIL Open Font License 1.1.
