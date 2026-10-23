@@ -124,7 +124,7 @@ Türkçe iki XML dosyasını indirmek için:
 - **N-gram**: kendi metnin, BOUN ya da Brown üzerinde unigram / bigram / trigram tabloları, sonraki sözcük tahmini, adım adım cümle olasılığı ve perplexity,
   **Laplace, backoff ve interpolation** yumuşatma, bilinmeyen sözcük için **UNK**, rastgele cümle üretimi, eğitim/test perplexity karşılaştırması ve **PMI** (birlikte geçiş, benzer bağlamlı sözcükler) (Lecture 5).
 - **Kullanım kipi**: üst çubuktaki **Araç / Öğrenci** anahtarı normal kullanımı çalışmadan ayırır. Araç kipi yalnızca sonuç verir; Öğrenci kipi ders bağlantıları,
-  formüller, adım adım açıklama, kural izi, alıştırma ve sınavları (ve Ders sekmesini) açar. Öğretici öğeler `.stu` sınıfıyla işaretlidir.
+  formüller, adım adım açıklama, kural izi, alıştırma ve sınavları (ve Ders sekmesini) açar: CKY tablosunu kendin doldurup hücre hücre kontrol ettir, n-gram olasılıklarını ve tablo satırlarını elle hesapla, etiketleri gizleyerek bağımlılık ağacını dene. Öğretici öğeler `.stu` sınıfıyla işaretlidir.
 - **Ders**: slayt kavramları (homonymy, polysemy, synonymy, antonymy, hypernym/hyponym, ilişki tabloları, bass yolları,
   ID alıştırması, Q/A zorlukları) hazır sorgularla; veriden otomatik üretilen quiz (üst kavram / ilişki türü).
 - Kartlarda **↑ üst kavram** ipucu, çoklu hypernym yolları ve sözcük başlığında çok anlamlılık özeti.

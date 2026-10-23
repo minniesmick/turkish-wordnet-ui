@@ -27,7 +27,8 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [x] Zemberek WordGenerator ile üretim (`G`/`O` komutları, `/api/zemberek?g=&o=&i=`); alıştırma cevap anahtarı Zemberek'ten, çözümleme sorusunda geçerli çözümleme tek seçeneğe indirildi (belirsiz yüzey sorunu giderildi).
 - [ ] Morfoloji kapsamı (küçük motor, yalnızca yedek): sıfat-fiil -DHk, zarf-fiil -ArAk/-Ip, ki, ek-fiil (-DHr, -(y)Hm), birleşik zaman; sıklıkla yanlış çözümlenen ilk 100 BOUN sözcüğünü incele.
 - [ ] Morfolojik belirsizlik giderme (slayt 31–32): BOUN etiketlerinden en olası çözümlemeyi seç.
-- [ ] Öğrenci kipi: Ders sekmesini Lecture 1, 2, 3 ve 5 için genişlet; CKY / n-gram için "kendin doldur, kontrol et" alıştırması.
+- [x] "Kendin doldur, kontrol et": CKY tablosu (Ayrıştırma, hücre hücre kontrol, ipucu) ve n-gram (tek olasılık, tablo satırı).
+- [ ] Öğrenci kipi: Ders sekmesini Lecture 1, 2, 3 ve 5 için genişlet; kendin-doldur'u bağımlılık ağacına (kenar ekleme) ve Morfoloji FSM yoluna da taşı.
 
 ## Ayrıştırma laboratuvarı (InClass 2, 3, 4; Lecture 3)
 

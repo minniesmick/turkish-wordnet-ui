@@ -197,6 +197,65 @@ function pmiHTML(){
   return h + "</div>";
 }
 
+// ───────────────────────── kendin hesapla (öğrenci kipi)
+const NQ = {kind:"p", q:null, key:"", score:0, n:0, done:false, right:null};
+const pickOf = a => a[Math.floor(Math.random() * a.length)];
+const parseVal = str => {
+  const t = String(str).trim().replace(",", ".").replace(/\s+/g, "");
+  if(!t) return NaN;
+  const m = t.match(/^(-?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if(m) return +m[2] ? +m[1] / +m[2] : NaN;
+  return /^-?\d*\.?\d+$/.test(t) ? +t : NaN;
+};
+const closeTo = (v, p) => isFinite(v) && Math.abs(v - p) < 5e-4 + 1e-9;
+function nqKey(){ return `${srcKey()}|${NG.n}|${NG.smooth}|${NG.unk}`; }
+function makeNQ(){
+  const ents = [...M.orders[M.n]].filter(([, e]) => e.total >= 2);
+  if(!ents.length) return null;
+  const [key, e] = pickOf(ents), hist = M.n === 1 ? [] : key.split(SEP), cf = cfg();
+  if(NQ.kind === "p"){
+    const seen = [...e.next.keys()], w = Math.random() < .7 ? pickOf(seen) : pickOf(M.cols);
+    return {hist, w, key, r:prob(M, hist, w, cf)};
+  }
+  const words = M.cols.length <= 12 ? M.cols : [...e.next].sort((a, b) => b[1] - a[1]).slice(0, 8).map(x => x[0]);
+  return {hist, key, rows:words.map(w => ({w, r:prob(M, hist, w, cf)})), all:M.cols.length <= 12};
+}
+function nqHTML(){
+  if(!M?.S) return "";
+  if(NG.smooth !== "none" && NG.smooth !== "laplace") return '<div class="notice">Elle hesaplamak için yumuşatmayı <b>Yok</b> ya da <b>Laplace +1</b> seç: backoff ve interpolation karışık ağırlıklar kullandığı için kesirle yazılmaz.</div>';
+  if(NQ.key !== nqKey()){ NQ.key = nqKey(); NQ.q = null; NQ.done = false; }
+  if(!NQ.q) NQ.q = makeNQ();
+  const q = NQ.q;
+  const head = `<div class="row" style="margin-bottom:12px"><div class="seg"><button data-nq="kind" data-k="p" aria-pressed="${NQ.kind === "p"}">Tek olasılık</button><button data-nq="kind" data-k="row" aria-pressed="${NQ.kind === "row"}">Tablo satırı</button></div><button class="btn sm" data-nq="new">Yeni soru</button><span class="muted" style="font-size:.9rem">${NQ.score} / ${NQ.n} doğru</span></div>`;
+  if(!q) return head + '<p class="ck-meta">Bu korpusta soru üretmek için en az iki kez görülen bir bağlam gerekir.</p>';
+  const hl = M.n > 1 ? q.hist.join(" ") : "";
+  const lap = NG.smooth === "laplace";
+  const note = `<p class="ck-meta">Kesir (örn. <span class="ng-t">2/3</span>) ya da ondalık (<span class="ng-t">0.667</span>) yazabilirsin; ${lap ? `Laplace: <span class="ng-t">(C + 1) / (C(bağlam) + V)</span>, V = ${M.V}` : "yumuşatma yok: <span class=\"ng-t\">C(bağlam sözcük) / C(bağlam)</span>"}. Ondalıkta ±0.0005 kabul edilir.</p>`;
+  if(NQ.kind === "p"){
+    const r = q.r;
+    const body = `<p class="mp-q">${M.n > 1 ? `P( ${T(q.w)} | ${T(hl)} ) = ?` : `P( ${T(q.w)} ) = ?`}</p>
+      <div class="pair" style="grid-template-columns:1fr auto"><label class="field sm"><input id="nqIn" type="text" autocomplete="off" spellcheck="false" placeholder="örn. 2/3" ${NQ.done ? "disabled" : ""}></label><button class="btn pri sm" data-nq="check" ${NQ.done ? "disabled" : ""}>Kontrol et</button></div>${note}`;
+    const res = NQ.done ? `<p class="verdict" style="margin-top:10px">${NQ.right ? "Doğru ✓" : "Yanlış ✗"} · <b>${r.num}/${r.den} = ${dec(r.p)}</b></p><p class="ck-meta">${M.n > 1 ? `C(${T(q.hist.concat(q.w).join(" "))}) = ${r.c}, C(${T(hl)}) = ${r.h}` : `C(${T(q.w)}) = ${r.c}, N = ${r.h}`}${lap ? `, +1 ve V = ${M.V}` : ""}.</p>` : "";
+    return head + body + res;
+  }
+  const rows = q.rows.map((x, i) => `<tr><td>${T(x.w)}</td><td><input class="nq-cell ${NQ.done ? (closeTo(parseVal(NQ.vals?.[i] ?? ""), x.r.p) ? "ok" : "bad") : ""}" data-i="${i}" type="text" autocomplete="off" spellcheck="false" value="${esc(NQ.vals?.[i] ?? "")}" ${NQ.done ? "disabled" : ""}></td>${NQ.done ? `<td class="muted">${x.r.num}/${x.r.den} = ${dec(x.r.p)}</td>` : ""}</tr>`).join("");
+  const sumRow = NQ.done ? `<p class="verdict" style="margin-top:10px">${NQ.right ? "Hepsi doğru ✓" : "Bazıları yanlış ✗"} · toplam ${dec(q.rows.reduce((a, x) => a + x.r.p, 0))}${q.all ? " (tüm sözlük: 1 olmalı)" : " (yalnızca gösterilen sözcükler)"}</p>` : "";
+  return head + `<p class="mp-q">${M.n > 1 ? `${T(hl)} bağlamından sonra gelen her sözcük için P(· | ${T(hl)}) yaz:` : "Her sözcük için P(w) yaz:"}</p>
+    <table class="ng-tbl nq-tbl"><tr><th>Sonraki</th><th>Olasılık</th>${NQ.done ? "<th>Doğru</th>" : ""}</tr>${rows}</table>
+    ${NQ.done ? "" : '<button class="btn pri sm" data-nq="check" style="margin-top:10px">Kontrol et</button>'}${note}${sumRow}`;
+}
+function renderNQ(){ const el = $("#ngQuiz", root); if(el) el.innerHTML = nqHTML(); }
+function nqAct(a, d){
+  if(a === "kind"){ NQ.kind = d.k; NQ.q = null; NQ.done = false; NQ.vals = []; }
+  else if(a === "new"){ NQ.q = null; NQ.done = false; NQ.vals = []; }
+  else if(a === "check" && NQ.q){
+    if(NQ.kind === "p"){ const v = parseVal($("#nqIn", root).value); if(!isFinite(v)) return; NQ.right = closeTo(v, NQ.q.r.p); }
+    else{ NQ.vals = $$(".nq-cell", root).map(i => i.value); NQ.right = NQ.q.rows.every((x, i) => closeTo(parseVal(NQ.vals[i]), x.r.p)); }
+    NQ.done = true; NQ.n++; if(NQ.right) NQ.score++;
+  }
+  renderNQ();
+}
+
 // ───────────────────────── kabuk
 function syncControls(){
   const p = PRESETS[NG.preset];
@@ -232,6 +291,7 @@ function renderMore(){
   $("#ngGen", root).innerHTML = genHTML();
   $("#ngCmp", root).innerHTML = cmpHTML();
   $("#ngPmi", root).innerHTML = pmiHTML();
+  renderNQ();
 }
 function renderTablesOnly(){ if(!M) return; $("#ngTables", root).innerHTML = tablesHTML(); renderPred(); renderSent(); $("#ngStats", root).innerHTML = statsHTML(); save(); }
 function ex(kind){
@@ -292,6 +352,7 @@ function mount(){
     <div id="ngCmp"></div>
     <h2 class="ng-h">7 · PMI <small>birlikte geçiş</small></h2>
     <div id="ngPmi"></div>
+    <div class="stu"><h2 class="ng-h">8 · Kendin hesapla <small>önce sen, sonra kontrol</small></h2><div id="ngQuiz"></div></div>
     <div style="height:56px"></div></div>`;
   const text = $("#ngText", root);
   let t;
@@ -304,6 +365,7 @@ function mount(){
   $("#ngSize", root).addEventListener("change", e => { NG.limit = +e.target.value; refresh(); });
   $("#ngAlphaIn", root).addEventListener("input", e => { NG.alpha = Math.min(1, Math.max(0, +e.target.value)); later(() => { renderAll(); }); });
   $("#ngRegen", root).addEventListener("click", () => { $("#ngGen", root).innerHTML = genHTML(); });
+  root.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.id === "nqIn") root.querySelector('[data-nq="check"]')?.click(); });
   root.addEventListener("input", e => {
     const d = e.target;
     if(d.dataset.lam !== undefined){ const l = lamFor(NG.n).slice(); l[+d.dataset.lam] = Math.max(0, +d.value || 0); NG.lam[NG.n] = l; later(() => { renderTablesOnly(); $("#ngCmp", root).innerHTML = cmpHTML(); }); }
@@ -313,6 +375,7 @@ function mount(){
   });
   root.addEventListener("click", e => {
     const go = e.target.closest("[data-go]"); if(go){ e.preventDefault(); setView(go.dataset.go); return; }
+    const nq = e.target.closest("[data-nq]"); if(nq){ nqAct(nq.dataset.nq, nq.dataset); return; }
     const b = e.target.closest("[data-n],[data-sm],[data-src],[data-preset],[data-hist],[data-ex]"); if(!b) return;
     const d = b.dataset;
     if(d.n){ NG.n = +d.n; NG.hist = ""; }

@@ -65,7 +65,7 @@ Per-file sources, licenses and re-download commands: **[data/README.md](data/REA
 | **N-gram** | Counts and probabilities from your own text, BOUN or Brown: unigram / bigram / trigram tables, next-word prediction, step-by-step sentence probability and perplexity, **Laplace, backoff and interpolation** smoothing, **UNK** for unseen words, random sentence generation, a held-out perplexity comparison and **PMI** collocations / similar-context words (Lecture 5). |
 | **Lesson** | Lecture concepts (homonymy, polysemy, hypernymy, ...) as ready-made queries, plus quizzes generated from the data. |
 
-**Two modes.** The *Tool* / *Öğrenci (Student)* switch in the top bar separates plain use from studying. Tool mode only gives results; Student mode adds course links, formulas, step-by-step explanations, rule traces, practice and quizzes (and the Lesson tab). Teaching UI is tagged `.stu` and hidden by CSS in Tool mode.
+**Two modes.** The *Tool* / *Öğrenci (Student)* switch in the top bar separates plain use from studying. Tool mode only gives results; Student mode adds course links, formulas, step-by-step explanations, rule traces, practice and quizzes (and the Lesson tab): fill the CKY chart yourself and have it checked cell by cell, compute n-gram probabilities and table rows by hand, hide dependency labels and try first. Teaching UI is tagged `.stu` and hidden by CSS in Tool mode.
 
 Extras: **⌘K** command palette, favourites / notes / trail saved in the browser (no account), Markdown export, presentation mode (`P`), keyboard shortcuts (`?`), light/dark theme (`?theme=dark`), and a shareable URL for every view.
 
