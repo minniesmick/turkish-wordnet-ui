@@ -14,6 +14,8 @@ import math
 import os
 import random
 import re
+import shutil
+import subprocess
 import threading
 import time
 import xml.etree.ElementTree as ET
@@ -1371,6 +1373,67 @@ def ud_get(sid):
     return None
 
 
+# ------------------------------------------------------------------ Zemberek (isteğe bağlı gerçek morfolojik çözümleyici)
+# lib/zemberek-full.jar (Apache 2.0) ve bir JDK varsa scripts/ZemberekBridge.java derlenip kalıcı bir alt süreç olarak çalıştırılır.
+ZEM_JAR = os.path.join(ROOT, "lib", "zemberek-full.jar")
+ZEM_SRC = os.path.join(ROOT, "scripts", "ZemberekBridge.java")
+ZEM_OUT = os.path.join(ROOT, "lib", "bridge")
+ZEM = {"proc": None, "ready": threading.Event(), "state": "idle", "error": "", "lock": threading.Lock()}
+
+
+def zem_start():
+    """Arka planda köprüyü derler ve başlatır; durum ZEM['state'] içinde: idle / starting / ready / unavailable."""
+    if ZEM["state"] != "idle":
+        return
+    ZEM["state"] = "starting"
+    java, javac = shutil.which("java"), shutil.which("javac")
+    jh = os.environ.get("JAVA_HOME")
+    if jh:
+        java = java or os.path.join(jh, "bin", "java")
+        javac = javac or os.path.join(jh, "bin", "javac")
+    cls = os.path.join(ZEM_OUT, "ZemberekBridge.class")
+    try:
+        if not os.path.exists(ZEM_JAR):
+            raise RuntimeError("lib/zemberek-full.jar yok")
+        if not java:
+            raise RuntimeError("java bulunamadı")
+        if not os.path.exists(cls) or os.path.getmtime(cls) < os.path.getmtime(ZEM_SRC):
+            if not javac:
+                raise RuntimeError("javac (JDK) bulunamadı")
+            os.makedirs(ZEM_OUT, exist_ok=True)
+            r = subprocess.run([javac, "-encoding", "UTF-8", "-cp", ZEM_JAR, "-d", ZEM_OUT, ZEM_SRC], capture_output=True, text=True)
+            if r.returncode:
+                raise RuntimeError("derleme hatası: " + r.stderr[:200])
+        sep = ";" if os.name == "nt" else ":"
+        p = subprocess.Popen([java, "-Xmx1g", "-cp", ZEM_OUT + sep + ZEM_JAR, "ZemberekBridge"], stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, encoding="utf-8", bufsize=1)
+        line = p.stdout.readline()
+        while line and not line.startswith("@@"):
+            line = p.stdout.readline()
+        if not line.startswith("@@READY"):
+            raise RuntimeError("köprü başlamadı")
+        ZEM["proc"] = p
+        ZEM["state"] = "ready"
+    except Exception as e:  # noqa: BLE001 - kullanıcıya durum olarak gösterilir
+        ZEM["state"], ZEM["error"] = "unavailable", str(e)
+    ZEM["ready"].set()
+
+
+def zem_call(cmd, text):
+    text = text.replace(NL, " ").replace(TAB, " ").strip()[:600]
+    with ZEM["lock"]:
+        p = ZEM["proc"]
+        p.stdin.write(cmd + TAB + text + NL)
+        p.stdin.flush()
+        line = p.stdout.readline()
+        while line and not line.startswith("@@"):
+            line = p.stdout.readline()
+    if not line:
+        ZEM["state"], ZEM["error"] = "unavailable", "köprü kapandı"
+        raise ValueError("Zemberek kapandı")
+    return json.loads(line[2:])
+
+
 # ------------------------------------------------------------------ HTTP katmanı
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw):
@@ -1433,6 +1496,18 @@ class Handler(SimpleHTTPRequestHandler):
                 self.send_json(nb_eval(p))
             elif u.path == "/api/nblemmas":
                 self.send_json({"lemmas": nb_lemmas(_q(p, "corpus", "semcor"))})
+            elif u.path == "/api/zemberek":
+                st = ZEM["state"]
+                if st == "starting":
+                    return self.send_json({"loading": True}, 503)
+                if st != "ready":
+                    return self.send_json({"available": False, "error": ZEM["error"]})
+                if p.get("w"):
+                    self.send_json({"available": True, **zem_call("A", p["w"][0])})
+                elif p.get("s"):
+                    self.send_json({"available": True, **zem_call("S", p["s"][0])})
+                else:
+                    self.send_json({"available": True})
             elif u.path == "/api/relate":
                 r = relate(ds, p.get("a", [""])[0], p.get("b", [""])[0])
                 self.send_json(r)
@@ -1467,6 +1542,7 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8770"))
     srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
     threading.Thread(target=load_all, daemon=True).start()
+    threading.Thread(target=zem_start, daemon=True).start()
     print(f"http://127.0.0.1:{port}  (veri arka planda yükleniyor)", flush=True)
     try:
         srv.serve_forever()

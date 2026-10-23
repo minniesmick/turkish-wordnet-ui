@@ -6,3 +6,4 @@ __pycache__/
 .impeccable/decision-payload.json
 .impeccable/brief-body.md
 .impeccable/questions/
+lib/
