@@ -63,6 +63,8 @@ Per-file sources, licenses and re-download commands: **[data/README.md](data/REA
 | **N-gram** | Corpus to n-gram counts: unigram / bigram / trigram tables, conditional probabilities (fraction and decimal), next-word prediction, step-by-step sentence probability in log space, Laplace smoothing and perplexity (COMP 451 Lecture 5). Runs in the browser. |
 | **Lesson** | Lecture concepts (homonymy, polysemy, hypernymy, ...) as ready-made queries, plus quizzes generated from the data. |
 
+**Two modes.** The *Tool* / *Öğrenci (Student)* switch in the top bar separates plain use from studying. Tool mode only gives results; Student mode adds course links, formulas, step-by-step explanations, rule traces, practice and quizzes (and the Lesson tab). Teaching UI is tagged `.stu` and hidden by CSS in Tool mode.
+
 Extras: **⌘K** command palette, favourites / notes / trail saved in the browser (no account), Markdown export, presentation mode (`P`), keyboard shortcuts (`?`), light/dark theme (`?theme=dark`), and a shareable URL for every view.
 
 Design direction: *İki Renkli Sözlük* (a two-colour dictionary): cool paper, blue-black ink, a single ultramarine accent, categories told apart by line style instead of colour. See [DESIGN.md](DESIGN.md) and [PRODUCT.md](PRODUCT.md).

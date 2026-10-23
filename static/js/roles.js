@@ -1,5 +1,5 @@
 // Roller: PropBank / TRopBank / VerbNet sözlüğü, Türkçe cümle etiketleme ve rol sınavı.
-import {$, $$, esc, tr, sub, POS, FUNC, CASEL, icon, state, R, api, urlSync, setView, registerView, debounce} from "./core.js";
+import {$, $$, esc, tr, sub, POS, FUNC, CASEL, icon, state, R, api, urlSync, setView, registerView, debounce, MODE} from "./core.js";
 import {argsTable, argCls, roleName, paintTokens, openConcept} from "./ui.js";
 
 const S = {res:[], total:0, facets:{}, ctl:null, srl:null, sel:0};
@@ -19,7 +19,7 @@ function mount(){
   root = $("#v-roles");
   root.innerHTML = `<div class="page">
     <h1 class="page-title">Fiil kimin neyle ne yaptığını söyler</h1>
-    <div class="row"><div class="seg" id="rSub"><button data-v="dict">Çerçeve sözlüğü</button><button data-v="label">Cümle etiketle · TR</button><button data-v="quiz">Rol sınavı · EN</button></div>
+    <div class="row"><div class="seg" id="rSub"><button data-v="dict">Çerçeve sözlüğü</button><button data-v="label">Cümle etiketle · TR</button><button data-v="quiz" class="stu">Rol sınavı · EN</button></div>
       <div class="seg" id="rLang"><button data-v="en">English PropBank</button><button data-v="tr">Türkçe PropBank</button><button data-v="vn">VerbNet 3.3</button></div></div>
 
     <div id="rDict">
@@ -203,6 +203,7 @@ export const view = {
     if(p.text !== undefined){ R.text = p.text; R.pred = -1; R.cases = {}; }
   },
   async enter(){
+    if(R.sub === "quiz" && !MODE.student) R.sub = "dict";
     mount(); ui();
     if(R.sub === "dict") await runDict();
     else if(R.sub === "label"){ $("#slText", root).value = R.text; $("#slEx", root).innerHTML = SL_EX.map((t, i) => `<button class="chip" data-si="${i}">${esc(t)}</button>`).join(""); urlSync(false); await runSrl(true); }

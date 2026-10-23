@@ -95,6 +95,24 @@ export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"t
 export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", parse:"c", deps:"k", ngram:"n", learn:"d"};
 export const DS_VIEWS = ["search","graph","relate","wsd"];
 
+// Kullanım kipi: "Araç" (client) yalnızca sonuçları verir; "Öğrenci" ders bağlantılarını, formülleri, adım adım açıklamayı, alıştırma ve sınavı da açar.
+// Öğretici öğeler .stu sınıfıyla işaretlenir; kip kapalıyken CSS onları gizler (bkz. app.css).
+export const STUDENT_VIEWS = new Set(["learn"]);
+export const MODE = {student:false};
+export const isStudent = () => MODE.student;
+export function setMode(student){
+  MODE.student = !!student;
+  try{ localStorage.setItem("wn:mode", MODE.student ? "student" : "client"); }catch(_){}
+  document.body.classList.toggle("student", MODE.student);
+  emit("mode", MODE.student);
+}
+export function initMode(){
+  let m = new URLSearchParams(location.search).get("mode");
+  if(!m){ try{ m = localStorage.getItem("wn:mode"); }catch(_){} }
+  MODE.student = m === "student";
+  document.body.classList.toggle("student", MODE.student);
+}
+
 export const state = {
   v:"search", ds:"kenet", lex:"", q:"", field:"word", mode:"exact", sense:"", pos:new Set(), example:false, fold:false, focus:"",
   c:"", cds:"",                                           // kenar kâğıdında açık kavram
@@ -108,6 +126,7 @@ export const G = {id:"", ds:"kenet", up:3, kids:12, sib:false, mode:"map", sel:"
 export function readURL(){
   const p = new URLSearchParams(location.search);
   state.v = VIEWS.includes(p.get("v")) ? p.get("v") : "search";
+  if(STUDENT_VIEWS.has(state.v) && !MODE.student) setMode(true);
   state.ds = ["kenet","en","1998"].includes(p.get("ds")) ? p.get("ds") : "kenet";
   state.lex = p.get("lex") || ""; state.q = p.get("q") || ""; state.field = p.get("field") || "word"; state.mode = p.get("mode") || "exact";
   state.sense = p.get("sense") || ""; state.example = p.get("example") === "1"; state.fold = p.get("fold") === "1";
@@ -229,6 +248,7 @@ export const registerView = (name, mod) => { views[name] = mod; };
 let shellSync = () => {};
 export const setShellSync = f => { shellSync = f; };
 export async function setView(v, patch = {}, {push = true} = {}){
+  if(STUDENT_VIEWS.has(v) && !MODE.student){ setMode(true); toast("Öğrenci kipine geçildi"); }
   if(patch.ds) state.ds = patch.ds;
   if(state.v !== v) emit("viewchange", v);
   state.v = v;

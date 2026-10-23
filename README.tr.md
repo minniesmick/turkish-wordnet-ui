@@ -120,6 +120,8 @@ Türkçe iki XML dosyasını indirmek için:
   ağaç özellikleri (tek kök, bağlı, tek başlı, döngüsüz, projektif) kontrol edilir, ilişkiler açıklanır, etiketler gizlenip kendin deneyebilirsin (Lecture 3, InClass 4).
 - **N-gram**: korpustan unigram / bigram / trigram sayımları, koşullu olasılık tabloları (kesir + ondalık, satır toplamı 1),
   sonraki sözcük tahmini, log uzayında adım adım cümle olasılığı, Laplace (add-one) yumuşatma ve perplexity (Lecture 5). Tarayıcıda çalışır.
+- **Kullanım kipi**: üst çubuktaki **Araç / Öğrenci** anahtarı normal kullanımı çalışmadan ayırır. Araç kipi yalnızca sonuç verir; Öğrenci kipi ders bağlantıları,
+  formüller, adım adım açıklama, kural izi, alıştırma ve sınavları (ve Ders sekmesini) açar. Öğretici öğeler `.stu` sınıfıyla işaretlidir.
 - **Ders**: slayt kavramları (homonymy, polysemy, synonymy, antonymy, hypernym/hyponym, ilişki tabloları, bass yolları,
   ID alıştırması, Q/A zorlukları) hazır sorgularla; veriden otomatik üretilen quiz (üst kavram / ilişki türü).
 - Kartlarda **↑ üst kavram** ipucu, çoklu hypernym yolları ve sözcük başlığında çok anlamlılık özeti.

@@ -1,6 +1,6 @@
 // Kabuk: gezinti rayı, üst çubuk, kenar kâğıdı (bağlam), komut paleti, kısayollar + ortak çizim yardımcıları.
 import {$, $$, esc, tr, lower, hl, sub, w1, other, debounce, POS, DSNAME, REL, REL_ORDER, relLabel, REL_FAMILY, FAMILY, FUNC, CASEL, icon,
-  VIEWS, VIEW_LABEL, VIEW_ICON, VIEW_KEY, DS_VIEWS, state, G, store, itemOf, on, api, toast, copyText, views, setView, urlSync, act, setShellSync, buildURL} from "./core.js";
+  VIEWS, STUDENT_VIEWS, MODE, setMode, VIEW_LABEL, VIEW_ICON, VIEW_KEY, DS_VIEWS, state, G, store, itemOf, on, api, toast, copyText, views, setView, urlSync, act, setShellSync, buildURL} from "./core.js";
 
 // ───────────────────────── ortak çizim yardımcıları
 export const relBtn = (b, ds, extra = "") => `<button class="rel" data-open="${esc(b.id)}" data-ods="${ds}" title="${esc(b.d || "")}">${b.lits.map(l => esc(l.w) + sub(l.s)).join(", ")}${b.more ? ` <sub>+${b.more}</sub>` : ""}</button>${extra}`;
@@ -68,7 +68,7 @@ export function togglePresent(force){
 
 // ───────────────────────── kabuk
 export function mountShell(){
-  $("#tabs").innerHTML = VIEWS.map(v => `<button class="tab" data-view="${v}">${icon(VIEW_ICON[v])}<span>${VIEW_LABEL[v]}</span><span class="kb">g ${VIEW_KEY[v]}</span></button>`).join("");
+  $("#tabs").innerHTML = VIEWS.map(v => `<button class="tab${STUDENT_VIEWS.has(v) ? " stu" : ""}" data-view="${v}">${icon(VIEW_ICON[v])}<span>${VIEW_LABEL[v]}</span><span class="kb">g ${VIEW_KEY[v]}</span></button>`).join("");
   $("#menuBtn").innerHTML = icon("menu");
   $("#omni").insertAdjacentHTML("afterbegin", icon("search"));
   $("#linkBtn").innerHTML = icon("link");
@@ -80,6 +80,12 @@ export function mountShell(){
     const b = e.target.closest("[data-ds]"); if(!b || b.dataset.ds === state.ds) return;
     state.ds = b.dataset.ds; syncShell();
     (views[state.v].dsChange || views[state.v].enter)?.call(views[state.v]); urlSync(true);
+  });
+  $("#modeSeg").addEventListener("click", e => {
+    const b = e.target.closest("[data-mode]"); if(!b) return;
+    const st = b.dataset.mode === "student"; if(st === MODE.student) return;
+    setMode(st);
+    if(!st && STUDENT_VIEWS.has(state.v)) setView("search"); else { syncShell(); views[state.v]?.enter?.(); }
   });
   $("#menuBtn").addEventListener("click", () => $("#app").classList.toggle("rail-open"));
   $("#omni").addEventListener("click", openPalette);
@@ -105,6 +111,7 @@ export function syncShell(){
   $("#dsSeg").classList.toggle("hidden", !dsOn);
   $("#ds1998").classList.toggle("hidden", state.v !== "search");
   $$("#dsSeg [data-ds]").forEach(b => b.setAttribute("aria-pressed", b.dataset.ds === state.ds));
+  $$("#modeSeg [data-mode]").forEach(b => b.setAttribute("aria-pressed", (b.dataset.mode === "student") === MODE.student));
   const dark = isDark();
   $("#themeBtn").innerHTML = icon(dark ? "sun" : "moon");
   $("#railTheme").innerHTML = icon(dark ? "sun" : "moon");
@@ -243,7 +250,7 @@ export function openPalette(prefill = ""){
 }
 export const closePalette = () => $("#palette").close();
 const cmds = () => [
-  ...VIEWS.map(v => ({k:"cmd", label:`${VIEW_LABEL[v]} bölümüne git`, key:"g " + VIEW_KEY[v], run:() => setView(v), icon:VIEW_ICON[v]})),
+  ...VIEWS.filter(v => MODE.student || !STUDENT_VIEWS.has(v)).map(v => ({k:"cmd", label:`${VIEW_LABEL[v]} bölümüne git`, key:"g " + VIEW_KEY[v], run:() => setView(v), icon:VIEW_ICON[v]})),
   {k:"cmd", label:"Rastgele bir kavram aç", run:async () => { const j = await api("/api/random", {ds:state.ds === "1998" ? "kenet" : state.ds, n:1}); if(j.results[0]) openConcept(j.results[0].id, state.ds === "1998" ? "kenet" : state.ds); }, icon:"dice"},
   {k:"cmd", label:"Çalışma listemi aç", key:"F", run:openFavs, icon:"star"},
   {k:"cmd", label:"Temayı değiştir", key:"T", run:toggleTheme, icon:isDark() ? "sun" : "moon"},
@@ -317,7 +324,7 @@ export function initKeys(){
       return;
     }
     if(typing || e.metaKey || e.ctrlKey || e.altKey) return;
-    if(g){ g = false; clearTimeout(gt); const v = VIEWS.find(x => VIEW_KEY[x] === e.key); if(v){ e.preventDefault(); setView(v); } return; }
+    if(g){ g = false; clearTimeout(gt); const v = VIEWS.find(x => VIEW_KEY[x] === e.key && (MODE.student || !STUDENT_VIEWS.has(x))); if(v){ e.preventDefault(); setView(v); } return; }
     if(e.key === "g"){ g = true; gt = setTimeout(() => g = false, 900); return; }
     if(e.key === "/"){ e.preventDefault(); openPalette(); return; }
     if(e.key === "?"){ openShortcuts(); return; }

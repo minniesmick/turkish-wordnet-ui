@@ -2,7 +2,7 @@
 import {$, $$, esc, registerView} from "./core.js";
 
 const PRESETS = {
-  inclass2: {label:"InClass 2 · PCFG", sent:"Alice said the scientist that believed the student proved the experiment", ex:["Alice said the student proved the experiment"], grammar:
+  inclass2: {stu:true, label:"InClass 2 · PCFG", sent:"Alice said the scientist that believed the student proved the experiment", ex:["Alice said the student proved the experiment"], grammar:
 `S -> NP VP [0.6] | S Conj S [0.15] | Adv S [0.25]
 NP -> Det N [0.25] | Det Adj N [0.15] | NP RC [0.20] | ProperN [0.20] | NP PP [0.20]
 VP -> V NP [0.4] | V S [0.35] | V [0.2] | Adv VP [0.05]
@@ -15,7 +15,7 @@ Adv -> quietly [0.5] | sincerely [0.5]
 Conj -> and [0.6] | but [0.4]
 ProperN -> Alice [1.0]
 Rel -> that [1.0]`},
-  inclass3: {label:"InClass 3 · CKY", sent:"the open position may require quick response time", ex:["the quick response may help", "open time"], grammar:
+  inclass3: {stu:true, label:"InClass 3 · CKY", sent:"the open position may require quick response time", ex:["the quick response may help", "open time"], grammar:
 `S -> NP VP | VP NP
 NP -> D NP | N | ADJ NP | ADJ N
 VP -> V NP | V N | N V | V ADV | AUX VP | AUX V
@@ -25,7 +25,7 @@ D -> the | a | some
 ADJ -> good | quick | open
 ADV -> fast | quick
 AUX -> may | can`},
-  pp: {label:"Slayt · PP bağlanması", sent:"kids saw birds with binoculars", ex:["kids saw birds with fish"], grammar:
+  pp: {label:"Örnek · PP bağlanması", sent:"kids saw birds with binoculars", ex:["kids saw birds with fish"], grammar:
 `S -> NP VP
 NP -> N | NP PP
 VP -> V NP | VP PP
@@ -207,7 +207,7 @@ function grammarInfo(r){
   if(r.rules.length){
     const mixed = r.rules.some(x => x.p != null) && !r.hasProb;
     h += `<p class="ck-meta">${r.rules.length} kural · ${r.lhs.length} sol taraf simgesi · ${r.hasProb ? "<b>PCFG</b> (olasılıklı)" : "<b>CFG</b> (olasılıksız)"}${mixed ? ' · <b>bazı kurallarda olasılık yok, CFG sayıldı</b>' : ""}</p>`;
-    if(r.hasProb) h += `<div class="chips">${r.lhs.map(s => { const v = r.sums.get(s), ok = Math.abs(v - 1) < 1e-9; return `<span class="chip" title="${esc(s)} kurallarının olasılık toplamı 1 olmalı">${esc(s)} <small>Σ ${+v.toFixed(4)}${ok ? " ✓" : " ✗"}</small></span>`; }).join("")}</div>`;
+    if(r.hasProb) h += `<div class="chips stu">${r.lhs.map(s => { const v = r.sums.get(s), ok = Math.abs(v - 1) < 1e-9; return `<span class="chip" title="${esc(s)} kurallarının olasılık toplamı 1 olmalı">${esc(s)} <small>Σ ${+v.toFixed(4)}${ok ? " ✓" : " ✗"}</small></span>`; }).join("")}</div>`;
   }
   return h;
 }
@@ -225,7 +225,7 @@ function chartHTML(r){
     rows += `<tr>${tds}</tr>`;
   }
   const words = `<tr class="ck-w">${r.toks.map((t, i) => `<th><small>${i}</small>${esc(t)}<small>${i + 1}</small></th>`).join("")}</tr>`;
-  return `<div class="ck-scroll"><table class="ck">${rows}${words}</table></div>${detail(r, si, sj)}`;
+  return `<div class="ck-scroll"><table class="ck">${rows}${words}</table></div><div class="stu">${detail(r, si, sj)}</div>`;
 }
 function detail(r, i, j){
   const cell = r.chart[i]?.[j]; if(!cell) return "";
@@ -252,11 +252,11 @@ function treesHTML(r){
     let a = null;                                      // başlangıç simgesinin kapsadığı en geniş aralık
     for(let len = n - 1; len >= 1 && !a; len--) for(let i = 0; i + len <= n && !a; i++) if(r.chart[i][i + len].has(PS.start)) a = [i, i + len];
     return `<p class="verdict">Cümle bu gramerde <b>yok</b>: üst hücre [0,${n}] içinde başlangıç simgesi <span class="ck-s st">${esc(PS.start)}</span> çıkmadı.</p>`
-      + (a ? `<p class="ck-meta"><span class="ck-s st">${esc(PS.start)}</span> en geniş <button class="rel" data-cell="${a[0]},${a[1]}">[${a[0]},${a[1]}] “${esc(r.toks.slice(a[0], a[1]).join(" "))}”</button> aralığını kapsıyor; kalan sözcükler gramerle bağlanamıyor.</p>` : "");
+      + (a ? `<p class="ck-meta stu"><span class="ck-s st">${esc(PS.start)}</span> en geniş <button class="rel" data-cell="${a[0]},${a[1]}">[${a[0]},${a[1]}] “${esc(r.toks.slice(a[0], a[1]).join(" "))}”</button> aralığını kapsıyor; kalan sözcükler gramerle bağlanamıyor.</p>` : "");
   }
   const best = r.top.best, total = r.top.ins, list = r.trees, show = PS.all ? list.slice(0, 30) : list.slice(0, 3);
   let h = `<p class="verdict">Cümle gramerde <b>var</b> ✓ · <b>${r.top.cnt}</b> farklı ayrıştırma${r.hasProb ? ` · en olası P = <b>${fmtP(best)}</b> · toplam P(cümle) = <b>${fmtP(total)}</b>` : ""}</p>`;
-  if(r.top.cnt > 1) h += `<p class="ck-meta">${r.hasProb ? "Birden fazla ağaç var: cümle belirsiz (ambiguous). PCFG bunlardan olasılığı en yüksek olanı seçer." : "Birden fazla ağaç var: cümle belirsiz (ambiguous)."}</p>`;
+  if(r.top.cnt > 1) h += `<p class="ck-meta stu">${r.hasProb ? "Birden fazla ağaç var: cümle belirsiz (ambiguous). PCFG bunlardan olasılığı en yüksek olanı seçer." : "Birden fazla ağaç var: cümle belirsiz (ambiguous)."}</p>`;
   h += show.map((t, k) => {
     const rl = used(t);
     return `<article class="pt-card"><header><b>Ağaç ${k + 1}</b>${r.hasProb ? ` <span class="tag">P = ${fmtP(t.tp)}</span> <span class="tag">toplamın %${(100 * t.tp / total).toFixed(1)}'i</span>${k === 0 ? ' <span class="tag pt-best">en olası</span>' : ""}` : ""}<button class="btn sm ghost" data-copy="${esc(bracket(t))}">${"[ ] kopyala"}</button></header>
@@ -287,17 +287,17 @@ function mount(){
   root = $("#v-parse");
   root.innerHTML = `<div class="page wide">
     <h1 class="page-title">CFG, PCFG ve CKY</h1>
-    <p class="lesson-intro" style="margin:0">Bir gramer ve bir cümle ver: CKY tablosu hücre hücre dolar, ayrıştırma ağaçları çizilir; kurallara olasılık yazarsan (PCFG) en olası ağaç seçilir. Lecture 3, InClass 2 ve 3.</p>
+    <p class="lesson-intro" style="margin:0">Bir gramer ve bir cümle ver: CKY tablosu hücre hücre dolar, ayrıştırma ağaçları çizilir; kurallara olasılık yazarsan (PCFG) en olası ağaç seçilir. <span class="stu">Lecture 3, InClass 2 ve 3.</span></p>
     <h2 class="ng-h">1 · Gramer</h2>
     <textarea class="ta" id="pgGrammar" rows="10" spellcheck="false" style="font:500 .92rem/1.55 var(--font-mono)" aria-label="Gramer kuralları"></textarea>
     <p class="ng-formula" style="margin:6px 0 0">Her satır <span class="ng-t">A -&gt; B C | D</span> (ok olarak → da olur). Kuralın sonuna <span class="ng-t">[0.6]</span> yazarsan PCFG olur. Sol tarafta olmayan simgeler sözcüktür.</p>
-    <div class="ng-ctl"><div class="chips">${Object.entries(PRESETS).map(([k, p]) => `<button class="chip" data-preset="${k}">${esc(p.label)}</button>`).join("")}</div>
+    <div class="ng-ctl"><div class="chips">${Object.entries(PRESETS).map(([k, p]) => `<button class="chip${p.stu ? " stu" : ""}" data-preset="${k}">${esc(p.label)}</button>`).join("")}</div>
       <label class="muted" style="font-size:.88rem">Başlangıç simgesi <select id="pgStart" class="btn sm"></select></label></div>
     <div id="pgInfo"></div>
     <h2 class="ng-h">2 · Cümle</h2>
     <label class="field sm">Cümle<input id="pgSent" type="text" autocomplete="off" spellcheck="false"></label>
     <div class="chips" id="pgEx" style="margin-top:10px"></div>
-    <h2 class="ng-h">3 · CKY tablosu <small>satır: aralık uzunluğu, alt satır: sözcükler (hücre <i>i,j</i> = i. ile j. sözcük arası)</small></h2>
+    <h2 class="ng-h">3 · CKY tablosu <small class="stu">satır: aralık uzunluğu, alt satır: sözcükler (hücre <i>i,j</i> = i. ile j. sözcük arası)</small></h2>
     <div id="pgChart" aria-live="polite"></div>
     <h2 class="ng-h">4 · Ayrıştırma ağaçları</h2>
     <div id="pgTrees" aria-live="polite"></div>

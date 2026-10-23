@@ -3,8 +3,8 @@ import {$, $$, esc, registerView} from "./core.js";
 
 const BOS = "<s>", EOS = "</s>", SEP = "\u0001";
 const PRESETS = {
-  slayt: {label:"Slayt 24 · I am Sam", text:"I am Sam\nSam I am\nI fly", n:2, pred:"I", sent:"I am Sam", extra:["I am fly", "Sam fly"]},
-  inclass5: {label:"InClass 5", text:"the dog barks\nthe cat laughs\nthe cat saw the dog\nthe\ncat the dog the\ncat cat cat", n:2, pred:"the cat", sent:"the cat laughs", extra:["the cat saw the dog", "the cat barks"]},
+  slayt: {stu:true, label:"Slayt 24 · I am Sam", text:"I am Sam\nSam I am\nI fly", n:2, pred:"I", sent:"I am Sam", extra:["I am fly", "Sam fly"]},
+  inclass5: {stu:true, label:"InClass 5", text:"the dog barks\nthe cat laughs\nthe cat saw the dog\nthe\ncat the dog the\ncat cat cat", n:2, pred:"the cat", sent:"the cat laughs", extra:["the cat saw the dog", "the cat barks"]},
   tr: {label:"Türkçe örnek", text:"bu çocuk bugün okula gidecek\nbu çocuk yarın okula gidecek\no çocuk bugün eve gidecek\nbu kız bugün okula gitmedi", n:2, pred:"bu çocuk", sent:"bu çocuk bugün okula gidecek", extra:["bu çocuk yarın eve gidecek"]}
 };
 const NG = {text:PRESETS.slayt.text, n:2, lower:false, smooth:false, pred:PRESETS.slayt.pred, sent:PRESETS.slayt.sent, hist:"", preset:"slayt"};
@@ -77,7 +77,7 @@ function distTable(m, key){
     <tr><th>${m.n > 1 ? "Sonraki" : "Sözcük"}</th><th>Sayım</th><th>Kesir</th><th>Olasılık</th><th class="ng-bar"></th></tr>
     ${shown.map(r => `<tr><td>${T(r.w)}</td><td>${r.c}</td><td>${fr(r)}</td><td><b>${dec(r.p)}</b></td><td class="ng-bar">${meter(r.p)}</td></tr>`).join("")}
     ${rest > 0 ? `<tr><td colspan="5" class="muted">… ve ${rest} sözcük daha</td></tr>` : ""}
-    <tr class="sum"><td>Toplam</td><td>${rows.reduce((a, r) => a + r.c, 0)}</td><td></td><td><b>${dec(sum)}</b></td><td class="ng-bar">${ok ? '<span class="ng-ok">Σ = 1 ✓</span>' : `<span class="ng-bad">Σ ≠ 1</span>`}</td></tr></table>`;
+    <tr class="sum"><td>Toplam</td><td>${rows.reduce((a, r) => a + r.c, 0)}</td><td></td><td><b>${dec(sum)}</b></td><td class="ng-bar">${ok ? '<span class="ng-ok stu">Σ = 1 ✓</span>' : `<span class="ng-bad stu">Σ ≠ 1</span>`}</td></tr></table>`;
 }
 function matrix(m){
   const rows = [BOS, ...m.vocab].filter(h => m.hists.has(h));
@@ -92,12 +92,12 @@ function matrix(m){
 }
 function tablesHTML(m){
   if(!m.sents.length) return '<div class="empty">Yukarıya en az bir cümle yaz.</div>';
-  let h = `<p class="ng-formula">${esc(formula(m))}${NG.smooth ? " <small>· V = sözcük türü sayısı" + (m.n > 1 ? " + </s>" : "") + `, burada ${m.V}</small>` : ""}</p>`;
+  let h = `<p class="ng-formula stu">${esc(formula(m))}${NG.smooth ? " <small>· V = sözcük türü sayısı" + (m.n > 1 ? " + </s>" : "") + `, burada ${m.V}</small>` : ""}</p>`;
   if(m.n === 1) return h + distTable(m, "");
   if(!NG.hist || !m.hists.has(NG.hist)) NG.hist = [...m.hists.keys()].sort((a, b) => m.hists.get(b).total - m.hists.get(a).total)[0];
   if(m.n === 2 && m.cols.length <= 12) h += matrix(m);
   const keys = [...m.hists.keys()].sort((a, b) => m.hists.get(b).total - m.hists.get(a).total || a.localeCompare(b, "tr"));
-  h += `<h3 class="ng-h3">Geçmiş seç <small>${m.n === 2 ? "tablodan satıra da tıklayabilirsin" : "yan yana " + (m.n - 1) + " sözcük"}</small></h3>
+  h += `<h3 class="ng-h3">Geçmiş seç <small class="stu">${m.n === 2 ? "tablodan satıra da tıklayabilirsin" : "yan yana " + (m.n - 1) + " sözcük"}</small></h3>
     <div class="chips">${keys.slice(0, 40).map(k => `<button class="chip" data-hist="${esc(k)}" aria-pressed="${k === NG.hist}">${histLabel(k)} <small>${m.hists.get(k).total}</small></button>`).join("")}${keys.length > 40 ? `<span class="muted">+${keys.length - 40}</span>` : ""}</div>`;
   return h + distTable(m, NG.hist);
 }
@@ -111,8 +111,8 @@ function predHTML(m){
   const line = `<p class="ng-pred">${ctx ? `<span class="ng-t">${ctx}</span> ` : ""}<span class="ng-blank">X</span></p>`;
   if(!rows.length) return line + `<div class="notice warn">Bu geçmiş korpusta hiç yok: C(${ctx}) = 0, olasılık 0/0 <b>tanımsız</b>. Laplace'ı aç: her sözcük 1/V olur.</div>`;
   const top = rows[0], ties = rows.filter(r => r.p === top.p);
-  const why = m.n > 1 ? `C(${T(hist.concat(top.w).join(" "))}) = ${top.c}, C(${T(hist.join(" "))}) = ${top.h}, yani <b>${fr(top)} = ${dec(top.p)}</b>.` : `C(${T(top.w)}) = ${top.c}, N = ${top.h}, yani <b>${fr(top)} = ${dec(top.p)}</b>.`;
-  const verdict = ties.length > 1 ? `Beraberlik: ${ties.map(r => T(r.w)).join(", ")} aynı olasılıkta (${fr(top)}). ${why}` : `En olası sonraki sözcük ${T(top.w)}. ${why}`;
+  const why = m.n > 1 ? `Neden: C(${T(hist.concat(top.w).join(" "))}) = ${top.c}, C(${T(hist.join(" "))}) = ${top.h}.` : `Neden: C(${T(top.w)}) = ${top.c}, N = ${top.h}.`;
+  const verdict = (ties.length > 1 ? `Beraberlik: ${ties.map(r => T(r.w)).join(", ")} aynı olasılıkta (<b>${fr(top)} = ${dec(top.p)}</b>).` : `En olası sonraki sözcük ${T(top.w)} (<b>${fr(top)} = ${dec(top.p)}</b>).`) + ` <span class="stu">${why}</span>`;
   return `${line}<p class="verdict">${verdict}</p>
     <table class="ng-tbl"><tr><th>Aday</th><th>Sayım</th><th>Kesir</th><th>Olasılık</th><th class="ng-bar"></th></tr>
     ${rows.map(r => `<tr><td>${T(r.w)}</td><td>${r.c}</td><td>${fr(r)}</td><td><b>${dec(r.p)}</b></td><td class="ng-bar">${meter(r.p)}</td></tr>`).join("")}</table>`;
@@ -135,16 +135,16 @@ function sentHTML(m){
   if(!toks.length) return '<div class="empty" style="padding:24px 0">Bir cümle yaz.</div>';
   const r = seqLogProb(m, toks), zero = r.steps.some(s => s.p === 0), oov = r.steps.filter(s => s.oov);
   const lab = s => m.n > 1 ? `P(${T(s.w)} | ${T(s.hist.join(" "))})` : `P(${T(s.w)})`;
-  const warn = (zero ? `<div class="notice warn">Bir çarpan <b>0</b>: ${r.steps.filter(s => s.p === 0).map(s => lab(s)).join(", ")}. Çarpım 0, log 0 tanımsız (−∞), perplexity ∞. ${NG.smooth ? "" : "Çözüm: Laplace (add-one) yumuşatma."}</div>` : "")
+  const warn = (zero ? `<div class="notice warn">Bir çarpan <b>0</b>: ${r.steps.filter(s => s.p === 0).map(s => lab(s)).join(", ")}. Çarpım 0, log 0 tanımsız (−∞), perplexity ∞. ${NG.smooth ? "" : `<span class="stu">Çözüm: Laplace (add-one) yumuşatma.</span>`}</div>` : "")
     + (oov.length ? `<div class="notice">${oov.map(s => T(s.w)).join(", ")} korpusta yok (OOV). Gerçek sistemlerde <span class="ng-t">UNK</span> simgesine eşlenir.</div>` : "");
   const prodStr = r.steps.map(fr).join(" × ");
   return `<p class="verdict">P = ${r.steps.map(s => dec(s.p)).join(" × ")} = <b>${dec(r.prod)}</b></p>
-    <p class="ng-formula">${m.n > 1 ? `${T(BOS)} (×${m.n - 1}) ve ${T(EOS)} otomatik eklenir` : "Unigram'da yalnızca sözcükler çarpılır"} · ${r.N} çarpan</p>${warn}
+    <p class="ng-formula stu">${m.n > 1 ? `${T(BOS)} (×${m.n - 1}) ve ${T(EOS)} otomatik eklenir` : "Unigram'da yalnızca sözcükler çarpılır"} · ${r.N} çarpan</p>${warn}
     <div class="ng-scroll"><table class="ng-tbl"><tr><th>#</th><th>Çarpan</th><th>Kesir</th><th>Değer</th><th>log₂</th><th>Birikmiş çarpım</th></tr>
     ${r.steps.map((s, i) => `<tr class="${s.p === 0 ? "bad" : ""}"><td>${i + 1}</td><td>${lab(s)}</td><td>${s.und ? "0/0" : fr(s)}</td><td><b>${dec(s.p)}</b></td><td>${lgs(lg(s.p))}</td><td>${dec(s.prod)}</td></tr>`).join("")}
     <tr class="sum"><td></td><td>Toplam</td><td></td><td><b>${dec(r.prod)}</b></td><td><b>${lgs(r.ls)}</b></td><td></td></tr></table></div>
-    <p class="ng-formula">${esc(prodStr)}</p>
-    <p class="verdict" style="margin-top:10px">Perplexity = ${isFinite(r.ls) ? `2<sup>${(-r.ls).toFixed(3)} / ${r.N}</sup> = ` : ""}<b>${isFinite(r.ppl) ? r.ppl.toFixed(3) : "∞"}</b> <small class="muted">(düşük = model cümleyi daha az “şaşırtıcı” buluyor)</small></p>`;
+    <p class="ng-formula stu">${esc(prodStr)}</p>
+    <p class="verdict" style="margin-top:10px">Perplexity = ${isFinite(r.ls) ? `2<sup>${(-r.ls).toFixed(3)} / ${r.N}</sup> = ` : ""}<b>${isFinite(r.ppl) ? r.ppl.toFixed(3) : "∞"}</b> <small class="muted stu">(düşük = model cümleyi daha az “şaşırtıcı” buluyor)</small></p>`;
 }
 
 // ───────────────────────── kabuk
@@ -185,12 +185,12 @@ function mount(){
   root = $("#v-ngram");
   root.innerHTML = `<div class="page">
     <h1 class="page-title">N-gram dil modeli</h1>
-    <p class="lesson-intro" style="margin:0">Bir korpustan sözcük dizilerinin olasılığını öğren: sayımlar, koşullu olasılık, cümle olasılığı, log, Laplace ve perplexity. Slayt 17–33, InClass 5.</p>
+    <p class="lesson-intro" style="margin:0">Bir korpustan sözcük dizilerinin olasılığını hesapla: sayımlar, koşullu olasılık, cümle olasılığı, log, Laplace ve perplexity.<span class="stu"> Slayt 17–33, InClass 5.</span></p>
     <h2 class="ng-h">1 · Korpus</h2>
     <textarea class="ta" id="ngText" rows="5" spellcheck="false" aria-label="Korpus, her satır bir cümle"></textarea>
     <p class="ng-formula" style="margin:6px 0 0">Her satır bir cümle (nokta, soru ve ünlem de cümleyi böler). <span class="ng-t">&lt;s&gt;</span> ve <span class="ng-t">&lt;/s&gt;</span> otomatik eklenir; noktalama atılır.</p>
     <div class="ng-ctl">
-      <div class="chips">${Object.entries(PRESETS).map(([k, p]) => `<button class="chip" data-preset="${k}">${esc(p.label)}</button>`).join("")}</div>
+      <div class="chips">${Object.entries(PRESETS).map(([k, p]) => `<button class="chip${p.stu ? " stu" : ""}" data-preset="${k}">${esc(p.label)}</button>`).join("")}</div>
       <div class="seg" role="group" aria-label="N"><button data-n="1">Unigram</button><button data-n="2">Bigram</button><button data-n="3">Trigram</button></div>
       <div class="seg" role="group" aria-label="Yumuşatma"><button data-sm="0">Yumuşatma yok</button><button data-sm="1">Laplace +1</button></div>
       <label class="chk"><input type="checkbox" id="ngLower"> küçük harf</label>

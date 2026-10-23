@@ -1,5 +1,5 @@
 // Bağımlılık ağacı: Lecture 3 (Dependency Parsing), InClass 4. UD Turkish-BOUN cümlesi seç ya da CoNLL-U yapıştır; ok ve ağaç çizimi, özellik kontrolleri.
-import {$, $$, esc, api, registerView} from "./core.js";
+import {$, $$, esc, api, registerView, MODE} from "./core.js";
 
 // Universal Dependencies ilişkileri: kısa Türkçe açıklama
 const REL = {
@@ -108,7 +108,7 @@ function treeSVG(toks){
 // ───────────────────────── çıktı
 function checksHTML(toks, c){
   const li = (ok, name, note) => `<li class="${ok ? "ok" : "bad"}"><b>${ok ? "✓" : "✗"}</b> <span><b>${name}</b> <small>${note}</small></span></li>`;
-  return `<ul class="dp-checks">
+  return `<ul class="dp-checks stu">
     ${li(c.roots.length === 1, "Tek kök", c.roots.length === 1 ? `kök: <i>${esc(c.roots[0].form)}</i>` : `${c.roots.length} kök bulundu`)}
     ${li(!c.bad.length && !c.cyc.length, "Bağlı ve döngüsüz", c.bad.length ? "geçersiz HEAD var" : c.cyc.length ? "döngü var" : "her sözcükten HEAD zinciriyle köke ulaşılır")}
     ${li(!c.bad.length, "Tek başlı", "her sözcüğün (kök hariç) tam bir HEAD'i var")}
@@ -120,26 +120,26 @@ function tableHTML(toks){
 }
 function relsHTML(toks){
   const used = [...new Set(toks.map(t => t.rel))].sort();
-  return `<div class="dp-rels">${used.map(r => `<span class="dp-rel"><span class="ck-s">${esc(r)}</span> ${esc(relText(r) || "—")}</span>`).join("")}</div>`;
+  return `<div class="dp-rels stu">${used.map(r => `<span class="dp-rel"><span class="ck-s">${esc(r)}</span> ${esc(relText(r) || "—")}</span>`).join("")}</div>`;
 }
 function selHTML(toks){
   const t = toks.find(x => x.id === DS.sel); if(!t) return `<p class="ck-meta">Bir sözcüğe ya da oka tıkla: ilişkisi burada açıklanır.</p>`;
   const h = toks.find(x => x.id === t.head), kids = toks.filter(x => x.head === t.id);
-  return `<p class="verdict" style="font-size:1.15rem"><b>${esc(t.form)}</b> ${h ? `→ bağımlısı olduğu baş: <b>${esc(h.form)}</b> · ilişki <span class="ck-s">${esc(t.rel)}</span> <small class="muted">${esc(relText(t.rel))}</small>` : `cümlenin <b>kökü</b>`}.${kids.length ? ` Bağımlıları: ${kids.map(k => `<button class="rel" data-tok="${k.id}">${esc(k.form)}<sub>${esc(k.rel)}</sub></button>`).join(" ")}` : " Bağımlısı yok (yaprak)."}</p>`;
+  return `<p class="verdict" style="font-size:1.15rem"><b>${esc(t.form)}</b> ${h ? `→ bağımlısı olduğu baş: <b>${esc(h.form)}</b> · ilişki <span class="ck-s">${esc(t.rel)}</span> <small class="muted stu">${esc(relText(t.rel))}</small>` : `cümlenin <b>kökü</b>`}.${kids.length ? ` Bağımlıları: ${kids.map(k => `<button class="rel" data-tok="${k.id}">${esc(k.form)}<sub>${esc(k.rel)}</sub></button>`).join(" ")}` : " Bağımlısı yok (yaprak)."}</p>`;
 }
 function render(){
   const out = $("#dpOut", root);
   if(!sent || !sent.toks.length){ out.innerHTML = '<div class="empty" style="padding:30px 0">Bir cümle seç ya da CoNLL-U yapıştır.</div>'; return; }
   const {toks, meta} = sent, c = check(toks);
-  out.className = DS.hide ? "dp-hide" : "";
+  out.className = DS.hide && MODE.student ? "dp-hide" : "";
   out.innerHTML = `<p class="ck-meta" style="margin-bottom:4px">${meta.sent_id ? `<span class="tag">${esc(meta.sent_id)}</span> ` : ""}${toks.length} sözcük</p>
     <p class="dp-text">${esc(meta.text || toks.map(t => t.form).join(" "))}</p>
     <div class="ng-ctl"><div class="seg" role="group" aria-label="Görünüm"><button data-dv="arc" aria-pressed="${DS.view === "arc"}">Oklar</button><button data-dv="tree" aria-pressed="${DS.view === "tree"}">Ağaç</button></div>
-      <label class="chk"><input type="checkbox" id="dpHide" ${DS.hide ? "checked" : ""}> etiketleri gizle (önce kendin dene)</label></div>
+      <label class="chk stu"><input type="checkbox" id="dpHide" ${DS.hide ? "checked" : ""}> etiketleri gizle (önce kendin dene)</label></div>
     <div class="dp-scroll dp-fig">${DS.view === "arc" ? arcSVG(toks, c) : treeSVG(toks)}</div>
     <div id="dpSel">${selHTML(toks)}</div>
-    <h3 class="ng-h3">Özellikler <small>Lecture 3, bağımlılık ağacı</small></h3>${checksHTML(toks, c)}
-    <h3 class="ng-h3">Bu cümledeki ilişkiler</h3>${relsHTML(toks)}
+    <h3 class="ng-h3 stu">Özellikler <small>Lecture 3, bağımlılık ağacı</small></h3>${checksHTML(toks, c)}
+    <h3 class="ng-h3 stu">Bu cümledeki ilişkiler</h3>${relsHTML(toks)}
     <h3 class="ng-h3">CoNLL-U tablosu</h3>${tableHTML(toks)}`;
 }
 function setSent(text, id){
@@ -164,7 +164,7 @@ function mount(){
   root = $("#v-deps");
   root.innerHTML = `<div class="page wide">
     <h1 class="page-title">Bağımlılık ağacı</h1>
-    <p class="lesson-intro" style="margin:0">UD Turkish-BOUN treebank'inden bir cümle seç (InClass 4): sözcükler arası baş–bağımlı ilişkileri ok ve ağaç olarak çizilir, ağaç özellikleri (tek kök, bağlı, tek başlı, döngüsüz, projektif) kontrol edilir. Kendi CoNLL-U'nu da yapıştırabilirsin.</p>
+    <p class="lesson-intro" style="margin:0">UD Turkish-BOUN treebank'inden bir cümle seç ya da kendi CoNLL-U'nu yapıştır: sözcükler arası baş–bağımlı ilişkileri ok ve ağaç olarak çizilir.<span class="stu"> Ağaç özellikleri (tek kök, bağlı, tek başlı, döngüsüz, projektif) kontrol edilir, ilişkiler açıklanır (InClass 4).</span></p>
     <h2 class="ng-h">1 · Cümle seç <small id="dpCount"></small></h2>
     <div class="ng-ctl" style="margin-top:0"><label class="field sm" style="flex:1 1 260px">${""}<input id="dpQ" type="text" placeholder="Cümlede ara (örn. kitap)" autocomplete="off" spellcheck="false"></label>
       <label class="muted" style="font-size:.88rem">en az <input id="dpMin" class="dp-num" type="number" min="1" max="60"> en çok <input id="dpMax" class="dp-num" type="number" min="1" max="60"> sözcük</label>

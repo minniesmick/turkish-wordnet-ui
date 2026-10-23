@@ -616,3 +616,11 @@ svg.dp .dp-node.on rect{stroke:var(--spot);fill:var(--wash);stroke-width:2}
 .dp-tbl tr.sel td{background:var(--wash)}
 .dp-hide .dp-lbl,.dp-hide .dp-rels,.dp-hide #dpSel,.dp-hide .sec{visibility:hidden}
 .dp-hide .dp-rels,.dp-hide .dp-checks{display:none}
+
+/* Kullanım kipi: Araç kipinde öğretici öğeler gizlenir */
+body:not(.student) .stu{display:none!important}
+#modeSeg button{padding:4px 10px;font-size:.8rem}
+#modeSeg{margin-left:auto}
+#modeSeg + .top-actions{margin-left:6px}
+@media(max-width:700px){#modeSeg button{padding:4px 7px}}
+
