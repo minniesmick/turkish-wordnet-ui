@@ -15,6 +15,7 @@ import os
 import random
 import re
 import shutil
+import socket
 import subprocess
 import threading
 import time
@@ -1346,7 +1347,7 @@ def ud_index():
                 continue
             f = forms.setdefault(norm(c[1], False), {})
             f[(c[2], c[3], c[5])] = f.get((c[2], c[3], c[5]), 0) + 1
-            if c[3] in ("NOUN", "VERB", "ADJ") and c[2].isalpha():
+            if c[3] in ("NOUN", "VERB", "ADJ", "PROPN") and c[2].isalpha():
                 k = (norm(c[2], False), c[3])
                 lemmas[k] = lemmas.get(k, 0) + 1
     with _UD_LOCK:
@@ -1586,6 +1587,15 @@ class Handler(SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8770"))
     srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+
+    class Srv6(ThreadingHTTPServer):
+        address_family = socket.AF_INET6
+
+    # Windows'ta "localhost" önce ::1'e gider; orada dinleyen yoksa her bağlantı ~250 ms bekler. Yalnızca yerel ::1 de dinlenir (dışarıya açılmaz).
+    try:
+        threading.Thread(target=Srv6(("::1", port), Handler).serve_forever, daemon=True).start()
+    except OSError:
+        pass
     threading.Thread(target=load_all, daemon=True).start()
     threading.Thread(target=zem_start, daemon=True).start()
     print(f"http://127.0.0.1:{port}  (veri arka planda yükleniyor)", flush=True)
