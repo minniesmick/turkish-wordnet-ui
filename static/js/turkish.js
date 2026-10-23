@@ -73,7 +73,7 @@ const N = (w, o = {}) => ({w, pos:"N", ...o}), Vb = (w, o = {}) => ({w, pos:"V",
 export const CURATED = [
   N("okul"), N("ev"), N("masa"), N("kitap", {soft:1}), N("ağaç", {soft:1}), N("çocuk", {soft:1}), N("ayak", {soft:1}), N("renk", {soft:1}),
   N("araba"), N("göz"), N("kalem"), N("kapı"), N("saat", {fh:1}), N("rol", {fh:1}), N("kalp", {soft:1, fh:1}), N("devlet"), N("bahçe"),
-  N("şehir"), N("kütüphane"), N("öğrenci"), N("yaprak", {soft:1}), N("kuş"), N("ders"), N("el"), N("gül"), N("yol"), N("arkadaş"),
+  N("şehir", {vd:1}), N("ağız", {vd:1}), N("burun", {vd:1}), N("kütüphane"), N("öğrenci"), N("yaprak", {soft:1}), N("kuş"), N("ders"), N("el"), N("gül"), N("yol"), N("arkadaş"),
   Aj("güzel"), Aj("büyük", {soft:1}), Aj("küçük", {soft:1}), Aj("yeni"), Aj("sağlam"),
   Vb("gel"), Vb("git", {soft:1}), Vb("al"), Vb("ver"), Vb("oku"), Vb("yaz"), Vb("sev"), Vb("ara"), Vb("başla"), Vb("kapa"), Vb("ye", {dey:1}),
   Vb("de", {dey:1}), Vb("bak"), Vb("gör"), Vb("bil"), Vb("ol"), Vb("çalış"), Vb("sevin"), Vb("uyu"), Vb("yap"), Vb("anla"), Vb("kal"),
@@ -127,13 +127,14 @@ export function generate(stem, ids){
   let form = stem.w, st = stem.pos === "V" ? "V" : "N", par = null, p3 = false, soft = !!stem.soft;
   const segs = [{id:"STEM", text:stem.w}], trace = [{id:"STEM", out:stem.w, notes:[`kök: ${stem.w} (${{N:"isim", A:"sıfat", V:"fiil"}[stem.pos]})`]}];
   const tags = [];
-  for(const id of ids){
+  for(const [ix, id] of ids.entries()){
     const S = SUF[id], notes = [];
     if(!S) return {ok:false, reason:`bilinmeyen ek: ${id}`, at:id};
     if(!S.from.includes(st)) return {ok:false, reason:`${S.name} eki “${stateName(st)}” durumundan sonra gelemez`, at:id, state:st};
     if(S.cond && !S.cond(form)) return {ok:false, reason:`${S.name} bu gövdeye uymuyor`, at:id, state:st};
     if(S.grp === "pers" && S.par !== "any" && par !== S.par) return {ok:false, reason:`${S.name} bu zamandan sonra gelmez (kişi eki takımı farklı)`, at:id, state:st};
     let prev = form, hv = lastVowel(form);
+    if(id === "PROG" && ids[ix - 1] === "NEG"){ hv = lastVowel(form.slice(0, -1)); notes.push(`olumsuz şimdiki zaman -mHyor: H, kökün son ünlüsüne (${hv}) göre`); }
     if(segs.length === 1 && stem.fh && hv){ const f = FRONT[hv]; if(f){ hv = f; notes.push(`istisna: ${stem.w} kökü ince ünlü gibi davranır`); } }
     if(id === "PROG" && "ae".includes(last(prev))){ prev = prev.slice(0, -1); notes.push(`kök sonu ${last(form)} düştü (kural 8, -Iyor öncesi)`); }
     let t = typeof S.t === "function" ? S.t(form) : S.t;
@@ -151,6 +152,7 @@ export function generate(stem, ids){
       else if(l === "t") r = prev.slice(0, -1) + "d", notes.push("t → d: ünlüyle başlayan ek");
       if(r) prev = r;
     }
+    if(stem.vd && segs.length === 1 && vi && prev.length > 2 && isV(prev[prev.length - 2])){ notes.push(`ünlü düşmesi: ${prev} → ${prev.slice(0, -2) + prev.slice(-1)} (ünlüyle başlayan ek)`); prev = prev.slice(0, -2) + prev.slice(-1); }
     if(stem.dey && segs.length === 1 && txt[0] === "y" && last(prev) === "e"){ prev = prev.slice(0, -1) + "i"; notes.push(`${stem.w} → ${prev}: y- ile başlayan ekten önce e → i`); }
     form = prev + txt;
     segs.push({id, text:txt});

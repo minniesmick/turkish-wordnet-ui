@@ -9,7 +9,9 @@ const cases = [
  ["oku",["PROG","A3pl"],"okuyorlar"],["yaz",["AOR"],"yazar"],["gel",["AOR","A2sg_k"],"gelirsin"],["saat",["PLU"],"saatler"],["kalp",["P1sg"],"kalbim"],
  ["güzel",["LIK","ACC"],"güzelliği"],["kitap",["CI"],"kitapçı"],["gör",["PAST","A2pl_z"],"gördünüz"],["gez",["INF2"],"gezme"],["gez",["NEG"],"gezme"],
  ["gel",["ABIL","AOR"],"gelebilir"],["yaz",["PASS_l","PAST"],"yazıldı"],["oku",["PASS_n","PAST"],"okundu"],["de",["PROG"],"diyor"],["su",["INS"],"suyla"],
- ["okul",["LAS"],"okullaş"],["çocuk",["P3sg"],"çocuğu"],["gül",["PLU","P2pl"],"gülleriniz"]
+ ["okul",["LAS"],"okullaş"],["çocuk",["P3sg"],"çocuğu"],["gül",["PLU","P2pl"],"gülleriniz"],
+ ["oku",["NEG","PROG"],"okumuyor"],["gör",["NEG","PROG","A2pl_k"],"görmüyorsunuz"],["yap",["NEG","PROG"],"yapmıyor"],["gel",["NEG","PROG"],"gelmiyor"],
+ ["şehir",["P1sg"],"şehrim"],["şehir",["ACC"],"şehri"],["şehir",["LOC"],"şehirde"],["şehir",["PLU"],"şehirler"],["burun",["DAT"],"burna"]
 ];
 let bad=0;
 for(const [s,ids,exp] of cases){ const g=generate(L[s],ids); const got=g.ok?g.surface:"ERR:"+g.reason; if(got!==exp){bad++; console.log("FAIL",s,ids.join("+"),"->",got,"expected",exp);} }
