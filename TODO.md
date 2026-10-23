@@ -2,6 +2,31 @@
 
 Haftalık InClass soruları ve slaytlar geldikçe uygulamaya taşınacak işler. Önce PDF doldurulur, uygulama işi buraya yazılır.
 
+## Bilinen kısıtlar
+
+Rakamlar 2026-10-23'te 500 gerçek BOUN sözcüğü ve 400 rastgele üretimle ölçüldü; ölçüm betikleri repoda yok, yeniden ölçmek için yöntem: BOUN'dan sözcük örnekle, Zemberek'le çözümle, `fsm.js` / `turkish.js` çıktısıyla karşılaştır.
+
+**Morfoloji**
+- Küçük kural motoru yalnızca çevrimdışı yedek: bilinen 491 sözcükten %72'sinde çözümleme veriyor, %67'sinde kök Zemberek'le örtüşüyor. Bağlaç, edat, zamir, özel ad, -DHk sıfat-fiil ve zarf-fiil yok. Sözlüğü BOUN test lemmalarından ve ~70 elle yazılmış kökten oluşuyor; yumuşama sezgisel (çok heceli p/ç/k ile bitenler yumuşar), ünlü düşmesi yalnızca 3 kökte. Üretimde Zemberek'le etiketler %93 örtüşüyor, farkın çoğu adlandırma (Cond / Desr).
+- Zemberek (0.17.1, 2019) için JDK ve `lib/zemberek-full.jar` gerekir; jar git'te yok. Yoksa uygulama küçük motora düşer, yani aynı sözcük makineden makineye farklı sonuç verebilir. Zemberek Pnon / Nom / Pos yazmaz (`fsm.js` tamamlar); etiket adları `Sample.pdf`'teki eski sürümden farklı olabilir. Cümle bağlamında belirsizlik giderme olasılıksaldır, yanlış seçebilir.
+- Oflazer FSM yolu şekillerden elle kodlandı. `Sample.pdf`'teki 3 yol birebir doğrulandı; geri kalan yollar doğrulanmadı. 1031 analizin %86'sı için yol çıkıyor. Şekilde olmayanlar: Pron / Adverb / Num / Conj kökleri, noktalama, isimden fiile türetme (lAş, lAn), AorPart, kısaltma; Caus'un köke bağlanışı şekilde yok (varsayım olarak işaretli). Zemberek etiketlerini şekil kenarlarına eşleme kararları bana ait.
+
+**N-gram ve korpus**
+- Backoff "stupid backoff": puan verir, normalize olasılık dağılımı vermez; bu yüzden perplexity'si yaklaşıktır. λ ağırlıkları elle girilir. Katz / Kneser-Ney yok.
+- "Brown" korpusu SemCor cümleleridir (küçük harfli, noktalamasız), gerçek Brown'un tamamı değildir; cümleler eşit aralıkla seçilir.
+- PMI yalnızca ilk ~150 bin sözcüğü kullanır; "benzer bağlamlı sözcükler" gürültülüdür (BOUN gibi küçük korpusta özellikle; Brown'da `president` iyi, `good` / `school` zayıf).
+- Eğitim/test ayrımı sabittir (her 5. cümle); küçük korpuslarda test perplexity oynaktır. Rastgele cümle üretimi bilerek rastgeledir (her tıklamada farklı).
+- "Kendin hesapla" yalnızca Yumuşatma Yok ya da Laplace iken çalışır.
+
+**Ayrıştırma ve bağımlılık**
+- CKY: tekli kural döngüleri atlanır, düğüm başına en iyi 60 alt ağaç tutulur, çok belirsiz cümlede en fazla 30 ağaç gösterilir. Adım adım yöntemler küçük cümleler için (üstten alta 400, shift-reduce 500 adım sınırı). Earley yok.
+- Bağımlılık verisi yalnızca UD Turkish-BOUN **test** kümesidir (979 cümle); çok sözcüklü belirteçler (1-2) atlanır.
+
+**Genel**
+- İndirilen SVG / PNG sitenin yazı tiplerini taşımaz, açıldığı bilgisayarın yazı tipiyle çizilir.
+- Ders sayfaları ve soruları ders slaytlarının metninden yazıldı; slayt görselleri (şekiller, tablolar) tek tek taranmadı.
+- Testler: `scripts/test_*.mjs` (turkish 43, fsm 4 yol, lm 41, mle 19, parsers 13 denetim); arayüz otomatik test edilmiyor, preview'da elle denendi.
+
 ## N-gram dil modeli laboratuvarı (InClass 5, Güz 2026)
 
 Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekme: **N-gram** (`static/js/ngram.js`, `g n`). Slayt 24 korpusu doğrulandı (2/3, 1/3, 1/2, Laplace 3/8).
