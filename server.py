@@ -1452,8 +1452,8 @@ def zem_start():
     ZEM["ready"].set()
 
 
-def zem_call(cmd, text):
-    text = text.replace(NL, " ").replace(TAB, " ").strip()[:600]
+def zem_call(cmd, *fields):
+    text = TAB.join(f.replace(NL, " ").replace(TAB, " ").strip()[:600] for f in fields)
     with ZEM["lock"]:
         p = ZEM["proc"]
         p.stdin.write(cmd + TAB + text + NL)
@@ -1546,6 +1546,11 @@ class Handler(SimpleHTTPRequestHandler):
                     self.send_json({"available": True, **zem_call("A", p["w"][0])})
                 elif p.get("s"):
                     self.send_json({"available": True, **zem_call("S", p["s"][0])})
+                elif p.get("i"):
+                    self.send_json({"available": True, **zem_call("I", p["i"][0])})
+                elif p.get("g") or p.get("o"):
+                    cmd = "G" if p.get("g") else "O"
+                    self.send_json({"available": True, **zem_call(cmd, p[cmd.lower()][0], p.get("pos", [""])[0], p.get("ids", [""])[0])})
                 else:
                     self.send_json({"available": True})
             elif u.path == "/api/relate":
