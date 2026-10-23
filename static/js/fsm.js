@@ -9,7 +9,7 @@ export const STATE_NAME = {
   112:"Positive", 113:"Verbal Stem", 118:"Infinitive", 119:"End", 120:"Other Tense", 121:"Optative", 122:"Imperative", 123:"Definite Past", 1230:"Subjunctive", 125:"Other Tense Pers.", 126:"Optative Pers.",
   127:"Imperative Pers.", 128:"Past Pers.", 130:"End", 1080:"Negative ma (2)", 1130:"Verbal Stem (neg Hyor)", 1131:"Verbal Stem (Hyor, Aor)", 1200:"Other Tense (0)", 1260:"End", 1270:"End", 1280:"End"
 };
-export const END = new Set([6, 7, 8, 10, 11, 15, 18, 20, 22, 23, 119, 130, 1260, 1270, 1280]);
+export const END = new Set([6, 7, 8, 10, 11, 15, 18, 20, 22, 23, 117, 119, 130, 1260, 1270, 1280]);
 
 // [from, to, token, tag, flags]  flags: s = sessiz (hiçbir belirteç tüketmeden 0 ile geçilebilir), e = bitiş durumuna gider, r = sonraki belirteç Rel ise, p = sonraki belirteç Prog1 ise, a = şekilde yok (varsayım)
 const E = [];
@@ -51,7 +51,11 @@ edge(108, 113, "", "0", "s"); edge(108, 111, "Aor", "+z");
 edge(112, 113, "", "0", "s"); edge(112, 1131, "", "0", "s");
 edge(113, 118, "Inf1", "+mAk");
 for(const [id, tag] of [["Loc", "+DA"], ["Abl", "+DAn"], ["Ins", "+ylA"], ["Dat", "+yA"]]) edge(118, 5, id, tag);
-for(const [id, tag] of [["Inf2", "+mA"], ["PresPart", "+yAn"], ["FutPart", "+yAcAk"], ["PastPart", "+DHk"], ["Fut", "+yAcAk"]]) edge(113, 2, id, tag);
+edge(118, 5, "Nom", "0", "s");
+for(const [id, tag] of [["Inf2", "+mA"], ["Inf3", "+yHş"], ["PresPart", "+yAn"], ["FutPart", "+yAcAk"], ["PastPart", "+DHk"], ["NarrPart", "+mHş"], ["Fut", "+yAcAk"]]) edge(113, 2, id, tag);
+edge(113, 114, "ByDoingSo", "+yArAk"); edge(114, 119, "", "+DAn, 0", "se"); edge(113, 115, "When", "+yHncA"); edge(115, 119, "", "+yA, 0", "se");
+for(const [id, tag] of [["AfterDoingSo", "+yHp"], ["AfterDoing", "+yHp"], ["SinceDoingSo", "+yAlH"], ["AsLongAs", "+DHkçA"]]) edge(113, 119, id, tag);
+for(const id of ["WithoutHavingDoneSo", "WithoutBeingAbleToHaveDoneSo"]) edge(112, 117, id, "+mAdAn");
 edge(113, 120, "Narr", "+mHş"); edge(113, 121, "Opt", "+yA"); edge(113, 122, "Imp", "0"); edge(113, 123, "Past", "+DH"); edge(113, 1230, "Cond", "+sA");
 // ───── fiiller devam (Figure 4.4)
 edge(1130, 120, "Prog1", "+Hyor"); edge(1131, 120, "Prog1", "+Hyor"); edge(1131, 120, "Aor", "+Hr, +Ar");
@@ -87,7 +91,7 @@ export function normalize(toks){
   let i = 0;
   const groups = [];
   for(const t of toks){
-    if(LEXPOS.has(t.id) && (t.db || !groups.length)){
+    if(t.db || !groups.length){   // türetme sınırından sonraki ilk belirteç ve ilk belirteç her zaman sözcük türüdür (Noun, Verb, Adverb, Postp ...)
       if(t.db && t.id === "Verb" && groups[groups.length - 1]?.pos === "Verb") continue;   // fiil -> fiil türetmesi (Able vb.) aynı gövdede sayılır
       groups.push({pos:t.id, db:t.db, items:[]});
     }else groups[groups.length - 1].items.push(t);
@@ -100,12 +104,17 @@ export function normalize(toks){
       let body = items.slice();
       const p3pl = body.some(t => t.id === "P3pl");
       if(p3pl) body = body.filter(t => t.id !== "A3sg");
-      if(!p3pl && !body.some(t => NUM.has(t.id))) body.unshift({id:"A3sg", db:false, implicit:true});
-      const ni = body.findIndex(t => NUM.has(t.id)), hasP = body.some(t => POSS.has(t.id));
-      const pi = ni < 0 ? 0 : ni + 1;
-      if(!hasP) body.splice(pi, 0, {id:"Pnon", db:false, implicit:true});
-      const hasCase = body.some(t => CASES.has(t.id));
-      if(!hasCase){ const at = body.findIndex(t => !NUM.has(t.id) && !POSS.has(t.id)); body.splice(at < 0 ? body.length : at, 0, {id:"Nom", db:false, implicit:true}); }
+      let skipNum = false;
+      const nextFirst = groups[gi + 1]?.items.find(t => t.id !== "Zero")?.id;
+      if(body.length === 1 && body[0].id === "A3sg" && (nextFirst === "Ness" || nextFirst === "Agt")) body = [], skipNum = true;   // şekilde -lHk / -CH, çoğuldan önce 2 -> 2 döngüsüdür; sıfır A3sg tüketilmez
+      const isNom = t => NUM.has(t.id) || POSS.has(t.id) || CASES.has(t.id);
+      const nextG = groups[gi + 1], hasCase = body.some(t => CASES.has(t.id));
+      const complete = !nextG || (nextG.pos === "Verb" && nextG.items.some(t => t.id === "Zero"));   // başka bir türetme geliyorsa Pnon/Nom yazılmaz
+      const lead = body.findIndex(isNom);                               // başta türetme ekleri olabilir (Inf1, PastPart, Ness ...)
+      if(!p3pl && !skipNum && !body.some(t => NUM.has(t.id))) body.splice(lead < 0 ? body.length : lead, 0, {id:"A3sg", db:false, implicit:true});
+      const lastOf = pred => { let k = -1; body.forEach((t, i) => { if(pred(t)) k = i; }); return k; };
+      if((complete || hasCase) && !body.some(t => POSS.has(t.id))) body.splice(lastOf(t => NUM.has(t.id)) + 1, 0, {id:"Pnon", db:false, implicit:true});
+      if(complete && !hasCase) body.splice(lastOf(t => NUM.has(t.id) || POSS.has(t.id)) + 1, 0, {id:"Nom", db:false, implicit:true});
       out.push(...body);
     }else if(g.pos === "Verb"){
       const body = items.slice();
@@ -164,11 +173,11 @@ export function trace(oflazer){
   const lex = n => fmt(stem, toks.slice(0, n));
   while(i < toks.length){
     const tok = toks[i], next = toks[i + 1]?.id;
-    if(i > 0 && tok.db && LEXPOS.has(tok.id) && !direct(st, tok.id, next)){
+    if(i > 0 && tok.db && !direct(st, tok.id, next)){
       steps.push({from:st, via:[], to:st, tag:"", note:`^DB: tür ${tok.id} olur; geçiş, türetme ekinin kenarında yapılır`, lex:lex(i + 1), skipped:true});
       i++; continue;
     }
-    if(i > 0 && ((SKIP[st]?.has(tok.id) && !direct(st, tok.id, next)) || (tok.id === "A3sg" && next === "Cop" && (st === "5" || st === "13")))){
+    if(i > 0 && (((SKIP[st]?.has(tok.id) || tok.id === "Pres") && !direct(st, tok.id, next)) || (tok.id === "A3sg" && next === "Cop" && (st === "5" || st === "13")))){
       steps.push({from:st, via:[], to:st, tag:"", note:`${tok.id} bu durumda şekilde ayrı bir geçiş değil, yutulur`, lex:lex(i + 1), skipped:true});
       i++; continue;
     }
