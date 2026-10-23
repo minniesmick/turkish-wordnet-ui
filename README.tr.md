@@ -114,6 +114,8 @@ Türkçe iki XML dosyasını indirmek için:
   yol uzunluğu, path benzerliği (1/(yol+1)) ve Wu-Palmer; hiyerarşi yolu görsel olarak çizilir.
 - **Anlam seçimi (WSD)**: basitleştirilmiş / genişletilmiş **Lesk** (bağlam–tanım örtüşmesi, idf ağırlıklı).
   Doğruluğu sınırlıdır; yöntemin zayıf yanlarını görmek için tasarlandı.
+- **Morfoloji**: Türkçe sözcüğü morfemlerine ayır (`okul+Noun+A3sg+P1sg+Nom`) ya da kök + eklerden sözcük üret. Küçük kural tabanlı motor:
+  kök sözlüğü (BOUN lemmaları), ek sıralama durum makinesi, ünlü uyumu ve ünsüz değişimi; yanında BOUN'daki gerçek çözümlemeler (Lecture 2). Zemberek/Nuve değildir.
 - **Ayrıştırma**: CFG / PCFG yaz (kuralın sonuna `[olasılık]`), cümle ver; CKY tablosu hücre hücre dolar, tüm ayrıştırma ağaçları SVG çizilir,
   PCFG en olası ağacı ve cümle olasılığını bulur (Lecture 3, InClass 2 ve 3). Tarayıcıda çalışır.
 - **Bağımlılık**: UD Turkish-BOUN (test kümesi, 979 cümle) cümlesi seç ya da CoNLL-U yapıştır; bağımlılık okları ve baş–bağımlı ağacı çizilir,

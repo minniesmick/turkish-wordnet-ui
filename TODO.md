@@ -16,6 +16,14 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [ ] Backoff ve interpolation (slayt 32), UNK / kapalı-açık sözcük dağarcığı (slayt 33).
 - [ ] PMI (slayt 34–39): pencere ±k birlikte geçiş sayımı, PMI tablosu.
 
+## Kullanım kipi ve morfoloji (Lecture 2)
+
+- [x] Araç / Öğrenci kipi (`MODE`, `.stu`, `STUDENT_VIEWS` in `core.js`); öğretici öğeler Araç kipinde gizli.
+- [x] Morfoloji sekmesi (`static/js/morph.js`, `turkish.js`, `g m`); motor denetimi: `node scripts/test_turkish.mjs`.
+- [ ] Morfoloji kapsamı: sıfat-fiil -DHk, zarf-fiil -ArAk/-Ip, ki, ek-fiil (-DHr, -(y)Hm), birleşik zaman; sıklıkla yanlış çözümlenen ilk 100 BOUN sözcüğünü incele.
+- [ ] Morfolojik belirsizlik giderme (slayt 31–32): BOUN etiketlerinden en olası çözümlemeyi seç.
+- [ ] Öğrenci kipi: Ders sekmesini Lecture 1, 2, 3 ve 5 için genişlet; CKY / n-gram için "kendin doldur, kontrol et" alıştırması.
+
 ## Ayrıştırma laboratuvarı (InClass 2, 3, 4; Lecture 3)
 
 - [x] PCFG (InClass 2) ve CKY (InClass 3): sekme **Ayrıştırma** (`static/js/parse.js`, `g c`). InClass 2 cümlesi 2 ağaç verir ve ikisi de P = 3.527e-9 (eşit, kuralların çarpanları aynı); InClass 3 cümlesi gramerde yok (S yalnızca [0,7] kapsıyor, `time` bağlanamıyor).

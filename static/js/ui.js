@@ -306,7 +306,7 @@ export function initPalette(){
 }
 
 // ───────────────────────── kısayollar
-const KEYS = [["⌘ K  /  /", "Komut paletini aç"], ["g  s h b w r f c k n d", "Bölümlere git (Ara, Harita, Benzerlik, Anlam seçimi, Roller, Çerçeveler, Ayrıştırma, Bağımlılık, N-gram, Ders)"], ["j  k", "Sonuçlar arasında aşağı / yukarı (odak)"], ["Enter", "Odaktaki anlamın kâğıdını aç"], ["m", "Odaktaki kavramı haritada aç"], ["f", "Odaktaki kavramı favorilere ekle / çıkar"], ["Esc", "Odağı ve kâğıdı kapat"], ["←  →", "Haritada komşu kavramlar arasında gez"], ["↵ / Çift tık", "Haritada seçili kavramı merkeze al"], ["Backspace", "Haritada bir önceki merkeze dön"], ["p", "Sunum modu"], ["t", "Açık / koyu tema"], ["?", "Bu pencere"]];
+const KEYS = [["⌘ K  /  /", "Komut paletini aç"], ["g  s h b w r f m c k n d", "Bölümlere git (Ara, Harita, Benzerlik, Anlam seçimi, Roller, Çerçeveler, Morfoloji, Ayrıştırma, Bağımlılık, N-gram, Ders)"], ["j  k", "Sonuçlar arasında aşağı / yukarı (odak)"], ["Enter", "Odaktaki anlamın kâğıdını aç"], ["m", "Odaktaki kavramı haritada aç"], ["f", "Odaktaki kavramı favorilere ekle / çıkar"], ["Esc", "Odağı ve kâğıdı kapat"], ["←  →", "Haritada komşu kavramlar arasında gez"], ["↵ / Çift tık", "Haritada seçili kavramı merkeze al"], ["Backspace", "Haritada bir önceki merkeze dön"], ["p", "Sunum modu"], ["t", "Açık / koyu tema"], ["?", "Bu pencere"]];
 export function openShortcuts(){
   $("#kbGrid").innerHTML = KEYS.map(([k, d]) => `<span>${k.split("  ").map(x => `<span class="kbd">${esc(x)}</span>`).join(" ")}</span><span>${esc(d)}</span>`).join("");
   $("#shortcuts").showModal();
