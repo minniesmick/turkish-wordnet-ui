@@ -1,6 +1,6 @@
 // Morfoloji: Lecture 2. Türkçe sözcüğü eklerine ayır (çözümle) ya da kökten ek ek sözcük üret. Öğrenci kipinde kural izi, kavram notları ve alıştırma da açılır.
 import {$, $$, esc, api, registerView, MODE} from "./core.js";
-import {trace, stepStates, STATE_NAME, sampleLines} from "./fsm.js";
+import {trace, stepStates, STATE_NAME, sampleLines, flagNote} from "./fsm.js";
 import {mountFsmQuiz} from "./fsmquiz.js";
 import {SUF, GROUP_NAME, CURATED, generate, analyze, nextOptions, lexiconFromLemmas, stateName} from "./turkish.js";
 
@@ -87,7 +87,7 @@ function fsmBlock(a){
   const text = lines.join("\n");
   return `<h4>Oflazer FSM yolu <small>Nouns / Verbs1 / Verbs2 şekilleri</small></h4>
     <pre class="mp-fsm">${esc(text)}${t.ok ? "" : `\n✗ ${esc(t.reason)}`}</pre>
-    <p class="muted" style="font-size:.82rem;margin:4px 0 0">${esc(names.join(" → "))}${t.steps.some(s => s.assumed) ? " · (varsayım) ile işaretli kenar şekilde yok" : ""}</p>
+    <p class="muted" style="font-size:.82rem;margin:4px 0 0">${esc(names.join(" → "))}${flagNote(t) ? " · " + esc(flagNote(t)) : ""}</p>
     <button class="btn sm ghost" data-copy="${esc(text)}">Yolu kopyala</button>`;
 }
 function zStudent(a){

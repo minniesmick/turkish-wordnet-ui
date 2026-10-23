@@ -7,13 +7,15 @@ export const STATE_NAME = {
   14:"Nominal Verb 1", 15:"End", 16:"Nominal Verb 2", 17:"Nom. Verb 2 Pers", 18:"End", 20:"End", 21:"Nominal Verb 4", 22:"End", 23:"End",
   101:"Verbal Root", 102:"Reflexive", 103:"Reciprocal", 104:"Causative Dir", 105:"Causative t", 106:"Passive Hl", 107:"Passive Hn", 108:"Negative ma", 109:"Negative yama", 111:"Negative Aorist",
   112:"Positive", 113:"Verbal Stem", 118:"Infinitive", 119:"End", 120:"Other Tense", 121:"Optative", 122:"Imperative", 123:"Definite Past", 1230:"Subjunctive", 125:"Other Tense Pers.", 126:"Optative Pers.",
-  127:"Imperative Pers.", 128:"Past Pers.", 130:"End", 1080:"Negative ma (2)", 1130:"Verbal Stem (neg Hyor)", 1131:"Verbal Stem (Hyor, Aor)", 1200:"Other Tense (0)", 1260:"End", 1270:"End", 1280:"End"
+  127:"Imperative Pers.", 128:"Past Pers.", 130:"End", 1080:"Negative ma (2)", 1130:"Verbal Stem (neg Hyor)", 1131:"Verbal Stem (Hyor, Aor)", 1200:"Other Tense (0)", 1260:"End", 1270:"End", 1280:"End",
+  109:"Negative yama", 110:"Negative Pers.", 114:"Adverb 1", 115:"Adverb 2", 1100:"End", 1101:"Neg. Aorist 2nd tense (Verbs2 1100)", 1111:"End", 124:"Other Tense 3rd Pers.", 129:"End",
+  132:"2nd Tense Definite Past", 133:"2nd Tense Narrative Past", 1320:"2nd Tense (before Past)", 1321:"2nd Tense (after +ysA)", 1322:"2nd Tense Conditional", 1330:"2nd Tense (before Narr)", 135:"End", 136:"End", 1271:"Imperative (AsIf)", 1272:"End"
 };
-export const END = new Set([6, 7, 8, 10, 11, 15, 18, 20, 22, 23, 117, 119, 130, 1260, 1270, 1280]);
+export const END = new Set([6, 7, 8, 10, 11, 15, 18, 20, 22, 23, 117, 119, 129, 130, 135, 136, 1100, 1111, 1260, 1270, 1272, 1280]);
 
-// [from, to, token, tag, flags]  flags: s = sessiz (hiçbir belirteç tüketmeden 0 ile geçilebilir), e = bitiş durumuna gider, r = sonraki belirteç Rel ise, p = sonraki belirteç Prog1 ise, a = şekilde yok (varsayım)
+// [from, to, token, tag, flags]  flags: s = sessiz (hiçbir belirteç tüketmeden 0 ile geçilebilir), e = bitiş durumuna gider, r = sonraki belirteç Rel ise, p = sonraki belirteç Prog1 ise, q = sonraki belirteç Past ise, w = sonraki belirteç While / AsIf ise, n = önceki belirteç kişi eki ise, a = şekilde yok (varsayım), i = şekilde var, bağlantısı çizgi kesişiminden yorumlandı (çıkarım)
 const E = [];
-const edge = (f, t, on, tag, fl = "") => E.push({f:String(f), t:String(t), on, tag, silent:fl.includes("s"), nextRel:fl.includes("r"), nextProg:fl.includes("p"), assumed:fl.includes("a")});
+const edge = (f, t, on, tag, fl = "") => E.push({f:String(f), t:String(t), on, tag, silent:fl.includes("s"), nextRel:fl.includes("r"), nextProg:fl.includes("p"), nextPast:fl.includes("q"), nextWhile:fl.includes("w"), afterPers:fl.includes("n"), assumed:fl.includes("a"), inferred:fl.includes("i")});
 
 // ───── isimler (Figure 4.2)
 edge(1, 2, "Noun", ""); edge(1, 2, "Adj", ""); edge(1, 101, "Verb", "");
@@ -69,12 +71,43 @@ for(const [id, tag] of [["A2sg", "0"], ["A2pl", "+yHnHz"], ["A3sg", "+sHn"], ["A
 edge(122, 127, "", "0", "s"); edge(127, 1270, "", "0", "se");
 for(const [id, tag] of [["A1sg", "+m"], ["A2sg", "+n"], ["A3sg", "0"], ["A1pl", "+k"], ["A2pl", "+nHz"], ["A3pl", "+lAr"]]){ edge(123, 128, id, tag); edge(1230, 128, id, tag); }
 edge(123, 128, "", "0", "s"); edge(1230, 128, "", "0", "s"); edge(128, 1280, "", "0", "se");
-edge(111, 1100, "", "0", "s");
+// ───── Verbs1 / Verbs2'den sonradan eklenenler
+// yetersizlik (+yAmA), kip türevleri, etken ad (+yHcH), Desr
+edge(107, 109, "Unable", "+yAmA"); edge(109, 113, "Able", "+yAbil"); edge(109, 113, "", "0", "s"); edge(109, 111, "Aor", "+z");
+for(const [id, tag] of [["Repeat", "+yAdur"], ["Hastily", "+yHver"], ["EverSince", "+yAgel"], ["Almost", "+yAyaz"], ["Stay", "+yAkal"], ["Start", "+yAkoy"]]) edge(107, 112, id, tag);
+for(const [id, tag] of [["Repeat", "+yAdur"], ["Hastily", "+yHver"], ["EverSince", "+yAgel"]]) edge(108, 113, id, tag);
+edge(112, 2, "Agt", "+yHcH"); edge(113, 1230, "Desr", "+sA");
+// olumsuz geniş zaman: şekilde kişi ekleri (+m, +zsHn, +z, +yHz, +zsHnHz, +zlAr) geniş zaman ekini de içerir; Zemberek Aor ve kişiyi ayrı belirteç yazar, bu yüzden "Aor+Kişi" tek kenar
+edge(108, 1080, "", "0", "s");
+for(const [id, tag] of [["A1sg", "+m"], ["A2sg", "+zsHn"], ["A3sg", "+z"], ["A1pl", "+yHz"], ["A2pl", "+zsHnHz"], ["A3pl", "+zlAr"]]){ edge(1080, 110, "Aor+" + id, tag); edge(109, 110, "Aor+" + id, tag); }
+edge(110, 1100, "", "0 (decl)", "se");
+// 111 -> Verbs2'deki "1100" kutusu; Verbs1'deki bitiş çemberi de 1100 diye çizilmiş, burada kutu 1101 diye ayrıldı
+edge(111, 1101, "Narr", "+mH");
+const PERS_NARR = [["A1sg", "+yHm"], ["A2sg", "+sHn"], ["A3sg", "0"], ["A1pl", "+yHz"], ["A2pl", "+sHnHz"], ["A3pl", "+lAr"]];
+for(const [id, tag] of PERS_NARR) edge(1101, 1111, id, tag);
+// "0, +mH" okları: kişi ekinden ya da kipten sonra isteğe bağlı +mH (Narr)
+edge(120, 1200, "Narr", "+mH"); edge(126, 1260, "Narr", "+mH", "n"); edge(128, 1280, "Narr", "+mH", "n");
+edge(122, 1271, "AsIf", "+cAsHnA"); edge(1271, 1272, "", "0", "se"); edge(1271, 1272, "Narr", "+mH", "n");
+edge(120, 124, "A1pl", "+k", "w"); edge(120, 124, "A3pl", "+lAr", "w"); edge(124, 129, "AsIf", "+cAsHnA"); edge(124, 129, "While", "+yken");
+// bileşik zamanlar (Figure 4.4 altı): 1320 +yDH, 1321 +ysA, 1330 +ymHş. Birinci zaman durumlarından bu üç durumun girişlerine giden uzun yatay çizgiler kesişiyor;
+// hangi durumdan hangisine gidildiği dil bilgisine göre yorumlandı (çıkarım): geniş / şimdiki / duyulan geçmiş / istek / koşul / belirli geçmişten sonra ikinci zaman gelir
+for(const s of [111, 120, 121, 123, 1230]){
+  edge(s, 1320, "", "0", "si"); edge(s, 1320, "Narr", "+mH", "qi"); edge(s, 1330, "", "0", "si"); edge(s, 1321, "Cond", "+ysA", "i");
+}
+const PERS_PAST = [["A1sg", "+m"], ["A2sg", "+n"], ["A3sg", "0"], ["A1pl", "+k"], ["A2pl", "+nHz"], ["A3pl", "+lAr"]];
+edge(1320, 132, "Past", "+yDH");
+for(const [id, tag] of PERS_PAST){ edge(132, 135, id, tag); edge(1321, 1322, id, tag); }
+edge(132, 135, "", "0", "se"); edge(1321, 1322, "", "0", "s"); edge(1322, 135, "", "0", "se"); edge(1322, 135, "Narr", "+mH", "n");
+edge(1330, 133, "Narr", "+ymHş");
+for(const [id, tag] of PERS_NARR) edge(133, 136, id, tag);
+edge(133, 136, "", "0", "se"); edge(133, 129, "AsIf", "+cAsHnA");
+// isim kökü gibi davranan, şekilde olmayan kökler (varsayım)
+edge(1, 2, "Pron", "", "a"); edge(1, 2, "Num", "", "a");
 
 // belirli durumlarda sessizce yutulan belirteçler (şekilde karşılığı olmayan Zemberek etiketleri)
-const SKIP = {112:new Set(["Pos"]), 118:new Set(["A3sg", "Pnon"]), 5:new Set(["Verb", "Pres", "Zero"]), 13:new Set(["Verb", "Pres", "Zero"]), 21:new Set(["A3sg"])};
+const SKIP = {112:new Set(["Pos"]), 118:new Set(["A3sg", "Pnon"]), 5:new Set(["Verb", "Pres", "Zero"]), 13:new Set(["Verb", "Pres", "Zero"]), 21:new Set(["A3sg"]), 2:new Set(["Time", "Abbrv", "Quant", "Card", "Ord", "Prop", "Pers", "Demons", "Reflex", "Ques", "Real", "Dist", "Range", "Ratio"])};
 const LEXPOS = new Set(["Noun", "Adj", "Verb", "Pron", "Adv", "Det", "Conj", "Postp", "Num", "Ques", "Interj", "Punc", "Dup"]);
-const VOICES = new Set(["Caus", "Pass", "Reflex", "Recip", "Able"]);
+const VOICES = new Set(["Caus", "Pass", "Reflex", "Recip", "Able", "Repeat", "Hastily", "EverSince", "Almost", "Stay", "Start"]);
 const TAMS = new Set(["Aor", "Prog1", "Prog2", "Past", "Narr", "Fut", "Cond", "Imp", "Opt", "Neces", "Pres", "Cop", "Inf1", "Inf2", "Inf3", "PastPart", "PresPart", "FutPart", "AorPart", "NarrPart", "Neg"]);
 const NUM = new Set(["A3sg", "A3pl"]), POSS = new Set(["Pnon", "P1sg", "P2sg", "P3sg", "P1pl", "P2pl", "P3pl"]), CASES = new Set(["Nom", "Acc", "Dat", "Loc", "Abl", "Gen", "Ins", "Equ"]);
 
@@ -118,7 +151,7 @@ export function normalize(toks){
       out.push(...body);
     }else if(g.pos === "Verb"){
       const body = items.slice();
-      if(!nominalVerb && !body.some(t => t.id === "Pos" || t.id === "Neg")){
+      if(!nominalVerb && !body.some(t => t.id === "Pos" || t.id === "Neg" || t.id === "Unable")){
         let at = 0; while(at < body.length && VOICES.has(body[at].id)) at++;
         body.splice(at, 0, {id:"Pos", db:false, implicit:true});
       }
@@ -135,15 +168,15 @@ const fmt = (stem, toks) => {
 };
 const byFrom = new Map();
 for(const e of E){ if(!byFrom.has(e.f)) byFrom.set(e.f, []); byFrom.get(e.f).push(e); }
-const direct = (st, tok, next) => (byFrom.get(st) || [])
-  .filter(e => e.on === tok && (!e.nextRel || next === "Rel") && (!e.nextProg || next === "Prog1"))
-  .sort((a, b) => (b.nextRel || b.nextProg) - (a.nextRel || a.nextProg))[0];   // koşullu kenar (sonraki belirteç Rel / Prog1) önce denenir
+const direct = (st, tok, next, prev) => (byFrom.get(st) || [])
+  .filter(e => e.on === tok && (!e.nextRel || next === "Rel") && (!e.nextProg || next === "Prog1") && (!e.nextPast || next === "Past") && (!e.nextWhile || next === "While" || next === "AsIf") && (!e.afterPers || PERS.has(prev)))
+  .sort((a, b) => (b.nextRel || b.nextProg || b.nextPast || b.nextWhile) - (a.nextRel || a.nextProg || a.nextPast || a.nextWhile))[0];   // koşullu kenar (sonraki belirteç Rel / Prog1) önce denenir
 // sessiz (0) kenarlarla tok'u tüketebilen bir duruma en kısa yol (BFS)
-function route(st, tok, next){
+function route(st, tok, next, prev){
   const q = [[st, []]], seen = new Set([st]);
   while(q.length){
     const [cur, path] = q.shift();
-    const d = direct(cur, tok, next);
+    const d = direct(cur, tok, next, prev);
     if(d) return {path, edge:d};
     for(const e of byFrom.get(cur) || []){
       if(e.silent && !e.end && !seen.has(e.t) && !END.has(+e.t)){ seen.add(e.t); q.push([e.t, [...path, e]]); }
@@ -166,25 +199,43 @@ function toEnd(st){
   return null;
 }
 
+const PERS = new Set(["A1sg", "A2sg", "A3sg", "A1pl", "A2pl", "A3pl"]);
+// Zemberek -mAktA (Prog2); Oflazer'de ad-fiil + bulunma durumu + ek-fiil olarak çözümlenir (Sample.pdf'teki uyumaktadır yolu)
+function expandProg2(raw){
+  const out = [];
+  for(const t of raw){
+    if(t.id !== "Prog2"){ out.push(t); continue; }
+    out.push({id:"Noun", db:true, implicit:false}, {id:"Inf1", db:false, implicit:false}, {id:"A3sg", db:false, implicit:false}, {id:"Loc", db:false, implicit:false}, {id:"Verb", db:true, implicit:false}, {id:"Zero", db:false, implicit:false}, {id:"Pres", db:false, implicit:false});
+  }
+  return out;
+}
 // ana işlev: Zemberek Oflazer dizesinden adım listesi üretir
 export function trace(oflazer){
-  const {stem, toks: raw} = parseOflazer(oflazer), toks = normalize(raw), steps = [];
+  const {stem, toks: raw0} = parseOflazer(oflazer), raw = expandProg2(raw0), toks = normalize(raw), steps = [];
   let st = "1", i = 0;
   const lex = n => fmt(stem, toks.slice(0, n));
   while(i < toks.length){
-    const tok = toks[i], next = toks[i + 1]?.id;
-    if(i > 0 && tok.db && !direct(st, tok.id, next)){
+    const tok = toks[i], next = toks[i + 1]?.db ? toks[i + 2]?.id : toks[i + 1]?.id;   // türetme sınırı işaretini atlayarak bir sonraki ek
+    if(tok.id === "Aor" && PERS.has(toks[i + 1]?.id)){          // olumsuz geniş zaman: Aor ve kişi eki tek kenarda
+      const pr = route(st, "Aor+" + toks[i + 1].id);
+      if(pr){
+        const to = pr.edge.t;
+        steps.push({from:st, via:pr.path.map(e => e.t), to, tag:pr.edge.tag, states:[st, ...pr.path.map(e => e.t), to], lex:lex(i + 2), assumed:pr.edge.assumed || pr.path.some(e => e.assumed), inferred:pr.edge.inferred || pr.path.some(e => e.inferred), token:"Aor+" + toks[i + 1].id});
+        st = to; i += 2; continue;
+      }
+    }
+    if(i > 0 && tok.db && !direct(st, tok.id, next, toks[i - 1]?.id)){
       steps.push({from:st, via:[], to:st, tag:"", note:`^DB: tür ${tok.id} olur; geçiş, türetme ekinin kenarında yapılır`, lex:lex(i + 1), skipped:true});
       i++; continue;
     }
-    if(i > 0 && (((SKIP[st]?.has(tok.id) || tok.id === "Pres") && !direct(st, tok.id, next)) || (tok.id === "A3sg" && next === "Cop" && (st === "5" || st === "13")))){
+    if(i > 0 && (((SKIP[st]?.has(tok.id) || tok.id === "Pres") && !direct(st, tok.id, next, toks[i - 1]?.id)) || (tok.id === "A3sg" && next === "Cop" && (st === "5" || st === "13")))){
       steps.push({from:st, via:[], to:st, tag:"", note:`${tok.id} bu durumda şekilde ayrı bir geçiş değil, yutulur`, lex:lex(i + 1), skipped:true});
       i++; continue;
     }
-    const r = route(st, tok.id, next);
+    const r = route(st, tok.id, next, i > 0 ? toks[i - 1].id : null);
     if(!r) return {stem, toks, steps, ok:false, stopAt:tok.id, state:st, reason:`${tok.id} etiketi ${st} durumundan sonra kodlanmadı (şekilde yok ya da bu çalışmada eklenmedi)`};
     const states = [st, ...r.path.map(e => e.t), r.edge.t];
-    steps.push({from:st, via:r.path.map(e => e.t), to:r.edge.t, tag:r.edge.tag, states, lex:lex(i + 1), assumed:r.edge.assumed || r.path.some(e => e.assumed), implicit:tok.implicit, token:tok.id});
+    steps.push({from:st, via:r.path.map(e => e.t), to:r.edge.t, tag:r.edge.tag, states, lex:lex(i + 1), assumed:r.edge.assumed || r.path.some(e => e.assumed), inferred:r.edge.inferred || r.path.some(e => e.inferred), implicit:tok.implicit, token:tok.id});
     st = r.edge.t; i++;
   }
   const e = toEnd(st);
@@ -204,7 +255,7 @@ export const POOL = [
   "küçük+Noun+A3pl", "ev+Noun+A3sg+P3sg+Abl", "kitap+Noun+A3pl+P1sg+Dat", "araba+Noun+A3sg+Pnon+Loc", "göz+Noun+A3pl+P3sg+Acc", "okul+Noun+A3sg+P1sg+Nom", "köy+Noun+A3sg+Pnon+Gen",
   "ev+Noun+A3sg+Loc^DB+Verb+Zero+Past+A3sg", "uyu+Verb+Prog1+A3sg+Cop", "uyu+Verb^DB+Noun+Inf1+A3sg+Loc^DB+Verb+Zero+Pres+A3sg+Cop",
   "gel+Verb+Pos+Past+A1sg", "git+Verb+Neg+Past+A2sg", "oku+Verb+Pos+Aor+A3sg", "gel+Verb+Neg+Prog1+A1sg", "gel+Verb+Past+A3pl", "gel+Verb+Pos+Narr+A3sg",
-  "bak+Verb+Pos+Prog1+A2pl", "sev+Verb+Pass+Pos+Past+A3sg", "gel+Verb+Pos+Opt+A1sg", "gel+Verb+Pos+Imp+A2sg", "al+Verb+Pos+Cond+A1sg", "oku+Verb+Pos+Fut+A1sg"
+  "bak+Verb+Pos+Prog1+A2pl", "sev+Verb+Pass+Pos+Past+A3sg", "gel+Verb+Pos+Opt+A1sg", "gel+Verb+Pos+Imp+A2sg", "al+Verb+Pos+Cond+A1sg", "oku+Verb+Pos+Fut+A1sg", "çalış+Verb+Neg+Aor+A3sg", "gel+Verb+Unable+Aor+A3sg", "uyu+Verb+Prog2+A3sg+Cop"
 ];
 // PDF'deki (Sample.pdf) el çözümüyle birebir doğrulanan örnekler; öbürlerinin yolu şekillerden elle kodlandı
 export const VERIFIED = new Set(["küçük+Noun+A3pl", "uyu+Verb+Prog1+A3sg+Cop", "uyu+Verb^DB+Noun+Inf1+A3sg+Loc^DB+Verb+Zero+Pres+A3sg+Cop"]);
@@ -214,13 +265,15 @@ export function edgeTable(){
     const to = new Map();
     for(const e of byFrom.get(f)){
       if(!to.has(e.t)) to.set(e.t, []);
-      to.get(e.t).push({on:e.on, tag:e.tag, silent:e.silent, cond:e.nextRel ? "sonraki ek Rel" : e.nextProg ? "sonraki ek Prog1" : "", assumed:e.assumed});
+      to.get(e.t).push({on:e.on, tag:e.tag, silent:e.silent, cond:e.nextRel ? "sonraki ek Rel" : e.nextProg ? "sonraki ek Prog1" : e.nextPast ? "sonraki ek Past" : e.nextWhile ? "sonraki ek While / AsIf" : e.afterPers ? "önceki ek kişi" : "", assumed:e.assumed, inferred:e.inferred});
     }
     return {from:f, to:[...to].sort((a, b) => num(a[0], b[0])).map(([t, items]) => ({to:t, items}))};
   });
 }
 export const edgesFrom = st => (byFrom.get(String(st)) || []).map(e => e.t);
-export const sampleLines = t => t.steps.filter(s => !s.skipped).map(s => `From State ${(s.states || [s.from, s.to]).join("-State ")}: ${s.lex}${s.tag ? ` (with tag ${s.tag})` : ""}`);
+export const sampleLines = t => t.steps.filter(s => !s.skipped).map(s => `From State ${(s.states || [s.from, s.to]).join("-State ")}: ${s.lex}${s.tag ? ` (with tag ${s.tag})` : ""}${s.assumed ? "  (varsayım)" : s.inferred ? "  (çıkarım)" : ""}`);
+// yolda işaretli kenar varsa açıklama
+export const flagNote = t => [t.steps.some(s => s.assumed) ? "(varsayım): kenar şekilde yok" : "", t.steps.some(s => s.inferred && !s.assumed) ? "(çıkarım): kenar şekilde var, hangi durumdan çıktığı kesişen çizgilerden yorumlandı" : ""].filter(Boolean).join(" · ");
 // yazılan durum dizisini beklenenle karşılaştırır: ok (tam), prefix (doğru ama eksik), wrong (k. durum yanlış), long (fazlası var)
 export function checkPath(want, typed){
   const got = typed[0] === "1" ? typed.slice() : ["1", ...typed];

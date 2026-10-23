@@ -1,7 +1,7 @@
 // "FSM yolunu kendin yaz" (Lecture 2, Sample.pdf): bir çözümleme verilir, Oflazer durum makinesindeki durum dizisini yaz, sonra kontrol et.
 // Yol hesabı fsm.js içinde; burada yalnızca arayüz var. Morfoloji sekmesinin Öğrenci kipi bölümü olarak bağlanır.
 import {$, esc} from "./core.js";
-import {trace, stepStates, STATE_NAME, END, POOL, VERIFIED, checkPath, sampleLines, edgeTable, edgesFrom} from "./fsm.js";
+import {trace, stepStates, STATE_NAME, END, POOL, VERIFIED, checkPath, sampleLines, edgeTable, edgesFrom, flagNote} from "./fsm.js";
 
 const FQ = {src:"pool", own:"uyu+Verb+Prog1+A3sg+Cop", i:-1, typed:"", checked:null, hint:0, hintMsg:"", reveal:false, counted:false, score:0, n:0};
 let box = null, cur = null;
@@ -19,7 +19,7 @@ function fresh(){
 const edgesText = st => [...new Set(edgesFrom(st))].map(nm).join(" · ") || "çıkan kenar yok (bitiş durumu)";
 
 function mapHTML(){
-  const rows = edgeTable().map(r => `<tr><td><b>${r.from}</b> <small class="muted">${esc(STATE_NAME[r.from] || "")}</small>${END.has(+r.from) ? ' <small class="muted">· bitiş</small>' : ""}</td><td>${r.to.map(g => `→ <b>${g.to}</b> <small class="muted">${esc(STATE_NAME[g.to] || "")}</small>${END.has(+g.to) ? ' <small class="muted">(bitiş)</small>' : ""}: ${g.items.map(x => `${esc(x.on || "ε")} <small class="muted">${esc(x.tag || "0")}${x.silent && x.tag !== "0" ? " (sessiz)" : ""}${x.cond ? ` · ${esc(x.cond)} ise` : ""}${x.assumed ? " · varsayım" : ""}</small>`).join(" · ")}`).join("<br>")}</td></tr>`).join("");
+  const rows = edgeTable().map(r => `<tr><td><b>${r.from}</b> <small class="muted">${esc(STATE_NAME[r.from] || "")}</small>${END.has(+r.from) ? ' <small class="muted">· bitiş</small>' : ""}</td><td>${r.to.map(g => `→ <b>${g.to}</b> <small class="muted">${esc(STATE_NAME[g.to] || "")}</small>${END.has(+g.to) ? ' <small class="muted">(bitiş)</small>' : ""}: ${g.items.map(x => `${esc(x.on || "ε")} <small class="muted">${esc(x.tag || "0")}${x.silent && x.tag !== "0" ? " (sessiz)" : ""}${x.cond ? ` · ${esc(x.cond)} ise` : ""}${x.assumed ? " · varsayım" : x.inferred ? " · çıkarım" : ""}</small>`).join(" · ")}`).join("<br>")}</td></tr>`).join("");
   return `<details class="fq-map"><summary>Durum haritası <small class="muted">şekil yerine kenar tablosu</small></summary><div class="ng-scroll"><table class="ng-tbl"><thead><tr><th>Durum</th><th>Çıkan kenarlar (ek ve etiketi)</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="ng-formula" style="margin:6px 0 0">Kenarlar Nouns.pdf, Verbs1.pdf ve Verbs2.pdf şekillerinden elle kodlandı. ε: ek yok (sıfır morfem), sessiz: belirteç tüketmeden geçilen kenar.</p></details>`;
 }
@@ -41,7 +41,7 @@ function feedback(){
 function answerHTML(){
   if(!FQ.reveal || !cur?.t) return "";
   return `<h4 style="margin:14px 0 6px">Cevap <small class="muted">Sample.pdf biçimi</small></h4><pre class="mp-fsm">${esc(sampleLines(cur.t).join("\n"))}</pre>
-    <p class="muted" style="font-size:.84rem;margin:4px 0 0">${esc(cur.want.map(nm).join(" → "))}${cur.t.steps.some(s => s.assumed) ? " · (varsayım) ile işaretli kenar şekilde yok" : ""}</p>`;
+    <p class="muted" style="font-size:.84rem;margin:4px 0 0">${esc(cur.want.map(nm).join(" → "))}${flagNote(cur.t) ? " · " + esc(flagNote(cur.t)) : ""}</p>`;
 }
 function render(keepOwn = false){
   if(!box) return;
