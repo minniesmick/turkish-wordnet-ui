@@ -79,13 +79,13 @@ function zipfHTML(){
   const ticksX = [], ticksY = [];
   for(let p = 0; 10 ** p <= V; p++) ticksX.push(10 ** p);
   for(let p = 0; 10 ** p <= f[0]; p++) ticksY.push(10 ** p);
-  return `<svg class="zipf" viewBox="0 0 ${W} ${H}" role="img" aria-label="Zipf grafiği">
+  return `<div class="fig-box"><svg class="zipf" viewBox="0 0 ${W} ${H}" role="img" aria-label="Zipf grafiği">
     ${ticksX.map(t => `<line class="g" x1="${X(t)}" y1="${Tp}" x2="${X(t)}" y2="${H - B}"/><text x="${X(t)}" y="${H - B + 16}">${num(t)}</text>`).join("")}
     ${ticksY.map(t => `<line class="g" x1="${L}" y1="${Y(t)}" x2="${W - R}" y2="${Y(t)}"/><text x="${L - 6}" y="${Y(t) + 4}" style="text-anchor:end">${num(t)}</text>`).join("")}
     <line class="ref" x1="${X(1)}" y1="${Y(f[0])}" x2="${X(V)}" y2="${Y(Math.max(1, f[0] / V))}"/>
     ${pts.map(([r, c]) => `<circle cx="${X(r)}" cy="${Y(c)}" r="2.2"/>`).join("")}
     <text x="${(L + W - R) / 2}" y="${H - 4}">sıra (log)</text><text x="12" y="${(Tp + H - B) / 2}" transform="rotate(-90 12 ${(Tp + H - B) / 2})">sıklık (log)</text></svg>
-    <p class="ck-meta" style="margin:4px 0">Log-log doğrusunun eğimi <b>${slope.toFixed(2)}</b>.<span class="stu"> Zipf yasası: sıklık ≈ C / sıra, yani eğim −1 civarı. Kesikli çizgi tam −1 eğimli referans; az sayıda çok sık sözcük, uzun bir nadir sözcük kuyruğu.</span></p>`;
+    <p class="ck-meta" style="margin:4px 0">Log-log doğrusunun eğimi <b>${slope.toFixed(2)}</b>.<span class="stu"> Zipf yasası: sıklık ≈ C / sıra, yani eğim −1 civarı. Kesikli çizgi tam −1 eğimli referans; az sayıda çok sık sözcük, uzun bir nadir sözcük kuyruğu.</span></p><div class="fig-actions" style="margin:0"><button class="btn sm ghost" data-export="svg" data-name="zipf-${CS.name}">SVG</button><button class="btn sm ghost" data-export="png" data-name="zipf-${CS.name}">PNG</button></div></div>`;
 }
 function kwicHTML(){
   const kw = CS.kw.trim();

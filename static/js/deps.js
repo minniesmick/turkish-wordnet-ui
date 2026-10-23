@@ -136,7 +136,7 @@ function render(){
     <p class="dp-text">${esc(meta.text || toks.map(t => t.form).join(" "))}</p>
     <div class="ng-ctl"><div class="seg" role="group" aria-label="Görünüm"><button data-dv="arc" aria-pressed="${DS.view === "arc"}">Oklar</button><button data-dv="tree" aria-pressed="${DS.view === "tree"}">Ağaç</button></div>
       <label class="chk stu"><input type="checkbox" id="dpHide" ${DS.hide ? "checked" : ""}> etiketleri gizle (önce kendin dene)</label></div>
-    <div class="dp-scroll dp-fig">${DS.view === "arc" ? arcSVG(toks, c) : treeSVG(toks)}</div>
+    <div class="fig-box"><div class="fig-actions" style="margin:0 0 6px"><button class="btn sm ghost" data-export="svg" data-name="bagimlilik-${esc(meta.sent_id || "cumle")}">SVG indir</button><button class="btn sm ghost" data-export="png" data-name="bagimlilik-${esc(meta.sent_id || "cumle")}">PNG indir</button><button class="btn sm ghost" data-copy="${esc(DS.conllu)}">CoNLL-U kopyala</button></div><div class="dp-scroll dp-fig">${DS.view === "arc" ? arcSVG(toks, c) : treeSVG(toks)}</div></div>
     <div id="dpSel">${selHTML(toks)}</div>
     <h3 class="ng-h3 stu">Özellikler <small>Lecture 3, bağımlılık ağacı</small></h3>${checksHTML(toks, c)}
     <h3 class="ng-h3 stu">Bu cümledeki ilişkiler</h3>${relsHTML(toks)}

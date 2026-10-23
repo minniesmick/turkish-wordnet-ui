@@ -704,3 +704,9 @@ svg.zipf circle{fill:var(--ink-2)}
 input.nq-cell{width:130px;height:32px;padding:0 8px;border:1px solid var(--rule-2);border-radius:var(--r);background:var(--page);font:500 .9rem var(--font-mono)}
 input.nq-cell.ok{border-color:var(--spot);background:var(--wash)}
 input.nq-cell.bad{border-style:dashed;background:var(--sunk)}
+
+/* şekil dışa aktarma */
+.fig-actions{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.pt-card header .fig-actions{margin-left:auto}
+.pt-card header .fig-actions .btn{margin-left:0}
+.fig-box{position:relative}

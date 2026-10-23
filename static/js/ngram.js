@@ -83,11 +83,12 @@ function distTable(key){
   const total = ent?.total || 0, complete = cf.smooth === "none" || (cf.smooth === "laplace" && M.V <= 400);
   const head = M.n > 1 ? `${T(key.split(SEP).join(" "))} bağlamından sonra gelenler · C = ${num(total)}` : `Sözcük olasılıkları · N = ${num(total)}`;
   const how = howMode();
+  const md = [`| ${M.n > 1 ? "Sonraki" : "Sözcük"} | Sayım | ${how ? "Kaynak" : "Kesir"} | Olasılık |`, "| --- | --- | --- | --- |", ...rows.slice(0, 40).map(r => `| ${r.w} | ${r.c} | ${how ? r.how : fr(r)} | ${dec(r.p)} |`)].join("\n");
   return `<table class="ng-tbl"><caption>${head}${cf.smooth === "laplace" ? ` · V = ${num(M.V)}` : ""}</caption>
     <tr><th>${M.n > 1 ? "Sonraki" : "Sözcük"}</th><th>Sayım</th><th>${how ? "Kaynak" : "Kesir"}</th><th>Olasılık</th><th class="ng-bar"></th></tr>
     ${shown.map(r => `<tr><td>${T(r.w)}</td><td>${r.c}</td><td>${how ? `<small class="muted">${esc(r.how)}</small>` : fr(r)}</td><td><b>${dec(r.p)}</b></td><td class="ng-bar">${meter(r.p)}</td></tr>`).join("")}
     ${rest > 0 ? `<tr><td colspan="5" class="muted">… ve ${num(rest)} sözcük daha</td></tr>` : ""}
-    <tr class="sum"><td>Toplam${complete ? "" : " (gösterilen)"}</td><td>${rows.reduce((a, r) => a + r.c, 0)}</td><td></td><td><b>${dec(sum)}</b></td><td class="ng-bar">${complete ? (Math.abs(sum - 1) < 1e-9 ? '<span class="ng-ok stu">Σ = 1 ✓</span>' : '<span class="ng-bad stu">Σ ≠ 1</span>') : '<small class="muted stu">tablo yalnızca bağlamda görülenleri içerir</small>'}</td></tr></table>`;
+    <tr class="sum"><td>Toplam${complete ? "" : " (gösterilen)"}</td><td>${rows.reduce((a, r) => a + r.c, 0)}</td><td></td><td><b>${dec(sum)}</b></td><td class="ng-bar">${complete ? (Math.abs(sum - 1) < 1e-9 ? '<span class="ng-ok stu">Σ = 1 ✓</span>' : '<span class="ng-bad stu">Σ ≠ 1</span>') : '<small class="muted stu">tablo yalnızca bağlamda görülenleri içerir</small>'}</td></tr></table><button class="btn sm ghost" data-copy="${esc(md)}" style="margin-top:6px">Tabloyu Markdown olarak kopyala</button>`;
 }
 function matrix(){
   const cf = cfg(), rows = [BOS, ...M.words].filter(h => M.orders[2].has(h)), how = howMode();

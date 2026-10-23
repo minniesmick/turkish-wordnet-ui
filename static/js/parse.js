@@ -173,7 +173,7 @@ function treeSVG(root){
     for(const k of n.kids){ lines += `<line x1="${px(n)}" y1="${py(n) + 6}" x2="${px(k)}" y2="${py(k) - (k.leaf ? 12 : 12)}" class="${k.leaf && k.d > n.d + 1 ? "dash" : ""}"/>`; draw(k); }
     labels += `<text class="pt-n" x="${px(n)}" y="${py(n)}">${esc(n.sym)}</text>`;
   })(root);
-  const w = 56 + (leaf - 1) * W, h = 22 + (maxD + 1) * H + 22;
+  const w = 96 + (leaf - 1) * W, h = 22 + (maxD + 1) * H + 22;
   return `<svg class="pt" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="Ayrıştırma ağacı">${lines}${labels}</svg>`;
 }
 
@@ -260,6 +260,17 @@ function hintCell(r){
   }
   return null;
 }
+// CKY tablosu: satır = aralık uzunluğu, sütun = başlangıç sözcüğü
+function chartMarkdown(r){
+  const n = r.toks.length, head = `| uzunluk | ${r.toks.map((t, i) => `${i} ${t}`).join(" | ")} |`;
+  const lines = [head, `|${" --- |".repeat(n + 1)}`];
+  for(let len = n; len >= 1; len--){
+    const cells = [];
+    for(let i = 0; i < n; i++) cells.push(i + len <= n ? [...r.chart[i][i + len].keys()].filter(s => !isHidden(s)).join(", ") : "");
+    lines.push(`| ${len} | ${cells.join(" | ")} |`);
+  }
+  return lines.join("\n");
+}
 function chartHTML(r){
   if(!r.chart) return '<div class="empty" style="padding:30px 0">Gramer ve cümle yaz.</div>';
   if(!MODE.student) PS.fill = false;
@@ -276,7 +287,7 @@ function chartHTML(r){
     rows += `<tr>${tds}</tr>`;
   }
   const words = `<tr class="ck-w">${r.toks.map((t, i) => `<th><small>${i}</small>${esc(t)}<small>${i + 1}</small></th>`).join("")}</tr>`;
-  return `${PS.fill ? toolbar(r) : toolbar(r)}<div class="ck-scroll"><table class="ck">${rows}${words}</table></div><div class="stu">${detail(r, si, sj)}</div>`;
+  return `${toolbar(r)}<div class="ck-tool"><button class="btn sm ghost" data-copy="${esc(chartMarkdown(r))}">Tabloyu Markdown olarak kopyala</button></div><div class="ck-scroll"><table class="ck">${rows}${words}</table></div><div class="stu">${detail(r, si, sj)}</div>`;
 }
 function detail(r, i, j){
   const cell = r.chart[i]?.[j]; if(!cell) return "";
@@ -310,7 +321,7 @@ function treesHTML(r){
   if(r.top.cnt > 1) h += `<p class="ck-meta stu">${r.hasProb ? "Birden fazla ağaç var: cümle belirsiz (ambiguous). PCFG bunlardan olasılığı en yüksek olanı seçer." : "Birden fazla ağaç var: cümle belirsiz (ambiguous)."}</p>`;
   h += show.map((t, k) => {
     const rl = used(t);
-    return `<article class="pt-card"><header><b>Ağaç ${k + 1}</b>${r.hasProb ? ` <span class="tag">P = ${fmtP(t.tp)}</span> <span class="tag">toplamın %${(100 * t.tp / total).toFixed(1)}'i</span>${k === 0 ? ' <span class="tag pt-best">en olası</span>' : ""}` : ""}<button class="btn sm ghost" data-copy="${esc(bracket(t))}">${"[ ] kopyala"}</button></header>
+    return `<article class="pt-card fig-box"><header><b>Ağaç ${k + 1}</b>${r.hasProb ? ` <span class="tag">P = ${fmtP(t.tp)}</span> <span class="tag">toplamın %${(100 * t.tp / total).toFixed(1)}'i</span>${k === 0 ? ' <span class="tag pt-best">en olası</span>' : ""}` : ""}<span class="fig-actions"><button class="btn sm ghost" data-copy="${esc(bracket(t))}">[ ] kopyala</button><button class="btn sm ghost" data-export="svg" data-name="agac-${k + 1}">SVG</button><button class="btn sm ghost" data-export="png" data-name="agac-${k + 1}">PNG</button></span></header>
       <div class="ck-scroll">${treeSVG(t)}</div>
       <details><summary>${r.hasProb ? "Kurallar ve olasılık çarpımı" : "Kullanılan kurallar"}</summary>
       <p class="ng-formula" style="margin:8px 0 4px">${r.hasProb ? rl.map(x => fmtP(x.p)).join(" × ") + " = " + fmtP(t.tp) : ""}</p>
