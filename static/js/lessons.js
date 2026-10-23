@@ -31,7 +31,7 @@ export const LECTURES = {
 
   2: {
     title:"Lecture 2 · Morfoloji",
-    intro:"Sözcüklerin iç yapısı ve oluşumu. Morfoloji sekmesinde çözümle, üret, Zemberek ve Oflazer FSM yolu bu derse karşılık gelir.",
+    intro:"Sözcüklerin iç yapısı ve oluşumu. Morfoloji sekmesinde çözümle, üret, Zemberek ve Oflazer FSM yolu, Belirsizlik sekmesinde belirsizlik giderme bu derse karşılık gelir.",
     sections:[
       {gut:"ders 2", h:"Morfem, kök, ek", p:["<b>Morfem</b>: anlamlı en küçük bölünmez birim. <b>Kök (stem)</b>: sözcüğün çekirdeği. <b>Ek (affix)</b>: sözcüğe anlam ya da dilbilgisel işlev katan birim. Morfolojinin görevi, sözcüklerin iç yapısını ve oluşumunu çözümlemek ya da üretmektir; amaç, kodlanmış bilgiyi diğer işleme katmanlarına (uyum denetimi, ayrıştırma, makine çevirisi) taşımaktır.",
         "Ek türleri: <b>önek</b> (un+seen), <b>sonek</b> (build+s), <b>içek</b> (cup+s+ful), <b>çevreleyen ek</b> (Almanca ge+lieb+t). Türkçede ekler sonektir."], chips:[["okullarım'ı ayır", {v:"morph", word:"okullarım"}], ["kitapçılık", {v:"morph", word:"kitapçılık"}]]},
@@ -41,7 +41,8 @@ export const LECTURES = {
       {gut:"ders 2", h:"Yüzey biçimi ve sözcüksel biçim", p:["<b>Yüzey biçimi</b>: sözcüğün metinde göründüğü hâl (okulum, sevindiriyor). <b>Sözcüksel biçim</b>: morfemlerin listesi (okul+Noun+A3sg+P1sg+Nom; sevin+Verb+Caus+Pos+Prog1+A3sg). <b>Çözümleme (analysis/parsing)</b> yüzeyden sözcükseline, <b>üretim (generation/synthesis)</b> sözcükselden yüzeye gider."], chips:[["çözümle: okulum", {v:"morph", word:"okulum"}], ["üret", {v:"morph"}]]},
       {gut:"ders 2", h:"Çözümleme için üç bileşen", p:["Türkçe için tüm sözcük biçimlerini listelemek olanaksız; bu yüzden üç parça gerekir: <b>sözlük (lexicon)</b>: kökler ve bilgileri; <b>morfotaktik</b>: ek sırası kuralları (kütüphane-si-ne olur, kütüphane-ne-si olmaz); <b>morfofonemik</b>: ek eklenirken ses değişimleri (ağaç-ta/ağaç-a → ağaca).",
         "Bunlar sonlu durum makineleri/dönüştürücüleriyle (FSM/FST) gerçeklenir; iki düzeyli morfoloji yüzey ve sözcüksel biçimi eşler (Oflazer, 1993; Türkçe için 22 kural). Açık kaynak çözümleyiciler: Zemberek, Nuve. Oflazer'in isim ve fiil durum makineleri sekmede “FSM yolu” olarak görünür."], chips:[["FSM yolu: küçükler", {v:"morph", word:"küçükler"}], ["FSM yolu: uyuyordur", {v:"morph", word:"uyuyordur"}], ["FSM yolu: uyumaktadır", {v:"morph", word:"uyumaktadır"}]]},
-      {gut:"ders 2", h:"Morfolojik belirsizlik giderme", p:["Bir yüzey biçimin birden çok çözümlemesi olabilir; bunları bağlama bakarak seçmek <b>morfolojik belirsizlik gidermedir</b>. Türkçe için yöntemler: ortalamalı perceptron (Sak, Güngör, Saraçlar), karar listeleri (Yüret ve Türe) ve sinir ağları. Zemberek'in çözümleyicisi cümle bağlamında en olası çözümlemeyi seçer."], chips:[["Cümlede çözümle", {v:"morph", word:"gözleri", sent:"Gözleri yaşlı bir adam bana baktı."}]]}
+      {gut:"ders 2", h:"Morfolojik belirsizlik giderme", p:["Bir yüzey biçimin birden çok çözümlemesi olabilir; bunları bağlama bakarak seçmek <b>morfolojik belirsizlik gidermedir</b>. Türkçe için yöntemler: ortalamalı perceptron (Sak, Güngör, Saraçlar), karar listeleri (Yüret ve Türe) ve sinir ağları.",
+        "<b>Taban çizgisi</b> sözcüğün eğitimde en sık görülen çözümlemesini seçer, bağlama bakmaz. <b>Karar listesi</b> “özellik → çözümleme” kurallarını güvenilirliğe göre sıralar; uyan ilk kural karar verir. <b>Ortalama perceptron</b> adayları özellik ağırlıklarıyla puanlar; yanlış seçimde doğrunun ağırlığını artırır, seçilenin azaltır ve sonda ağırlıkların ortalamasını alır. Belirsizlik sekmesi üçünü BOUN'la eğitir ve cümle içinde karşılaştırır; Zemberek'in “Cümlede çözümle” özelliği de perceptron kullanır."], chips:[["Belirsizlik sekmesi", {v:"disamb"}], ["Gözleri yaşlı bir adam…", {v:"disamb", sent:"Gözleri yaşlı bir adam bana baktı."}], ["Cümlede çözümle (Zemberek)", {v:"morph", word:"gözleri", sent:"Gözleri yaşlı bir adam bana baktı."}]]}
     ],
     quiz:[
       ["gel+di (gel → geldi) hangi morfolojik oluşumdur?", ["Çekim", "Yapım", "Birleştirme", "Önekleme"], 0, "Çekimde kökün anlamı ve sınıfı değişmez."],
@@ -53,7 +54,11 @@ export const LECTURES = {
       ["Morfolojik çözümleme (analysis) hangi yöndedir?", ["Sözcükselden yüzeye", "Yüzeyden sözcükseline", "Cümleden sözcüğe", "Sözlükten ekler"], 1, "Çözümleme yüzeyden sözcükseline, üretim sözcükselden yüzeye gider."],
       ["Türkçe bir sözcükte kökle birlikte ortalama kaç morfem bulunur?", ["1", "2", "3", "5"], 2, "Ortalama 3 morfem; ama sık sözcüklerin çoğu tek morfemlidir."],
       ["gez+me neden belirsizdir?", ["Kök sözlükte yok", "Olumsuz emir ya da eylemlik (isim) olabilir", "Ek sırası geçersiz", "Ünlü uyumu bozuk"], 1, "gez+me: “yürüme!” (olumsuz emir) ya da “bir yürüyüş” (eylemlik)."],
-      ["okul+Noun+A3sg+P1sg+Nom sözcüksel biçimi hangi yüzey biçimine karşılık gelir?", ["okullar", "okulum", "okula", "okulu"], 1, "P1sg: 1. tekil iyelik: okulum."]
+      ["okul+Noun+A3sg+P1sg+Nom sözcüksel biçimi hangi yüzey biçimine karşılık gelir?", ["okullar", "okulum", "okula", "okulu"], 1, "P1sg: 1. tekil iyelik: okulum."],
+      ["Slayt 32'ye göre hangisi Türkçe için bir morfolojik belirsizlik giderme yöntemidir?", ["Ortalama perceptron", "CKY ayrıştırma", "Backoff", "PMI"], 0, "Slaytta ortalama perceptron, karar listeleri ve sinir ağı sayılır."],
+      ["Belirsizlik gidermede “taban çizgisi” neyi seçer?", ["Sonraki sözcüğe uyan çözümlemeyi", "Sözcüğün eğitimde en sık görülen çözümlemesini", "Rastgele bir çözümlemeyi", "En uzun çözümlemeyi"], 1, "Taban çizgisi bağlama bakmaz; en sık çözümlemeyi seçer."],
+      ["Karar listesinde bir sözcüğe birden çok kural uyarsa hangisi karar verir?", ["Listedeki son kural", "Güven sırasına göre ilk uyan kural", "Hepsinin oyu", "Rastgele biri"], 1, "Kurallar güvenilirliğe göre sıralanır; ilk uyan kural kazanır."],
+      ["Ortalama perceptronda son ağırlıklar yerine ağırlıkların ortalaması neden kullanılır?", ["Eğitim hızlansın", "Aşırı uyma azalsın", "Daha çok özellik kullanılsın", "Adaylar sıralansın"], 1, "Son örneğe fazla uyan ağırlıkların etkisi ortalamayla yumuşar."]
     ]
   },
 
