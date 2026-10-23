@@ -1,5 +1,5 @@
 // Ayrıştırma: Lecture 3 (CFG, PCFG, CKY). Gramer yaz, cümle ver; CKY tablosunu, ayrıştırma ağaçlarını ve olasılıkları gör. Tamamı tarayıcıda.
-import {$, $$, esc, registerView} from "./core.js";
+import {$, $$, esc, registerView, MODE} from "./core.js";
 
 const PRESETS = {
   inclass2: {stu:true, label:"InClass 2 · PCFG", sent:"Alice said the scientist that believed the student proved the experiment", ex:["Alice said the student proved the experiment"], grammar:
@@ -34,7 +34,7 @@ N -> kids | birds | binoculars | fish
 V -> saw
 P -> with`}
 };
-const PS = {grammar:PRESETS.inclass2.grammar, sent:PRESETS.inclass2.sent, start:"", preset:"inclass2", sel:"", all:false};
+const PS = {grammar:PRESETS.inclass2.grammar, sent:PRESETS.inclass2.sent, start:"", preset:"inclass2", sel:"", all:false, fill:false, ans:{}, chk:false, show:false, hints:0, fk:""};
 const KEY = "wn:parse";
 let root = null, run = null;
 
@@ -211,8 +211,59 @@ function grammarInfo(r){
   }
   return h;
 }
+// ───────────────────────── kendin doldur (öğrenci kipi)
+const cellKey = (i, j) => `${i},${j}`;
+const typedSet = k => new Set((PS.ans[k] || "").split(/[\s,;|]+/).filter(x => x && x !== "·" && x !== "∅"));
+const trueSet = (r, i, j) => new Set([...r.chart[i][j].keys()].filter(x => !isHidden(x)));
+const sameSet = (a, b) => a.size === b.size && [...a].every(x => b.has(x));
+function fillStats(r){
+  const n = r.toks.length; let tot = 0, ok = 0;
+  for(let len = 1; len <= n; len++) for(let i = 0; i + len <= n; i++){
+    const got = typedSet(cellKey(i, i + len)), want = trueSet(r, i, i + len);
+    if(!got.size && !want.size) continue;                       // boş kalması gereken ve boş bırakılan hücreler puana girmez
+    tot++; if(sameSet(got, want)) ok++;
+  }
+  return {tot, ok};
+}
+function toolbar(r){
+  if(!r.chart) return "";
+  if(!PS.fill) return `<div class="stu ck-tool"><button class="btn sm" data-fa="toggle">Tabloyu kendin doldur</button><span class="muted" style="font-size:.86rem">Önce kendin dene, sonra kontrol et.</span></div>`;
+  const st = PS.chk ? fillStats(r) : null;
+  return `<div class="stu ck-tool"><button class="btn sm ghost" data-fa="toggle">← Doldurmayı bırak</button><button class="btn pri sm" data-fa="check">Kontrol et</button><button class="btn sm" data-fa="hint">İpucu: bir hücreyi doldur${PS.hints ? ` (${PS.hints})` : ""}</button><button class="btn sm" data-fa="reveal">${PS.show ? "Tekrar dene" : "Doğru tabloyu göster"}</button><button class="btn sm ghost" data-fa="reset">Temizle</button>
+    ${st ? `<span class="verdict" style="margin:0 0 0 6px;font-size:1.05rem"><b>${st.ok} / ${st.tot}</b> dolu hücre doğru${st.ok === st.tot ? " ✓" : ""}</span>` : ""}</div>
+    <p class="ck-meta stu" style="margin:6px 0 0">Her hücreye o aralığı üretebilen simgeleri boşlukla yaz (örn. <span class="ng-t">NP VP</span>); üretilemiyorsa boş bırak. Alt satır sözcüklerin türü, üst satırlar giderek uzun aralıklar.</p>`;
+}
+function fillHTML(r){
+  const n = r.toks.length;
+  let rows = "";
+  for(let len = n; len >= 1; len--){
+    let tds = "";
+    for(let i = 0; i + len <= n; i++){
+      const j = i + len, k = cellKey(i, j), want = trueSet(r, i, j), got = typedSet(k);
+      let cls = "", note = "";
+      if(PS.chk){
+        const ok = sameSet(got, want); cls = ok ? "ok" : "bad";
+        if(!ok){ const miss = [...want].filter(x => !got.has(x)).length, extra = [...got].filter(x => !want.has(x)).length; note = `<em>${miss ? `eksik ${miss}` : ""}${miss && extra ? " · " : ""}${extra ? `fazla ${extra}` : ""}</em>`; }
+      }
+      tds += `<td class="fill ${cls}"><small>${k}</small><input data-fc="${k}" value="${esc(PS.ans[k] || "")}" autocomplete="off" spellcheck="false" aria-label="Hücre ${k}">${note}</td>`;
+    }
+    rows += `<tr>${tds}</tr>`;
+  }
+  const words = `<tr class="ck-w">${r.toks.map((t, i) => `<th><small>${i}</small>${esc(t)}<small>${i + 1}</small></th>`).join("")}</tr>`;
+  return `${toolbar(r)}<div class="ck-scroll"><table class="ck">${rows}${words}</table></div>`;
+}
+function hintCell(r){
+  const n = r.toks.length;
+  for(let len = 1; len <= n; len++) for(let i = 0; i + len <= n; i++){
+    const j = i + len, k = cellKey(i, j), want = trueSet(r, i, j);
+    if(!sameSet(typedSet(k), want)){ PS.ans[k] = [...want].join(" "); PS.hints++; return k; }
+  }
+  return null;
+}
 function chartHTML(r){
   if(!r.chart) return '<div class="empty" style="padding:30px 0">Gramer ve cümle yaz.</div>';
+  if(!MODE.student) PS.fill = false;
+  if(PS.fill && !PS.show) return fillHTML(r);
   const n = r.toks.length, sel = PS.sel || `0,${n}`;
   const [si, sj] = sel.split(",").map(Number);
   let rows = "";
@@ -225,7 +276,7 @@ function chartHTML(r){
     rows += `<tr>${tds}</tr>`;
   }
   const words = `<tr class="ck-w">${r.toks.map((t, i) => `<th><small>${i}</small>${esc(t)}<small>${i + 1}</small></th>`).join("")}</tr>`;
-  return `<div class="ck-scroll"><table class="ck">${rows}${words}</table></div><div class="stu">${detail(r, si, sj)}</div>`;
+  return `${PS.fill ? toolbar(r) : toolbar(r)}<div class="ck-scroll"><table class="ck">${rows}${words}</table></div><div class="stu">${detail(r, si, sj)}</div>`;
 }
 function detail(r, i, j){
   const cell = r.chart[i]?.[j]; if(!cell) return "";
@@ -276,6 +327,8 @@ function renderAll(){
   sel.innerHTML = r.lhs.map(s => `<option ${s === PS.start ? "selected" : ""}>${esc(s)}</option>`).join("");
   $("#pgEx", root).innerHTML = [PS.sent, ...(PRESETS[PS.preset]?.ex || [])].map(t => `<button class="chip" data-sent="${esc(t)}">${esc(t)}</button>`).join("");
   $$("[data-preset]", root).forEach(b => b.setAttribute("aria-pressed", b.dataset.preset === PS.preset && PS.grammar === PRESETS[b.dataset.preset].grammar));
+  const fk = PS.grammar + "|" + PS.sent + "|" + PS.start;
+  if(fk !== PS.fk){ PS.fk = fk; PS.ans = {}; PS.chk = false; PS.show = false; PS.hints = 0; }
   $("#pgChart", root).innerHTML = chartHTML(r);
   $("#pgTrees", root).innerHTML = treesHTML(r);
   save();
@@ -306,7 +359,18 @@ function mount(){
   $("#pgGrammar", root).addEventListener("input", e => { PS.grammar = e.target.value; PS.sel = ""; clearTimeout(t); t = setTimeout(renderAll, 200); });
   $("#pgSent", root).addEventListener("input", e => { PS.sent = e.target.value; PS.sel = ""; clearTimeout(t); t = setTimeout(renderAll, 150); });
   $("#pgStart", root).addEventListener("change", e => { PS.start = e.target.value; renderAll(); });
+  root.addEventListener("input", e => { const k = e.target.dataset?.fc; if(k){ PS.ans[k] = e.target.value; PS.chk = false; save(); } });
   root.addEventListener("click", e => {
+    const fa = e.target.closest("[data-fa]");
+    if(fa){
+      const a = fa.dataset.fa;
+      if(a === "toggle"){ PS.fill = !PS.fill; PS.show = false; PS.chk = false; }
+      else if(a === "check") PS.chk = true;
+      else if(a === "hint"){ hintCell(run); PS.chk = false; }
+      else if(a === "reveal") PS.show = !PS.show;
+      else if(a === "reset"){ PS.ans = {}; PS.chk = false; PS.hints = 0; PS.show = false; }
+      $("#pgChart", root).innerHTML = chartHTML(run); save(); return;
+    }
     const c = e.target.closest("[data-cell],[data-preset],[data-sent],#pt-more"); if(!c) return;
     if(c.dataset.cell){ PS.sel = c.dataset.cell; $("#pgChart", root).innerHTML = chartHTML(run); save(); return; }
     if(c.dataset.preset){ const p = PRESETS[c.dataset.preset]; Object.assign(PS, {preset:c.dataset.preset, grammar:p.grammar, sent:p.sent, start:"", sel:"", all:false}); sync(); }

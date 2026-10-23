@@ -689,3 +689,13 @@ svg.zipf circle{fill:var(--ink-2)}
 .ng-expl p{margin:2px 0}
 .ng-cmp td.best{font-weight:700;color:var(--spot)}
 .ng-cmp td{font-variant-numeric:tabular-nums}
+
+/* CKY: kendin doldur */
+.ck-tool{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.ck td.fill{cursor:text;padding:16px 4px 4px;min-width:104px}
+.ck td.fill input{width:100%;min-width:90px;border:0;background:none;outline:0;font:600 .82rem var(--font-ui);color:var(--ink)}
+.ck td.fill:focus-within{background:var(--wash);border-color:var(--spot)}
+.ck td.fill.ok{box-shadow:inset 0 0 0 2px var(--spot);background:var(--wash)}
+.ck td.fill.bad{border-style:dashed;border-color:var(--ink-2);background:var(--sunk)}
+.ck td.fill em{display:block;font:italic 500 .7rem var(--font-text);color:var(--ink-3)}
+
