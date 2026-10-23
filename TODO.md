@@ -33,7 +33,8 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [ ] Morfoloji kapsamı (küçük motor, yalnızca yedek): sıfat-fiil -DHk, zarf-fiil -ArAk/-Ip, ki, ek-fiil (-DHr, -(y)Hm), birleşik zaman; sıklıkla yanlış çözümlenen ilk 100 BOUN sözcüğünü incele.
 - [ ] Morfolojik belirsizlik giderme (slayt 31–32): BOUN etiketlerinden en olası çözümlemeyi seç.
 - [x] "Kendin doldur, kontrol et": CKY tablosu (Ayrıştırma, hücre hücre kontrol, ipucu) ve n-gram (tek olasılık, tablo satırı).
-- [ ] Öğrenci kipi: Ders sekmesini Lecture 1, 2, 3 ve 5 için genişlet; kendin-doldur'u bağımlılık ağacına (kenar ekleme) ve Morfoloji FSM yoluna da taşı.
+- [x] Ders sekmesi Lecture 1, 2, 3 ve 5 için genişletildi (`static/js/lessons.js`: bölümler + 34 çoktan seçmeli soru; düğmeler `act: go` ile araçları hazır örnekle açar).
+- [ ] Kendin-doldur'u bağımlılık ağacına (kenar ekleme) ve Morfoloji FSM yoluna da taşı; Ders sorularını slayt görsellerinden ek sorularla zenginleştir.
 
 ## Ayrıştırma laboratuvarı (InClass 2, 3, 4; Lecture 3)
 
