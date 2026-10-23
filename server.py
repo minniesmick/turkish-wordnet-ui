@@ -1296,6 +1296,48 @@ def suggest(p):
     return out
 
 
+# ------------------------------------------------------------------ Universal Dependencies (BOUN)
+UD_FILE = os.path.join(DATA, "ud", "tr_boun-ud-test.conllu")
+_UD = []
+_UD_LOCK = threading.Lock()
+NL, TAB = chr(10), chr(9)
+
+
+def ud_sents():
+    """BOUN test kümesi: [{id, text, n, conllu}]. İlk istekte okunur."""
+    with _UD_LOCK:
+        if _UD or not os.path.exists(UD_FILE):
+            return _UD
+        with open(UD_FILE, encoding="utf-8") as f:
+            blocks = f.read().split(NL * 2)
+        for blk in blocks:
+            lines = [l for l in blk.strip().split(NL) if l]
+            if not lines:
+                continue
+            meta = {}
+            for l in lines:
+                m = re.match(r"# (\w+) = (.*)", l)
+                if m:
+                    meta[m.group(1)] = m.group(2)
+            rows = [l.split(TAB) for l in lines if l[0].isdigit()]
+            n = sum(1 for r in rows if r[0].isdigit())          # çok sözcüklü belirteç (1-2) ve boş düğüm (1.1) sayılmaz
+            _UD.append({"id": meta.get("sent_id", str(len(_UD))), "text": meta.get("text", ""), "n": n, "conllu": NL.join(lines)})
+        return _UD
+
+
+def ud_search(q, lo, hi, limit):
+    q = norm(q, True).strip()
+    out = [s for s in ud_sents() if lo <= s["n"] <= hi and (not q or q in norm(s["text"], True))]
+    return {"total": len(out), "results": [{"id": s["id"], "text": s["text"], "n": s["n"]} for s in out[:limit]]}
+
+
+def ud_get(sid):
+    for s in ud_sents():
+        if s["id"] == sid:
+            return s
+    return None
+
+
 # ------------------------------------------------------------------ HTTP katmanı
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw):
@@ -1371,6 +1413,13 @@ class Handler(SimpleHTTPRequestHandler):
                 n = min(30, int(p.get("n", ["10"])[0] or 10))
                 pool = [i for i, s in enumerate(ds.syn) if s["ex"] or ds.key == "en"]
                 self.send_json({"results": [view(ds, i) for i in random.sample(pool, n)]})
+            elif u.path == "/api/ud":
+                if p.get("id"):
+                    r = ud_get(p["id"][0])
+                    self.send_json(r or {"error": "not found"}, 200 if r else 404)
+                else:
+                    self.send_json(ud_search(p.get("q", [""])[0], int(p.get("min", ["1"])[0] or 1), int(p.get("max", ["999"])[0] or 999),
+                                             min(100, int(p.get("limit", ["30"])[0] or 30))))
             else:
                 self.send_json({"error": "not found"}, 404)
         except (ValueError, BrokenPipeError) as e:

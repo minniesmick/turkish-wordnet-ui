@@ -31,6 +31,7 @@ Hepsi [nltk/nltk_data](https://github.com/nltk/nltk_data/tree/gh-pages/packages/
 | `senseval.json.gz` | `senseval` | SENSEVAL-2 (`hard`, `interest`, `line`, `serve`); lisans için kaynağa bakın |
 | `verbnet.json` | `verbnet3` | [VerbNet 3.3](https://verbs.colorado.edu/verbnet/) (CU Boulder), CC BY 4.0 |
 | `framenet_lu_ex.json.gz` | `framenet_v17` | FrameNet 1.7 (ICSI), CC BY 3.0 |
+| `ud/tr_boun-ud-test.conllu` | `ud/UD_Turkish-BOUN-README.md` | [UD Turkish-BOUN](https://github.com/UniversalDependencies/UD_Turkish-BOUN) test kümesi (Boğaziçi, Universal Dependencies), CC BY-SA 4.0. InClass 4 için bağımlılık ağacı sekmesi |
 
 SemCor ve SENSEVAL için lisans bilgisini bu depoda doğrulamadım; ders amaçlı kullanım için NLTK veri deposundaki dağıtım olduğu gibi alınmıştır.
 
@@ -42,5 +43,6 @@ SemCor ve SENSEVAL için lisans bilgisini bu depoda doğrulamadım; ders amaçl�
     curl -L -o data/turkish1998_wordnet.xml $B/TurkishWordNet/master/turkish1998_wordnet.xml
     curl -L -o data/turkish-propbank.xml $B/TurkishPropBank/master/src/main/resources/turkish-propbank.xml
     curl -L -o data/framenet.xml $B/TurkishFrameNet/master/src/main/resources/framenet.xml
+    curl -L -o data/ud/tr_boun-ud-test.conllu https://raw.githubusercontent.com/UniversalDependencies/UD_Turkish-BOUN/master/tr_boun-ud-test.conllu
     python3 scripts/build_srl.py      # propbank_en.json, framenet_en.json
     python3 scripts/build_nltk.py     # wn31_extra, semcor, senseval, verbnet, framenet_lu_ex
