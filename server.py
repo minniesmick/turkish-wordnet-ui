@@ -1325,6 +1325,39 @@ def ud_sents():
         return _UD
 
 
+_UD_IDX = {}
+
+
+def ud_index():
+    """Sözcük biçimi -> (lemma, UPOS, FEATS) sayımları ve kök sözlüğü (lemma, UPOS, sıklık)."""
+    with _UD_LOCK:
+        if _UD_IDX:
+            return _UD_IDX
+    sents = ud_sents()
+    forms, lemmas = {}, {}
+    for s in sents:
+        for line in s["conllu"].split(NL):
+            if not line or not line[0].isdigit():
+                continue
+            c = line.split(TAB)
+            if len(c) < 6 or not c[0].isdigit():
+                continue
+            f = forms.setdefault(norm(c[1], False), {})
+            f[(c[2], c[3], c[5])] = f.get((c[2], c[3], c[5]), 0) + 1
+            if c[3] in ("NOUN", "VERB", "ADJ") and c[2].isalpha():
+                k = (norm(c[2], False), c[3])
+                lemmas[k] = lemmas.get(k, 0) + 1
+    with _UD_LOCK:
+        _UD_IDX["forms"] = forms
+        _UD_IDX["lemmas"] = sorted(([l, p, n] for (l, p), n in lemmas.items()), key=lambda x: (-x[2], x[0]))
+    return _UD_IDX
+
+
+def ud_word(w):
+    f = ud_index()["forms"].get(norm(w, False), {})
+    return {"form": w, "results": [{"lemma": k[0], "upos": k[1], "feats": k[2], "n": n} for k, n in sorted(f.items(), key=lambda x: -x[1])]}
+
+
 def ud_search(q, lo, hi, limit):
     q = norm(q, True).strip()
     out = [s for s in ud_sents() if lo <= s["n"] <= hi and (not q or q in norm(s["text"], True))]
@@ -1414,7 +1447,11 @@ class Handler(SimpleHTTPRequestHandler):
                 pool = [i for i, s in enumerate(ds.syn) if s["ex"] or ds.key == "en"]
                 self.send_json({"results": [view(ds, i) for i in random.sample(pool, n)]})
             elif u.path == "/api/ud":
-                if p.get("id"):
+                if p.get("lex"):
+                    self.send_json({"lemmas": ud_index()["lemmas"]})
+                elif p.get("w"):
+                    self.send_json(ud_word(p["w"][0]))
+                elif p.get("id"):
                     r = ud_get(p["id"][0])
                     self.send_json(r or {"error": "not found"}, 200 if r else 404)
                 else:
