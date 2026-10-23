@@ -11,8 +11,8 @@ const A_ = v => BACK.includes(v) ? "a" : "e";
 const H_ = v => ({a:"ı", ı:"ı", o:"u", u:"u", e:"i", i:"i", ö:"ü", ü:"ü"})[v] || "ı";
 const FRONT = {a:"e", ı:"i", o:"ö", u:"ü"};
 
-// Durumlar: N isim/sıfat gövdesi, PL çoğul, PS iyelik, CS hâl; V fiil gövdesi, NG olumsuz, T zaman, PE kişi eki
-export const ACCEPT = new Set(["N", "PL", "PS", "CS", "V", "NG", "T", "PE"]);
+// Durumlar: N isim/sıfat gövdesi, PL çoğul, PS iyelik, CS hâl; V fiil gövdesi, NG olumsuz, T zaman, PE kişi eki, CP ek-fiil (-DHr), AV zarf-fiil, RL ilgi eki (-ki)
+export const ACCEPT = new Set(["N", "PL", "PS", "CS", "V", "NG", "T", "PE", "CP", "AV", "RL"]);
 const AOR_H = new Set(["al", "bil", "bul", "dur", "gel", "gör", "kal", "ol", "öl", "san", "var", "ver", "vur", "git", "et"]);
 const causT = p => isV(last(p)) || (syl(p) >= 2 && "lr".includes(last(p)));
 
@@ -46,27 +46,49 @@ export const SUF = {
   PASS_in:{t:"Hn", from:["V"], to:"V", grp:"voice", cat:"yapım", tag:"Pass", name:"edilgen -In (l'den sonra)", cond:p => last(p) === "l"},
   ABIL:{t:"(y)Abil", from:["V"], to:"V", grp:"voice", cat:"çekim", tag:"Able", name:"yeterlilik -(y)Abil"},
   NEG:{t:"mA", from:["V"], to:"NG", grp:"neg", cat:"çekim", tag:"Neg", name:"olumsuzluk -mA"},
+  UNABLE:{t:"(y)AmA", from:["V"], to:"NG", grp:"neg", cat:"çekim", tag:"Unable", name:"yetersizlik -(y)AmA"},
   PAST:{t:"DH", from:["V", "NG"], to:"T", grp:"tam", cat:"çekim", tag:"Past", name:"görülen geçmiş -DI", par:"z"},
   EVID:{t:"mHş", from:["V", "NG"], to:"T", grp:"tam", cat:"çekim", tag:"Narr", name:"öğrenilen geçmiş -mIş", par:"k"},
   PROG:{t:"(H)yor", from:["V", "NG"], to:"T", grp:"tam", cat:"çekim", tag:"Prog1", name:"şimdiki zaman -Iyor", par:"k"},
   FUT:{t:"(y)AcAk", from:["V", "NG"], to:"T", grp:"tam", cat:"çekim", tag:"Fut", name:"gelecek zaman -(y)AcAk", par:"k", soft:true},
   AOR:{t:p => isV(last(p)) ? "r" : (syl(p) === 1 && !AOR_H.has(p)) ? "Ar" : "Hr", from:["V"], to:"T", grp:"tam", cat:"çekim", tag:"Aor", name:"geniş zaman -Ar / -Ir / -r", par:"k"},
-  COND:{t:"sA", from:["V", "NG"], to:"T", grp:"tam", cat:"çekim", tag:"Cond", name:"şart -sA", par:"z"},
+  COND:{t:"sA", from:["V", "NG"], to:"T", grp:"tam", cat:"çekim", tag:"Desr", name:"dilek-şart -sA", par:"z"},
+  NAOR:{t:"z", from:["NG"], to:"T", grp:"tam", cat:"çekim", tag:"Aor", name:"olumsuz geniş zaman -z (gelmez)", par:"nk"},
+  OPT:{t:"(y)A", from:["V", "NG"], to:"T", grp:"tam", cat:"çekim", tag:"Opt", name:"istek -(y)A", par:"o", soft:true},
+  NECES:{t:"mAlH", from:["V", "NG"], to:"T", grp:"tam", cat:"çekim", tag:"Neces", name:"gereklilik -mAlI", par:"k"},
+  // ikinci zaman (bileşik zaman) ve ek-fiil: tamamlanmış bir zamandan ya da ad gövdesinden sonra
+  PAST_2:{t:"(y)DH", from:["T", "N", "PL", "PS", "CS"], to:"T", grp:"tam", cat:"çekim", tag:"Past", name:"görülen geçmiş (2. zaman / ek-fiil) -(y)DI", par:"z"},
+  EVID_2:{t:"(y)mHş", from:["T", "N", "PL", "PS", "CS"], to:"T", grp:"tam", cat:"çekim", tag:"Narr", name:"öğrenilen geçmiş (2. zaman / ek-fiil) -(y)mIş", par:"k"},
+  COND_2:{t:"(y)sA", from:["T", "N", "PL", "PS", "CS"], to:"T", grp:"tam", cat:"çekim", tag:"Cond", name:"şart (2. zaman / ek-fiil) -(y)sA", par:"z"},
+  COP:{t:"DHr", from:["N", "PL", "PS", "CS", "T", "PE"], to:"CP", grp:"cop", cat:"çekim", tag:"Cop", name:"ek-fiil -DHr (-dır)"},
   A1sg_z:{t:"m", from:["T"], to:"PE", grp:"pers", cat:"çekim", tag:"A1sg", name:"1. tekil kişi (z)", par:"z"},
   A2sg_z:{t:"n", from:["T"], to:"PE", grp:"pers", cat:"çekim", tag:"A2sg", name:"2. tekil kişi (z)", par:"z"},
   A1pl_z:{t:"k", from:["T"], to:"PE", grp:"pers", cat:"çekim", tag:"A1pl", name:"1. çoğul kişi (z)", par:"z"},
   A2pl_z:{t:"nHz", from:["T"], to:"PE", grp:"pers", cat:"çekim", tag:"A2pl", name:"2. çoğul kişi (z)", par:"z"},
-  A1sg_k:{t:"(y)Hm", from:["T"], to:"PE", grp:"pers", cat:"çekim", tag:"A1sg", name:"1. tekil kişi (k)", par:"k"},
-  A2sg_k:{t:"sHn", from:["T"], to:"PE", grp:"pers", cat:"çekim", tag:"A2sg", name:"2. tekil kişi (k)", par:"k"},
-  A1pl_k:{t:"(y)Hz", from:["T"], to:"PE", grp:"pers", cat:"çekim", tag:"A1pl", name:"1. çoğul kişi (k)", par:"k"},
-  A2pl_k:{t:"sHnHz", from:["T"], to:"PE", grp:"pers", cat:"çekim", tag:"A2pl", name:"2. çoğul kişi (k)", par:"k"},
+  A1sg_k:{t:"(y)Hm", noPar:["nk"], from:["T", "N", "PL", "PS", "CS"], to:"PE", grp:"pers", cat:"çekim", tag:"A1sg", name:"1. tekil kişi (k)", par:"k"},
+  A2sg_k:{t:"sHn", from:["T", "N", "PL", "PS", "CS"], to:"PE", grp:"pers", cat:"çekim", tag:"A2sg", name:"2. tekil kişi (k)", par:"k"},
+  A1pl_k:{t:"(y)Hz", noPar:["nk"], from:["T", "N", "PL", "PS", "CS"], to:"PE", grp:"pers", cat:"çekim", tag:"A1pl", name:"1. çoğul kişi (k)", par:"k"},
+  A2pl_k:{t:"sHnHz", from:["T", "N", "PL", "PS", "CS"], to:"PE", grp:"pers", cat:"çekim", tag:"A2pl", name:"2. çoğul kişi (k)", par:"k"},
+  NA1sg:{t:"m", from:["NG"], to:"PE", grp:"pers", cat:"çekim", tag:"A1sg", impl:"Aor", name:"1. tekil kişi (olumsuz geniş zaman) -m", par:"na"},
+  NA1pl:{t:"(y)Hz", from:["NG"], to:"PE", grp:"pers", cat:"çekim", tag:"A1pl", impl:"Aor", name:"1. çoğul kişi (olumsuz geniş zaman) -(y)Hz", par:"na"},
+  A1sg_o:{t:"(y)Hm", from:["T"], to:"PE", grp:"pers", cat:"çekim", tag:"A1sg", name:"1. tekil kişi (istek)", par:"o"},
+  A2sg_o:{t:"sHn", from:["T"], to:"PE", grp:"pers", cat:"çekim", tag:"A2sg", name:"2. tekil kişi (istek)", par:"o"},
+  A1pl_o:{t:"lHm", from:["T"], to:"PE", grp:"pers", cat:"çekim", tag:"A1pl", name:"1. çoğul kişi (istek) -lIm", par:"o"},
+  A2pl_o:{t:"sHnHz", from:["T"], to:"PE", grp:"pers", cat:"çekim", tag:"A2pl", name:"2. çoğul kişi (istek)", par:"o"},
   A3pl:{t:"lAr", from:["T"], to:"PE", grp:"pers", cat:"çekim", tag:"A3pl", name:"3. çoğul kişi", par:"any"},
   // fiilden isme
   INF1:{t:"mAk", from:["V", "NG"], to:"N", grp:"deriv", cat:"yapım", tag:"^DB+Noun+Inf1", name:"mastar -mAk", soft:true},
   INF2:{t:"mA", from:["V", "NG"], to:"N", grp:"deriv", cat:"yapım", tag:"^DB+Noun+Inf2", name:"eylemlik -mA"},
-  PART:{t:"(y)An", from:["V", "NG"], to:"N", grp:"deriv", cat:"yapım", tag:"^DB+Adj+PresPart", name:"sıfat-fiil -(y)An"}
+  PART:{t:"(y)An", from:["V", "NG"], to:"N", grp:"deriv", cat:"yapım", tag:"^DB+Adj+PresPart", name:"sıfat-fiil -(y)An"},
+  PASTP:{t:"DHk", from:["V", "NG"], to:"N", grp:"deriv", cat:"yapım", tag:"^DB+Adj+PastPart", name:"sıfat-fiil -DHk", soft:true},
+  FUTP:{t:"(y)AcAk", from:["V", "NG"], to:"N", grp:"deriv", cat:"yapım", tag:"^DB+Adj+FutPart", name:"sıfat-fiil -(y)AcAk", soft:true},
+  NARRP:{t:"mHş", from:["V", "NG"], to:"N", grp:"deriv", cat:"yapım", tag:"^DB+Adj+NarrPart", name:"sıfat-fiil -mHş"},
+  INF3:{t:"(y)Hş", from:["V", "NG"], to:"N", grp:"deriv", cat:"yapım", tag:"^DB+Noun+Inf3", name:"ad-fiil -(y)Hş", soft:true},
+  ARAK:{t:"(y)ArAk", from:["V", "NG"], to:"AV", grp:"deriv", cat:"yapım", tag:"^DB+Adv+ByDoingSo", name:"zarf-fiil -(y)ArAk"},
+  IP:{t:"(y)Hp", from:["V", "NG"], to:"AV", grp:"deriv", cat:"yapım", tag:"^DB+Adv+AfterDoingSo", name:"zarf-fiil -(y)Hp"},
+  KI:{t:"ki", from:["CS"], to:"RL", grp:"deriv", cat:"yapım", tag:"^DB+Adj+Rel", name:"ilgi eki -ki (evdeki)", after:["LOC", "GEN"]}
 };
-export const GROUP_NAME = {num:"çoğul", poss:"iyelik", case:"hâl", deriv:"yapım eki", voice:"çatı / yeterlilik", neg:"olumsuzluk", tam:"zaman / kip", pers:"kişi"};
+export const GROUP_NAME = {num:"çoğul", poss:"iyelik", case:"hâl", deriv:"yapım eki", voice:"çatı / yeterlilik", neg:"olumsuzluk", tam:"zaman / kip", pers:"kişi", cop:"ek-fiil"};
 
 // Küçük kök sözlüğü. soft: son p/ç/t/k ünlüyle başlayan ekte b/c/d/ğ olur; fh: ünlü uyumunda ince (istisna); dey: de/ye -> di/yi (y- önünde)
 const N = (w, o = {}) => ({w, pos:"N", ...o}), Vb = (w, o = {}) => ({w, pos:"V", ...o}), Aj = (w, o = {}) => ({w, pos:"A", ...o});
@@ -132,9 +154,12 @@ export function generate(stem, ids){
     if(!S) return {ok:false, reason:`bilinmeyen ek: ${id}`, at:id};
     if(!S.from.includes(st)) return {ok:false, reason:`${S.name} eki “${stateName(st)}” durumundan sonra gelemez`, at:id, state:st};
     if(S.cond && !S.cond(form)) return {ok:false, reason:`${S.name} bu gövdeye uymuyor`, at:id, state:st};
-    if(S.grp === "pers" && S.par !== "any" && par !== S.par) return {ok:false, reason:`${S.name} bu zamandan sonra gelmez (kişi eki takımı farklı)`, at:id, state:st};
+    if(S.after && !S.after.includes(ids[ix - 1])) return {ok:false, reason:`${S.name} yalnızca ${S.after.map(a => SUF[a].name.split(" ")[0]).join(" / ")} hâlinden sonra gelir`, at:id, state:st};
+    if(S.noPar && S.noPar.includes(par)) return {ok:false, reason:`${S.name} bu zamandan sonra gelmez`, at:id, state:st};
+    if(S.par === "na") par = "na";
+    if(S.grp === "pers" && S.par !== "any" && S.par !== "na" && ((par === "nk" ? "k" : par) || (["N", "PL", "PS", "CS"].includes(st) ? "k" : null)) !== S.par) return {ok:false, reason:`${S.name} bu zamandan sonra gelmez (kişi eki takımı farklı)`, at:id, state:st};
     let prev = form, hv = lastVowel(form);
-    if(id === "PROG" && ids[ix - 1] === "NEG"){ hv = lastVowel(form.slice(0, -1)); notes.push(`olumsuz şimdiki zaman -mHyor: H, kökün son ünlüsüne (${hv}) göre`); }
+    if(id === "PROG" && (ids[ix - 1] === "NEG" || ids[ix - 1] === "UNABLE")){ hv = lastVowel(form.slice(0, -1)); notes.push(`olumsuz şimdiki zaman -mHyor: H, kökün son ünlüsüne (${hv}) göre`); }
     if(segs.length === 1 && stem.fh && hv){ const f = FRONT[hv]; if(f){ hv = f; notes.push(`istisna: ${stem.w} kökü ince ünlü gibi davranır`); } }
     if(id === "PROG" && "ae".includes(last(prev))){ prev = prev.slice(0, -1); notes.push(`kök sonu ${last(form)} düştü (kural 8, -Iyor öncesi)`); }
     let t = typeof S.t === "function" ? S.t(form) : S.t;
@@ -163,34 +188,38 @@ export function generate(stem, ids){
   if(!ACCEPT.has(st)) return {ok:false, reason:"eksik: sözcük bu durumda bitemez", at:null, state:st};
   return {ok:true, surface:form, segs, trace, state:st, par, p3, lex:lexOf(stem, ids)};
 }
-const stateName = s => ({N:"isim/sıfat gövdesi", PL:"çoğul", PS:"iyelik", CS:"hâl eki", V:"fiil gövdesi", NG:"olumsuzluk", T:"zaman eki", PE:"kişi eki"})[s] || s;
+const stateName = s => ({N:"isim/sıfat gövdesi", PL:"çoğul", PS:"iyelik", CS:"hâl eki", V:"fiil gövdesi", NG:"olumsuzluk", T:"zaman eki", PE:"kişi eki", CP:"ek-fiil", AV:"zarf-fiil", RL:"ilgi eki"})[s] || s;
 export { stateName };
 
 // ───────────────────────── sözlüksel (lexical) biçim: okul+Noun+A3sg+P1sg+Nom
 export function lexOf(stem, ids){
   let out = stem.w + "+" + ({N:"Noun", A:"Adj", V:"Verb"}[stem.pos]);
-  let mode = stem.pos === "V" ? "V" : "N", noun = {}, verb = {voices:[], neg:false, tam:null, pers:null};
+  let mode = stem.pos === "V" ? "V" : "N", noun = {}, verb = {voices:[], neg:false, unable:false, tams:[], pers:null, zero:false};
   const flushN = () => { out += "+" + (noun.num || "A3sg") + "+" + (noun.poss || "Pnon") + "+" + (noun.case || "Nom"); noun = {}; };
   const flushV = fin => {
-    out += verb.voices.map(v => "+" + v).join("") + "+" + (verb.neg ? "Neg" : "Pos");
-    if(fin) out += verb.tam ? "+" + verb.tam + "+" + (verb.pers || "A3sg") : "+Imp+A2sg";
-    verb = {voices:[], neg:false, tam:null, pers:null};
+    out += verb.voices.map(v => "+" + v).join("");
+    if(verb.unable) out += "+Unable"; else if(!verb.zero) out += "+" + (verb.neg ? "Neg" : "Pos");
+    if(fin) out += verb.tams.length ? verb.tams.map(t => "+" + t).join("") + "+" + (verb.pers || "A3sg") : "+Imp+A2sg";
+    verb = {voices:[], neg:false, unable:false, tams:[], pers:null, zero:false};
   };
+  // ad gövdesinden ek-fiile (sıfır türetme): ev+Noun+A3sg+Pnon+Nom^DB+Verb+Zero
+  const toVerb = () => { flushN(); out += "^DB+Verb+Zero"; mode = "V"; verb.zero = true; };
   for(const id of ids){
     const S = SUF[id];
     if(S.grp === "num") noun.num = S.tag;
     else if(S.grp === "poss") noun.poss = S.tag;
     else if(S.grp === "case") noun.case = S.tag;
     else if(S.grp === "voice") verb.voices.push(S.tag);
-    else if(S.grp === "neg") verb.neg = true;
-    else if(S.grp === "tam") verb.tam = S.tag;
-    else if(S.grp === "pers") verb.pers = S.tag;
+    else if(S.grp === "neg"){ if(S.tag === "Unable") verb.unable = true; else verb.neg = true; }
+    else if(S.grp === "tam"){ if(mode === "N") toVerb(); verb.tams.push(S.tag); }
+    else if(S.grp === "pers"){ if(mode === "N"){ toVerb(); verb.tams.push("Pres"); } if(S.impl) verb.tams.push(S.impl); verb.pers = S.tag; }
+    else if(S.grp === "cop"){ if(mode === "N"){ toVerb(); verb.tams.push("Pres"); } flushV(true); out += "+Cop"; mode = "X"; }
     else if(S.grp === "deriv"){
-      if(mode === "N") flushN(); else flushV(false);
-      out += S.tag; mode = S.to === "V" ? "V" : "N";
+      if(mode === "N") flushN(); else if(mode === "V") flushV(false);
+      out += S.tag; mode = S.to === "V" ? "V" : (S.to === "AV" || S.to === "RL") ? "X" : "N";
     }
   }
-  if(mode === "N") flushN(); else flushV(true);
+  if(mode === "N") flushN(); else if(mode === "V") flushV(true);
   return out;
 }
 
@@ -199,7 +228,7 @@ export const nextOptions = (stem, ids) => Object.keys(SUF).filter(id => generate
 
 // ───────────────────────── çözümleme: üret ve eşleştir
 export function analyze(word, lexicon, {maxDepth = 6, limit = 60} = {}){
-  const w = word.toLocaleLowerCase("tr").trim(), out = [], seen = new Set();
+  const w = word.toLocaleLowerCase("tr").trim().replace(/['’]/g, ""), out = [], seen = new Set();   // kesme işareti (Ankara'da) ekin sınırıdır, ses değişimine etkisi yok
   if(!w) return out;
   const ok = f => w.startsWith(f.slice(0, -1)) && f.length <= w.length + 1;
   for(const stem of lexicon){
