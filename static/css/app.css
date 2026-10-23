@@ -743,3 +743,13 @@ mark.dm-w{padding:0 4px;border-radius:var(--r-sm);background:var(--wash-2);color
 .dm-score b{font:750 1.05rem var(--font-ui)}
 .dm-cin{display:flex;gap:7px;align-items:flex-start}
 .dm-cin .dm-mk{margin:0;line-height:1.2}
+
+/* FSM yolunu kendin yaz */
+.fq-c{padding:3px 10px}
+.fq-c.ok{border-color:var(--ok);color:var(--ok)}
+.fq-c.no{border-color:var(--bad);color:var(--bad);background:var(--wash)}
+.fq-c small{color:var(--ink-3)}
+.fq-msg{margin:6px 0;font-size:.95rem}
+.fq-msg.hint{font-style:italic;color:var(--ink-2)}
+.fq-map{margin-top:20px}
+.fq-map summary{cursor:pointer;font:600 .9rem var(--font-ui)}

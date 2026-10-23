@@ -1,6 +1,6 @@
 // Oflazer FSM yol çıkarıcı için denetim: node scripts/test_fsm.mjs
 // Beklenen durum dizileri, Sample.pdf'teki üç el çözümünden alınmıştır.
-import {trace, stepStates} from "../static/js/fsm.js";
+import {trace, stepStates, POOL, VERIFIED, checkPath, edgeTable, edgesFrom, sampleLines} from "../static/js/fsm.js";
 
 const cases = [
   ["küçük+Noun+A3pl", ["1", "2", "3", "4", "5", "6"]],
@@ -19,5 +19,23 @@ for(const s of ["ev+Noun+A3sg+P3sg+Abl", "gel+Verb+Neg+Prog1+A1sg", "gel+Verb+Pa
   const t = trace(s);
   console.log(t.ok ? "ok  " : "STOP", s, t.ok ? stepStates(t).join(" ") : t.reason);
 }
+// "kendin yaz" alıştırması: havuzdaki her çözümlemenin yolu çıkmalı ve varsayım kenarı içermemeli
+let pbad = 0;
+for(const s of POOL){ const t = trace(s); if(!t.ok || t.steps.some(x => x.assumed)){ pbad++; console.log("FAIL havuz", s, t.ok ? "varsayım kenarı" : t.reason); } }
+// Sample.pdf'ten doğrulananlar havuzda ve yolları beklenenle aynı
+for(const [s, want] of cases) if(VERIFIED.has(s) && stepStates(trace(s)).join(" ") !== want.join(" ")){ pbad++; console.log("FAIL doğrulanmış yol", s); }
+const chk = (name, got, want) => { if(got !== want){ pbad++; console.log("FAIL", name, "beklenen", want, "bulunan", got); } };
+const W = ["1", "2", "3", "4", "5", "6"];
+chk("checkPath tam", checkPath(W, ["1", "2", "3", "4", "5", "6"]).status, "ok");
+chk("checkPath başlangıç 1 eklenir", checkPath(W, ["2", "3", "4", "5", "6"]).status, "ok");
+chk("checkPath eksik", checkPath(W, ["1", "2", "3"]).status, "prefix");
+chk("checkPath yanlış durum", checkPath(W, ["1", "2", "3", "9"]).bad, 3);
+chk("checkPath yanlış durum durumu", checkPath(W, ["1", "2", "3", "9"]).status, "wrong");
+chk("checkPath fazla", checkPath(W, ["1", "2", "3", "4", "5", "6", "7"]).status, "long");
+chk("edgesFrom 3", [...new Set(edgesFrom(3))].join(","), "4,9,2");
+chk("edgeTable her durum", edgeTable().every(r => r.to.length > 0), true);
+chk("sampleLines biçimi", sampleLines(trace("küçük+Noun+A3pl"))[0], "From State 1-State 2: küçük+Noun");
+console.log("alıştırma denetimi:", pbad ? "BAŞARISIZ " + pbad : "tamam", "(havuz " + POOL.length + " çözümleme)");
+if(pbad) process.exitCode = 1;
 console.log("Sample.pdf yolları:", cases.length - bad, "/", cases.length);
 if(bad) process.exitCode = 1;

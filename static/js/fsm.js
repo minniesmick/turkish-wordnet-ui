@@ -197,3 +197,37 @@ export function trace(oflazer){
   return {stem, toks, steps, ok:true, end:st};
 }
 export const stepStates = t => [...new Set(["1", ...t.steps.flatMap(s => s.states || [s.from, ...(s.via || []), s.to])])];
+
+// ───────────────────────── arayüz yardımcıları (alıştırma ve durum haritası)
+const num = (a, b) => +a - +b;
+export const POOL = [
+  "küçük+Noun+A3pl", "ev+Noun+A3sg+P3sg+Abl", "kitap+Noun+A3pl+P1sg+Dat", "araba+Noun+A3sg+Pnon+Loc", "göz+Noun+A3pl+P3sg+Acc", "okul+Noun+A3sg+P1sg+Nom", "köy+Noun+A3sg+Pnon+Gen",
+  "ev+Noun+A3sg+Loc^DB+Verb+Zero+Past+A3sg", "uyu+Verb+Prog1+A3sg+Cop", "uyu+Verb^DB+Noun+Inf1+A3sg+Loc^DB+Verb+Zero+Pres+A3sg+Cop",
+  "gel+Verb+Pos+Past+A1sg", "git+Verb+Neg+Past+A2sg", "oku+Verb+Pos+Aor+A3sg", "gel+Verb+Neg+Prog1+A1sg", "gel+Verb+Past+A3pl", "gel+Verb+Pos+Narr+A3sg",
+  "bak+Verb+Pos+Prog1+A2pl", "sev+Verb+Pass+Pos+Past+A3sg", "gel+Verb+Pos+Opt+A1sg", "gel+Verb+Pos+Imp+A2sg", "al+Verb+Pos+Cond+A1sg", "oku+Verb+Pos+Fut+A1sg"
+];
+// PDF'deki (Sample.pdf) el çözümüyle birebir doğrulanan örnekler; öbürlerinin yolu şekillerden elle kodlandı
+export const VERIFIED = new Set(["küçük+Noun+A3pl", "uyu+Verb+Prog1+A3sg+Cop", "uyu+Verb^DB+Noun+Inf1+A3sg+Loc^DB+Verb+Zero+Pres+A3sg+Cop"]);
+// kenarlar durum durum: [{from, to:[{to, items:[{on, tag, silent, cond, assumed}]}]}]
+export function edgeTable(){
+  return [...byFrom.keys()].sort(num).map(f => {
+    const to = new Map();
+    for(const e of byFrom.get(f)){
+      if(!to.has(e.t)) to.set(e.t, []);
+      to.get(e.t).push({on:e.on, tag:e.tag, silent:e.silent, cond:e.nextRel ? "sonraki ek Rel" : e.nextProg ? "sonraki ek Prog1" : "", assumed:e.assumed});
+    }
+    return {from:f, to:[...to].sort((a, b) => num(a[0], b[0])).map(([t, items]) => ({to:t, items}))};
+  });
+}
+export const edgesFrom = st => (byFrom.get(String(st)) || []).map(e => e.t);
+export const sampleLines = t => t.steps.filter(s => !s.skipped).map(s => `From State ${(s.states || [s.from, s.to]).join("-State ")}: ${s.lex}${s.tag ? ` (with tag ${s.tag})` : ""}`);
+// yazılan durum dizisini beklenenle karşılaştırır: ok (tam), prefix (doğru ama eksik), wrong (k. durum yanlış), long (fazlası var)
+export function checkPath(want, typed){
+  const got = typed[0] === "1" ? typed.slice() : ["1", ...typed];
+  const cells = got.map((v, i) => ({v, ok:i < want.length && v === want[i]}));
+  const bad = cells.findIndex(c => !c.ok);
+  let status = "ok";
+  if(bad >= 0) status = bad >= want.length ? "long" : "wrong";
+  else if(got.length < want.length) status = "prefix";
+  return {cells, status, bad, good:bad < 0 ? got.length : bad, prefixed:typed[0] !== "1"};
+}

@@ -1,11 +1,12 @@
 // Morfoloji: Lecture 2. Türkçe sözcüğü eklerine ayır (çözümle) ya da kökten ek ek sözcük üret. Öğrenci kipinde kural izi, kavram notları ve alıştırma da açılır.
 import {$, $$, esc, api, registerView, MODE} from "./core.js";
-import {trace, stepStates, STATE_NAME} from "./fsm.js";
+import {trace, stepStates, STATE_NAME, sampleLines} from "./fsm.js";
+import {mountFsmQuiz} from "./fsmquiz.js";
 import {SUF, GROUP_NAME, CURATED, generate, analyze, nextOptions, lexiconFromLemmas, stateName} from "./turkish.js";
 
 const MS = {word:"okullarım", stem:"okul", pos:"N", ids:[], engine:"zem", zpos:"Noun", zids:[], sent:"Ben dün akşam kitabı okudum.", quiz:{kind:"uret", q:null, score:0, n:0, done:false}};
 const KEY = "wn:morph";
-let root = null, LEX = CURATED, zem = null;   // zem: null bilinmiyor, false yok, true var
+let root = null, LEX = CURATED, zem = null, fsmq = null;   // zem: null bilinmiyor, false yok, true var
 const load = () => { try{ const v = JSON.parse(localStorage.getItem(KEY)) || {}; for(const k of ["word", "stem", "pos", "ids", "engine", "sent", "zpos", "zids"]) if(v[k] != null) MS[k] = v[k]; }catch(_){} };
 const save = () => { try{ localStorage.setItem(KEY, JSON.stringify({word:MS.word, stem:MS.stem, pos:MS.pos, ids:MS.ids, engine:MS.engine, sent:MS.sent, zpos:MS.zpos, zids:MS.zids})); }catch(_){} };
 const lc = s => s.toLocaleLowerCase("tr").trim();
@@ -81,7 +82,7 @@ function zTags(a){
 // Sample.pdf biçiminde Oflazer FSM yolu
 function fsmBlock(a){
   const t = trace(a.oflazer);
-  const lines = t.steps.filter(s => !s.skipped).map(s => `From State ${(s.states || [s.from, s.to]).join("-State ")}: ${s.lex}${s.tag ? ` (with tag ${s.tag})` : ""}`);
+  const lines = sampleLines(t);
   const names = stepStates(t).map(x => `${x} ${STATE_NAME[x] || ""}`.trim());
   const text = lines.join("\n");
   return `<h4>Oflazer FSM yolu <small>Nouns / Verbs1 / Verbs2 şekilleri</small></h4>
@@ -330,8 +331,10 @@ function mount(){
     <div id="mpGOut"></div>
     <div class="stu"><h2 class="ng-h">4 · Kurallar <small>motorun ses ve ek bilgisi</small></h2><div id="mpRules"></div>
     <h2 class="ng-h">5 · Kavramlar <small>slayt notları</small></h2><div id="mpNotes"></div>
-    <h2 class="ng-h">6 · Alıştırma</h2><div id="mpQuiz"></div></div>
+    <h2 class="ng-h">6 · Alıştırma</h2><div id="mpQuiz"></div>
+    <h2 class="ng-h">7 · FSM yolunu kendin yaz <small>Sample.pdf</small></h2><div id="mpFsmq"></div></div>
     <div style="height:56px"></div></div>`;
+  fsmq = mountFsmQuiz($("#mpFsmq", root));
   const w = $("#mpWord", root), st = $("#mpStem", root);
   w.addEventListener("keydown", e => { if(e.key === "Enter") go(); });
   $("#mpGo", root).addEventListener("click", go);
@@ -373,7 +376,7 @@ function syncEng(){
   $("#mpGenNote", root).textContent = z ? "Zemberek WordGenerator ile" : "küçük kural modeliyle";
 }
 function syncPos(){ $$("#mpPos button", root).forEach(b => b.setAttribute("aria-pressed", b.dataset.p === (MS.pos === "V" ? "V" : "N"))); $("#mpStem", root).value = MS.stem; }
-function renderStudent(){ $("#mpRules", root).innerHTML = rulesHTML(); $("#mpNotes", root).innerHTML = notesHTML(); renderQuiz(); }
+function renderStudent(){ $("#mpRules", root).innerHTML = rulesHTML(); $("#mpNotes", root).innerHTML = notesHTML(); renderQuiz(); fsmq.render(); }
 
 export const view = {
   apply(p){ ensure(); if(p.word) MS.word = p.word; if(p.sent) MS.sent = p.sent; },
