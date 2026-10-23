@@ -1,5 +1,6 @@
 // Ders: Lecture 4 (Semantics) slaytlarının kavramları, bu araçtaki canlı örneklerle eşleşir; kendini sına.
 import {$, $$, esc, REL, icon, state, api, registerView} from "./core.js";
+import {LECTURES} from "./lessons.js";
 
 const L = (label, act) => `<button class="chip" ${act}>${label}</button>`;
 const S_ = (w, ds = "en") => L(`Ara · ${esc(w)}`, `data-act="search" data-ds="${ds}" data-q="${esc(w)}"`);
@@ -113,19 +114,52 @@ const lessons = () => `<section class="lesson"><div class="gut">slayt 3</div><di
   <section class="lesson"><div class="gut">slayt 37–45</div><div><h3>Kapsam dışı (bu veride yok)</h3>
     <p><b>Birleşimsellik</b> (Frege), <b>FOL</b>, <b>CCG + λ-hesabı</b> ve <b>söylem semantiği</b> (SDRT, DRS, anafora, presupposition) bu veri setlerinde yok; bunlar mantık / ayrıştırma altyapısı ister. İstersen ileride küçük bir FOL dönüştürücü ya da CCG türetme çizici eklenebilir.</p></div></section>`;
 
+// ───────────────────────── ders seçici ve Lecture 1, 2, 3, 5 içeriği (lessons.js)
+let lec = 4, lq = {score:0, done:new Set()};
+try{ lec = +localStorage.getItem("wn:lec") || 4; }catch(_){}
+const attr = o => Object.entries(o).map(([k, v]) => k === "v" ? `data-act="go" data-v="${esc(v)}"` : `data-${k}="${esc(v)}"`).join(" ");
+const chipOf = ([label, o]) => `<button class="chip" ${attr(o)}>${esc(label)}</button>`;
+const secHTML = s => `<section class="lesson"><div class="gut">${esc(s.gut)}</div><div><h3>${esc(s.h)}</h3>${s.p.map(t => `<p>${t}</p>`).join("")}${s.list ? `<ul>${s.list.map(x => `<li>${x}</li>`).join("")}</ul>` : ""}${s.chips ? `<div class="chips">${s.chips.map(chipOf).join("")}</div>` : ""}</div></section>`;
+const lecQuizHTML = L => `<section class="lesson"><div class="gut">kendini sına</div><div><h3>Çoktan seçmeli sorular</h3>
+  ${L.quiz.map((q, i) => `<div class="lq" data-qi="${i}"><p class="q" style="margin:14px 0 6px"><b>${i + 1}.</b> ${esc(q[0])}</p>${q[1].map((o, k) => `<button class="opt" data-lq="${i}" data-k="${k}">${esc(o)}</button>`).join("")}<p class="lq-why muted hidden" style="margin:6px 0 0;font-size:.92rem"></p></div>`).join("")}
+  <p class="verdict" id="lqScore" style="margin-top:16px"></p></div></section>`;
+function renderLecture(){
+  $$("#lecSeg button", root).forEach(b => b.setAttribute("aria-pressed", +b.dataset.lec === lec));
+  lq = {score:0, done:new Set()};
+  const body = $("#lecBody", root);
+  if(lec === 4){
+    body.innerHTML = `<p class="lesson-intro">Sol kenardaki slayt numaraları Lecture 4'e (Semantics) karşılık gelir. Düğmeler ilgili bölümü hazır sorguyla açar.</p>${lessons()}
+      <section class="lesson" id="quizBox"><div class="gut">kendini sına</div><div><h3>Veriden üretilen sorular</h3>
+      <div class="row" style="margin-top:8px"><div class="seg" id="qKind"><button data-v="hyper" aria-pressed="true">Üst kavramı bul</button><button data-v="rel" aria-pressed="false">İlişki türünü bul</button></div>
+      <div class="seg" id="qDs"><button data-v="en" aria-pressed="true">English</button><button data-v="kenet" aria-pressed="false">Türkçe</button></div>
+      <button class="btn pri" id="qGo">Başlat · 5 soru</button></div><div id="qOut"></div></div></section>`;
+    return;
+  }
+  const L = LECTURES[lec];
+  body.innerHTML = `<p class="lesson-intro">${esc(L.intro)}</p>${L.sections.map(secHTML).join("")}${lecQuizHTML(L)}`;
+}
+function lecAnswer(btn){
+  const i = +btn.dataset.lq, k = +btn.dataset.k, q = LECTURES[lec].quiz[i], box = btn.closest(".lq");
+  if(lq.done.has(i)) return;
+  lq.done.add(i);
+  $$(".opt", box).forEach((b, j) => { b.disabled = true; if(j === q[2]) b.classList.add("ok"); else if(j === k) b.classList.add("no"); });
+  if(k === q[2]) lq.score++;
+  const why = $(".lq-why", box); why.textContent = (k === q[2] ? "Doğru. " : "Yanlış. ") + q[3]; why.classList.remove("hidden");
+  $("#lqScore", root).textContent = `${lq.done.size} / ${LECTURES[lec].quiz.length} soru yanıtlandı · ${lq.score} doğru`;
+}
+
 function mount(){
   if(root) return;
   root = $("#v-learn");
   root.innerHTML = `<div class="page">
     <h1 class="page-title">Slaytlardaki her kavram, bir tık uzakta</h1>
-    <p class="lesson-intro">Sol kenardaki slayt numaraları Lecture 4'e karşılık gelir. Düğmeler ilgili bölümü hazır sorguyla açar.</p>
-    ${lessons()}
-    <section class="lesson" id="quizBox"><div class="gut">kendini sına</div><div><h3>Veriden üretilen sorular</h3>
-      <div class="row" style="margin-top:8px"><div class="seg" id="qKind"><button data-v="hyper" aria-pressed="true">Üst kavramı bul</button><button data-v="rel" aria-pressed="false">İlişki türünü bul</button></div>
-      <div class="seg" id="qDs"><button data-v="en" aria-pressed="true">English</button><button data-v="kenet" aria-pressed="false">Türkçe</button></div>
-      <button class="btn pri" id="qGo">Başlat · 5 soru</button></div><div id="qOut"></div></div></section>
+    <div class="seg" id="lecSeg" role="group" aria-label="Ders" style="margin:6px 0 14px">${[1, 2, 3, 4, 5].map(n => `<button data-lec="${n}">Lecture ${n}</button>`).join("")}</div>
+    <div id="lecBody"></div>
   </div>`;
   root.addEventListener("click", e => {
+    const lb = e.target.closest("#lecSeg button");
+    if(lb){ lec = +lb.dataset.lec; try{ localStorage.setItem("wn:lec", lec); }catch(_){} renderLecture(); return; }
+    const la = e.target.closest("[data-lq]"); if(la){ lecAnswer(la); return; }
     const kb = e.target.closest("#qKind button"), db = e.target.closest("#qDs button");
     if(kb){ quiz.kind = kb.dataset.v; $$("#qKind button", root).forEach(b => b.setAttribute("aria-pressed", b === kb)); }
     else if(db){ quiz.ds = db.dataset.v; $$("#qDs button", root).forEach(b => b.setAttribute("aria-pressed", b === db)); }
@@ -133,6 +167,7 @@ function mount(){
     else if(e.target.closest(".opt")) quizAnswer(+e.target.closest(".opt").dataset.k);
     else if(e.target.id === "qNext"){ quiz.i++; quizShow(); }
   });
+  renderLecture();
 }
 async function quizStart(){
   const j = await api("/api/quiz", {ds:quiz.ds, kind:quiz.kind, n:5});
