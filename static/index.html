@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Türkçe WordNet</title>
+<meta name="description" content="Türkçe ve İngilizce WordNet, PropBank, VerbNet ve FrameNet üzerinde kavramdan kavrama gezinen yerel sözlük çalışma alanı.">
+<link rel="preload" href="/fonts/SchibstedGrotesk-normal-400_900-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%230d1220%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-family=%27Georgia,serif%27 font-weight=%27700%27 font-size=%2720%27 text-anchor=%27middle%27 fill=%27%23f5f7fb%27%3Ey%3C/text%3E%3Crect x=%2724%27 y=%278%27 width=%274%27 height=%274%27 fill=%27%232b3bd6%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/app.css">
+<script>try{var t=new URLSearchParams(location.search).get("theme")||JSON.parse(localStorage.getItem("wn:p:theme"));if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body>
+<div id="loadbar" class="loading-bar"></div>
+
+<div id="app" class="app">
+  <aside class="rail" id="rail" aria-label="Ana gezinti">
+    <a class="brand" href="/" aria-label="Türkçe WordNet, ana sayfa"><b>Türkçe WordNet</b></a>
+    <nav class="tabs" id="tabs" aria-label="Bölümler"></nav>
+    <section class="rail-sec" aria-label="Gezi izi"><h2>İz</h2><ul class="trail" id="trail"></ul></section>
+    <section class="rail-sec"><button class="btn sm" id="favBtn" style="width:100%;justify-content:space-between"><span style="display:inline-flex;gap:8px;align-items:center" id="favLbl"></span><span class="kbd">F</span></button></section>
+    <div class="rail-foot">
+      <button class="iconbtn" id="railTheme" aria-label="Temayı değiştir"></button>
+      <button class="iconbtn" id="railKeys" aria-label="Klavye kısayolları"><span class="kbd">?</span></button>
+      <span class="muted" style="font-size:.74rem;margin-left:auto" id="railStats"></span>
+    </div>
+  </aside>
+
+  <main class="stage" id="main">
+    <header class="topbar">
+      <button class="iconbtn menu-btn" id="menuBtn" aria-label="Menüyü aç"></button>
+      <button class="omni" id="omni" aria-label="Ara veya komut ver"><span id="omniTxt">Kavram, sözcük veya çerçeve ara…</span><span class="kbd" id="omniKbd">⌘K</span></button>
+      <div class="seg" id="dsSeg" role="group" aria-label="Sözlük dili">
+        <button data-ds="kenet">Türkçe</button><button data-ds="en">English</button><button data-ds="1998" id="ds1998">1998</button>
+      </div>
+      <div class="top-actions">
+        <button class="iconbtn" id="linkBtn" aria-label="Bağlantıyı kopyala" title="Bu ekranın bağlantısını kopyala"></button>
+        <button class="iconbtn" id="presentBtn" aria-label="Sunum modu" title="Sunum modu (P)" aria-pressed="false"></button>
+        <button class="iconbtn" id="themeBtn" aria-label="Temayı değiştir" title="Tema (T)"></button>
+      </div>
+    </header>
+    <div class="views" id="views">
+      <section id="v-search" class="hidden"></section>
+      <section id="v-graph" class="hidden"></section>
+      <section id="v-relate" class="hidden"></section>
+      <section id="v-wsd" class="hidden"></section>
+      <section id="v-roles" class="hidden"></section>
+      <section id="v-frames" class="hidden"></section>
+      <section id="v-learn" class="hidden"></section>
+    </div>
+  </main>
+
+  <aside class="sheet" id="sheet" aria-label="Kavram kâğıdı" aria-hidden="true"></aside>
+</div>
+
+<div id="boot" class="notice warn hidden" style="position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:95;box-shadow:var(--float)">Veri yükleniyor… ilk açılışta birkaç saniye sürer.</div>
+
+<dialog id="palette" aria-label="Komut paleti">
+  <div class="pal">
+    <div class="pal-in"><span id="palIcon"></span><input id="palInput" type="text" placeholder="Sözcük, çerçeve, roleset veya komut…" autocomplete="off" spellcheck="false" aria-label="Ara"><span class="kbd">Esc</span></div>
+    <div class="pal-list" id="palList" role="listbox"></div>
+    <div class="pal-foot"><span><span class="kbd">↑</span> <span class="kbd">↓</span> gez</span><span><span class="kbd">↵</span> aç</span><span><span class="kbd">⌥ ↵</span> haritada aç</span></div>
+  </div>
+</dialog>
+
+<dialog id="shortcuts" aria-label="Klavye kısayolları">
+  <div class="dlg">
+    <header><h2>Klavye kısayolları</h2><button class="iconbtn" id="keysClose" aria-label="Kapat"></button></header>
+    <div class="kb-grid" id="kbGrid"></div>
+  </div>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script type="module" src="/js/main.js"></script>
+</body>
+</html>

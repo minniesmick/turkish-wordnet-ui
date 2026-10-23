@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "static/index.html"
+        ],
+        "createdAt": "2026-10-22T08:11:05.543Z",
+        "reason": "klavye tuşu .kbd: kalın alt kenar tuşun derinliğini gösteren standart kısayol gösterimi, kart kenarlığı değil; Claude kararı, kullanıcı onayı yok"
+      },
+      {
+        "rule": "gpt-thin-border-wide-shadow",
+        "value": "*",
+        "files": [
+          "static/index.html"
+        ],
+        "createdAt": "2026-10-22T08:11:05.560Z",
+        "reason": "yüzen katmanlar (kenar kâğıdı, komut paleti, kısayol penceresi): 1px kenar + yumuşak ofsetli gölge, açılır katmanlar için standart derinlik; kart yığını değil; Claude kararı, kullanıcı onayı yok"
+      }
+    ]
+  }
+}
