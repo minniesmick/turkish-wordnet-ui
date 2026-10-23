@@ -655,3 +655,10 @@ button.mp-ch:hover{border-color:var(--spot)}
 .mp-opt:hover:not([disabled]){border-color:var(--spot)}
 .mp-opt.ok{border-color:var(--spot);background:var(--wash)}
 .mp-opt.bad{opacity:.55;text-decoration:line-through}
+
+.mp-tags{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 6px}
+.mp-tags .tag i{font-style:normal;color:var(--ink-3)}
+.mp-fmt{margin:4px 0;font-size:.9rem}
+.mp-alts{margin-top:4px;font-size:.84rem}
+.mp-alts summary{cursor:pointer;color:var(--ink-3)}
+.mp-fsm{margin:6px 0;padding:10px 12px;border:1px solid var(--rule);border-radius:var(--r);background:var(--sunk);font:500 .8rem/1.55 var(--font-mono);white-space:pre-wrap;word-break:break-word}

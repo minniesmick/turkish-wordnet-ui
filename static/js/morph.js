@@ -1,12 +1,13 @@
 // Morfoloji: Lecture 2. Türkçe sözcüğü eklerine ayır (çözümle) ya da kökten ek ek sözcük üret. Öğrenci kipinde kural izi, kavram notları ve alıştırma da açılır.
 import {$, $$, esc, api, registerView, MODE} from "./core.js";
+import {trace, stepStates, STATE_NAME} from "./fsm.js";
 import {SUF, GROUP_NAME, CURATED, generate, analyze, nextOptions, lexiconFromLemmas, stateName} from "./turkish.js";
 
-const MS = {word:"okullarım", stem:"okul", pos:"N", ids:[], quiz:{kind:"uret", q:null, score:0, n:0, done:false}};
+const MS = {word:"okullarım", stem:"okul", pos:"N", ids:[], engine:"zem", sent:"Ben dün akşam kitabı okudum.", quiz:{kind:"uret", q:null, score:0, n:0, done:false}};
 const KEY = "wn:morph";
-let root = null, LEX = CURATED, lexNote = "";
-const load = () => { try{ const v = JSON.parse(localStorage.getItem(KEY)) || {}; for(const k of ["word", "stem", "pos", "ids"]) if(v[k] != null) MS[k] = v[k]; }catch(_){} };
-const save = () => { try{ localStorage.setItem(KEY, JSON.stringify({word:MS.word, stem:MS.stem, pos:MS.pos, ids:MS.ids})); }catch(_){} };
+let root = null, LEX = CURATED, zem = null;   // zem: null bilinmiyor, false yok, true var
+const load = () => { try{ const v = JSON.parse(localStorage.getItem(KEY)) || {}; for(const k of ["word", "stem", "pos", "ids", "engine", "sent"]) if(v[k] != null) MS[k] = v[k]; }catch(_){} };
+const save = () => { try{ localStorage.setItem(KEY, JSON.stringify({word:MS.word, stem:MS.stem, pos:MS.pos, ids:MS.ids, engine:MS.engine, sent:MS.sent})); }catch(_){} };
 const lc = s => s.toLocaleLowerCase("tr").trim();
 const POSN = {N:"isim", A:"sıfat", V:"fiil"};
 const short = id => (SUF[id]?.name || id).replace(/ \(.*\)$/, "");
@@ -40,14 +41,88 @@ async function runAnalyze(){
   const w = lc(MS.word); save();
   const out = $("#mpAOut", root);
   if(!w){ out.innerHTML = ""; return; }
-  const list = analyze(w, LEX);
-  out.innerHTML = analysisHTML(list, MS.word) + '<div id="mpBoun"></div>';
+  if(zem && MS.engine === "zem"){
+    out.innerHTML = '<div class="skeleton" style="height:90px;margin-top:14px"></div>';
+    try{ out.innerHTML = zAnalysisHTML(await zemWord(MS.word.trim()), MS.word) + '<div id="mpBoun"></div>'; }
+    catch(_){ out.innerHTML = '<div id="mpBoun"></div>'; }
+  }else{
+    out.innerHTML = analysisHTML(analyze(w, LEX), MS.word) + '<div id="mpBoun"></div>';
+  }
   try{
     const j = await api("/api/ud", {w:MS.word.trim()});
     $("#mpBoun", root).innerHTML = j.results.length
       ? `<h3 class="ng-h3">BOUN treebank'inde gerçek çözümlemeler <small>UD etiketleri</small></h3><div class="ck-scroll"><table class="ng-tbl"><tr><th>Lemma</th><th>UPOS</th><th>Özellikler</th><th>Sayı</th></tr>${j.results.map(r => `<tr><td><b>${esc(r.lemma)}</b></td><td>${esc(r.upos)}</td><td class="muted" style="font-size:.8rem">${esc(r.feats === "_" ? "" : r.feats.replace(/\|/g, " · "))}</td><td>${r.n}</td></tr>`).join("")}</table></div>`
       : `<p class="ck-meta">“${esc(MS.word)}” BOUN test kümesinde geçmiyor.</p>`;
   }catch(_){}
+}
+
+
+// ───────────────────────── Zemberek çözümlemesi
+const GLOSS = {
+  Noun:"isim", Verb:"fiil", Adj:"sıfat", Adv:"zarf", Pron:"zamir", Det:"belirteç", Conj:"bağlaç", Postp:"edat", Num:"sayı", Ques:"soru", Interj:"ünlem", Punc:"noktalama", Dup:"ikileme",
+  A1sg:"1. tekil kişi", A2sg:"2. tekil kişi", A3sg:"3. tekil kişi", A1pl:"1. çoğul kişi", A2pl:"2. çoğul kişi", A3pl:"çoğul / 3. çoğul kişi",
+  Pnon:"iyelik yok", P1sg:"benim", P2sg:"senin", P3sg:"onun", P1pl:"bizim", P2pl:"sizin", P3pl:"onların",
+  Nom:"yalın hâl", Acc:"belirtme hâli", Dat:"yönelme hâli", Loc:"bulunma hâli", Abl:"ayrılma hâli", Gen:"tamlayan hâli", Ins:"araç hâli", Equ:"eşitlik hâli",
+  Pos:"olumlu", Neg:"olumsuz", Aor:"geniş zaman", Prog1:"şimdiki zaman (-Iyor)", Prog2:"şimdiki zaman (-mAktA)", Past:"görülen geçmiş", Narr:"öğrenilen geçmiş", Fut:"gelecek zaman",
+  Cond:"şart", Imp:"emir", Opt:"istek", Neces:"gereklilik", Pres:"şimdiki (ek-fiil)", Cop:"ek-fiil (-DIr)", Inf1:"mastar -mAk", Inf2:"eylemlik -mA", Inf3:"-Iş",
+  Caus:"ettirgen", Pass:"edilgen", Reflex:"dönüşlü", Recip:"işteş", Able:"yeterlilik", PastPart:"-DIk sıfat-fiil", PresPart:"-An sıfat-fiil", FutPart:"-AcAk sıfat-fiil",
+  AorPart:"-Ar sıfat-fiil", NarrPart:"-mIş sıfat-fiil", Ness:"-lIk (soyut isim)", With:"-lI (... olan)", Without:"-sIz (... olmayan)", Agt:"-CI (yapan)", Dim:"küçültme", Become:"-lAş (olmak)",
+  Acquire:"-lAn (edinmek)", Zero:"sıfır dönüşüm", Prop:"özel ad", Abbrev:"kısaltma", When:"-Ince", While:"-ken", AfterDoing:"-Ip", ByDoingSo:"-ArAk", WithoutHavingDoneSo:"-mAdAn",
+  Ly:"-cA (zarf)", Hastily:"-Iver", Stay:"-Akal", Almost:"-Ayaz", Start:"-Akoy"
+};
+const gl = id => GLOSS[id] || "";
+function zSegs(a){
+  const ms = a.morphemes.filter(m => m.surface);
+  return `<div class="mp-segs">${ms.map((m, i) => `<span class="mp-seg ${i ? "" : "root"}"><b>${esc(m.surface)}</b><small>${esc(i ? (gl(m.id) || m.name) : "kök")}</small></span>`).join('<i>+</i>') || `<span class="mp-seg root"><b>${esc(a.stem)}</b><small>kök</small></span>`}</div>`;
+}
+function zTags(a){
+  return `<div class="mp-tags">${a.morphemes.map(m => `<span class="tag ${m.deriv ? "mp-deriv" : ""}" title="${esc(m.name)}">${esc(m.id)}${m.surface ? `<i>:${esc(m.surface)}</i>` : ""}</span>`).join("")}</div>`;
+}
+// Sample.pdf biçiminde Oflazer FSM yolu
+function fsmBlock(a){
+  const t = trace(a.oflazer);
+  const lines = t.steps.filter(s => !s.skipped).map(s => `From State ${(s.states || [s.from, s.to]).join("-State ")}: ${s.lex}${s.tag ? ` (with tag ${s.tag})` : ""}`);
+  const names = stepStates(t).map(x => `${x} ${STATE_NAME[x] || ""}`.trim());
+  const text = lines.join("\n");
+  return `<h4>Oflazer FSM yolu <small>Nouns / Verbs1 / Verbs2 şekilleri</small></h4>
+    <pre class="mp-fsm">${esc(text)}${t.ok ? "" : `\n✗ ${esc(t.reason)}`}</pre>
+    <p class="muted" style="font-size:.82rem;margin:4px 0 0">${esc(names.join(" → "))}${t.steps.some(s => s.assumed) ? " · (varsayım) ile işaretli kenar şekilde yok" : ""}</p>
+    <button class="btn sm ghost" data-copy="${esc(text)}">Yolu kopyala</button>`;
+}
+function zStudent(a){
+  const ids = [...new Set(a.morphemes.map(m => m.id))].filter(id => gl(id));
+  return `<div class="stu mp-trace"><h4>Biçimler <small>Zemberek</small></h4>
+    <p class="mp-fmt"><b>Uzun</b> <span class="mp-lex" style="display:inline;font-size:.88rem">${esc(a.long)}</span></p>
+    <p class="mp-fmt"><b>Sözlük maddesi</b> ${esc(a.lemma)} · ${esc(a.pos)} · kök ${esc(a.stem)} + ek ${esc(a.ending || "∅")}</p>
+    ${fsmBlock(a)}
+    <h4>Etiketler</h4><div class="chips">${ids.map(id => `<span class="chip" style="cursor:default"><b>${esc(id)}</b> <small>${esc(gl(id))}</small></span>`).join("")}</div>
+    <p class="muted" style="font-size:.84rem;margin:8px 0 0">^DB türetme sınırı: sözcüğün türü ya da anlamı değişir (yapım eki). Sıfır morfemler (A3sg, Pnon, Nom) yüzeyde görünmez.</p></div>`;
+}
+function zAnalysisHTML(j, word){
+  const list = j.analyses || [];
+  if(!list.length) return `<div class="empty" style="padding:26px 0"><b>${esc(word)}</b> için çözümleme yok.</div>`;
+  const unknown = list.every(a => a.unknown);
+  return (unknown ? `<div class="notice warn"><b>${esc(word)}</b> Zemberek sözlüğünde yok; tahmin edilen çözümleme gösteriliyor.</div>` : "")
+    + (list.length > 1 ? `<p class="verdict"><b>${list.length}</b> farklı çözümleme: sözcük <b>belirsiz</b> <small class="stu muted">(morfolojik belirsizlik, slayt 10; cümle bağlamında seçmek için aşağıdaki “Cümlede çözümle”)</small></p>` : "")
+    + list.map(a => `<article class="mp-card"><div class="mp-lex">${esc(a.oflazer)}</div>${zSegs(a)}${zTags(a)}<p class="mp-meta">sözlük maddesi: <b>${esc(a.lemma)}</b> (${esc(a.pos)})</p>${zStudent(a)}</article>`).join("");
+}
+const zemWord = w => api("/api/zemberek", {w});
+
+function sentHTML(j){
+  const words = j.words || [];
+  if(!words.length) return "";
+  return `<div class="ck-scroll"><table class="ng-tbl"><tr><th>Sözcük</th><th>Seçilen çözümleme</th><th>Aday</th></tr>${words.map(w => {
+    const amb = w.all.length > 1;
+    return `<tr><td><b>${esc(w.input)}</b></td><td><span class="mp-lex" style="font-size:.9rem">${esc(w.best.oflazer)}</span>${amb ? `<details class="mp-alts"><summary>diğer ${w.all.length - 1} aday</summary>${w.all.filter(a => a.oflazer !== w.best.oflazer).map(a => `<div class="mp-lex" style="font-size:.84rem;font-weight:500;color:var(--ink-2)">${esc(a.oflazer)}</div>`).join("")}</details>` : ""}</td><td>${amb ? `<span class="tag mp-deriv">${w.all.length}</span>` : '<span class="tag">1</span>'}</td></tr>`;
+  }).join("")}</table></div>
+  <p class="ck-meta stu">Birden fazla adayı olan sözcükler belirsizdir. Zemberek her sözcük için bağlamdaki en olası çözümlemeyi ortalamalı perceptron ile seçer (slayt 32; Sak, Güngör ve Saraçlar).</p>`;
+}
+async function runSent(){
+  const t = MS.sent.trim(); save();
+  const out = $("#mpSOut", root);
+  if(!t){ out.innerHTML = ""; return; }
+  out.innerHTML = '<div class="skeleton" style="height:90px"></div>';
+  try{ out.innerHTML = sentHTML(await api("/api/zemberek", {s:t})); }catch(_){ out.innerHTML = ""; }
 }
 
 // ───────────────────────── üretim
@@ -148,26 +223,35 @@ function mount(){
     <h1 class="page-title">Morfoloji</h1>
     <p class="lesson-intro" style="margin:0">Türkçe bir sözcüğü eklerine ayır ya da bir kökten ek ek sözcük üret. Kural tabanlı küçük bir model: kök sözlüğü, ek sıralama kuralları ve ses değişimleri. Gerçek bir çözümleyici (Zemberek, Nuve) değil; kapsamı sınırlıdır.<span class="stu"> Lecture 2.</span></p>
     <h2 class="ng-h">1 · Çözümle <small id="mpLex"></small></h2>
+    <div class="ng-ctl hidden" id="mpEng" style="margin:0 0 12px"><div class="seg" role="group" aria-label="Çözümleyici"><button data-act="eng" data-e="zem">Zemberek</button><button data-act="eng" data-e="small">Küçük kural modeli</button></div><span class="muted" id="mpEngNote" style="font-size:.86rem"></span></div>
     <div class="pair" style="grid-template-columns:1fr auto"><label class="field">${""}<input id="mpWord" type="text" autocomplete="off" spellcheck="false" placeholder="Bir Türkçe sözcük (örn. okullarım)"></label><button class="btn pri" id="mpGo" style="height:46px">Çözümle</button></div>
     <div class="chips" style="margin-top:12px">${["okullarım", "sevindiriyor", "evleri", "gezme", "kitabımdan", "geleceğim", "kapıyor", "güzelliği"].map(w => `<button class="chip" data-act="ex" data-w="${w}">${w}</button>`).join("")}</div>
     <div id="mpAOut" aria-live="polite"></div>
-    <h2 class="ng-h">2 · Üret</h2>
+    <div id="mpSent" class="hidden"><h2 class="ng-h">2 · Cümlede çözümle <small>morfolojik belirsizlik giderme</small></h2>
+      <div class="pair" style="grid-template-columns:1fr auto"><label class="field sm"><input id="mpSin" type="text" autocomplete="off" spellcheck="false" placeholder="Bir Türkçe cümle"></label><button class="btn pri sm" id="mpSgo">Çözümle</button></div>
+      <div class="chips" style="margin-top:10px">${["Ben dün akşam kitabı okudum.", "Gözleri yaşlı bir adam bana baktı.", "Yarın okula gidecek miyiz?"].map(t => `<button class="chip" data-act="sex" data-t="${esc(t)}">${esc(t)}</button>`).join("")}</div>
+      <div id="mpSOut" aria-live="polite" style="margin-top:12px"></div></div>
+    <h2 class="ng-h">3 · Üret <small>küçük kural modeliyle</small></h2>
     <div class="ng-ctl" style="margin-top:0"><label class="field sm" style="flex:1 1 220px">Kök<input id="mpStem" type="text" list="mpStems" autocomplete="off" spellcheck="false"></label><datalist id="mpStems">${CURATED.map(e => `<option value="${esc(e.w)}">`).join("")}</datalist>
       <div class="seg" id="mpPos"><button data-act="pos" data-p="N">isim / sıfat</button><button data-act="pos" data-p="V">fiil</button></div></div>
     <div id="mpGOut"></div>
-    <div class="stu"><h2 class="ng-h">3 · Kurallar <small>motorun ses ve ek bilgisi</small></h2><div id="mpRules"></div>
-    <h2 class="ng-h">4 · Kavramlar <small>slayt notları</small></h2><div id="mpNotes"></div>
-    <h2 class="ng-h">5 · Alıştırma</h2><div id="mpQuiz"></div></div>
+    <div class="stu"><h2 class="ng-h">4 · Kurallar <small>motorun ses ve ek bilgisi</small></h2><div id="mpRules"></div>
+    <h2 class="ng-h">5 · Kavramlar <small>slayt notları</small></h2><div id="mpNotes"></div>
+    <h2 class="ng-h">6 · Alıştırma</h2><div id="mpQuiz"></div></div>
     <div style="height:56px"></div></div>`;
   const w = $("#mpWord", root), st = $("#mpStem", root);
   w.addEventListener("keydown", e => { if(e.key === "Enter") go(); });
   $("#mpGo", root).addEventListener("click", go);
   w.addEventListener("input", e => { MS.word = e.target.value; });
+  $("#mpSgo", root).addEventListener("click", () => { MS.sent = $("#mpSin", root).value; runSent(); });
+  $("#mpSin", root).addEventListener("keydown", e => { if(e.key === "Enter"){ MS.sent = e.target.value; runSent(); } });
   st.addEventListener("input", e => { const v = lc(e.target.value); if(!v) return; const hit = CURATED.find(x => x.w === v); MS.stem = v; if(hit) MS.pos = hit.pos === "V" ? "V" : "N"; MS.ids = []; syncPos(); renderGen(); });
   root.addEventListener("click", e => {
     const b = e.target.closest("[data-act]"); if(!b) return;
     const d = b.dataset, Q = MS.quiz;
     switch(d.act){
+      case "eng": MS.engine = d.e; syncEng(); runAnalyze(); break;
+      case "sex": MS.sent = d.t; $("#mpSin", root).value = d.t; runSent(); break;
       case "ex": MS.word = d.w; $("#mpWord", root).value = d.w; go(); break;
       case "add": MS.ids.push(d.id); renderGen(); break;
       case "del": MS.ids.splice(+d.i); renderGen(); break;
@@ -183,6 +267,14 @@ function mount(){
   root.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.id === "mpQIn") root.querySelector('[data-act="qcheck"]')?.click(); });
 }
 const go = () => { MS.word = $("#mpWord", root).value; runAnalyze(); };
+function syncEng(){
+  const on = zem === true;
+  $("#mpEng", root).classList.toggle("hidden", zem === null);
+  $$("#mpEng [data-e]", root).forEach(b => b.setAttribute("aria-pressed", b.dataset.e === (on ? MS.engine : "small")));
+  $$("#mpEng [data-e='zem']", root).forEach(b => b.disabled = !on);
+  $("#mpEngNote", root).textContent = on ? "Zemberek: açık kaynak (Apache 2.0) gerçek çözümleyici." : "Zemberek bulunamadı (lib/zemberek-full.jar ve JDK gerekir); küçük kural modeli kullanılıyor.";
+  $("#mpSent", root).classList.toggle("hidden", !on);
+}
 function syncPos(){ $$("#mpPos button", root).forEach(b => b.setAttribute("aria-pressed", b.dataset.p === (MS.pos === "V" ? "V" : "N"))); $("#mpStem", root).value = MS.stem; }
 function renderStudent(){ $("#mpRules", root).innerHTML = rulesHTML(); $("#mpNotes", root).innerHTML = notesHTML(); renderQuiz(); }
 
@@ -190,7 +282,12 @@ export const view = {
   apply(){},
   async enter(){
     mount();
-    $("#mpWord", root).value = MS.word; syncPos(); renderGen(); runAnalyze();
+    $("#mpWord", root).value = MS.word; $("#mpSin", root).value = MS.sent; syncPos(); renderGen(); syncEng();
+    if(zem === null){
+      try{ const j = await api("/api/zemberek", {}); zem = !!j.available; }catch(_){ zem = false; }
+      syncEng();
+    }
+    runAnalyze(); if(zem) runSent();
     if(MODE.student) renderStudent();
     if(LEX === CURATED){
       try{
