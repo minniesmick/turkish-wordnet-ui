@@ -39,7 +39,8 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 
 - [x] PCFG (InClass 2) ve CKY (InClass 3): sekme **Ayrıştırma** (`static/js/parse.js`, `g c`). InClass 2 cümlesi 2 ağaç verir ve ikisi de P = 3.527e-9 (eşit, kuralların çarpanları aynı); InClass 3 cümlesi gramerde yok (S yalnızca [0,7] kapsıyor, `time` bağlanamıyor).
 - [ ] Bağımlılık: train/dev kümesi, çok sözcüklü belirteç (1-2) gösterimi, çevrimiçi graph-based / transition-based ayrıştırıcı demosu, Turkish IG (çekim grupları) gösterimi.
-- [ ] Ayrıştırma: PCFG için kural olasılığını korpustan MLE ile öğrenme (slayt), top-down / shift-reduce adım adım gösterim.
+- [x] PCFG kural olasılığını parantezli ağaçlardan MLE ile öğrenme (`static/js/mle.js`, test `node scripts/test_mle.mjs`).
+- [ ] Ayrıştırma: top-down / shift-reduce adım adım gösterim.
 - [x] Bağımlılık ağacı (InClass 4): sekme **Bağımlılık** (`static/js/deps.js`, `g k`, API `/api/ud`). Veri: `data/ud/tr_boun-ud-test.conllu` (UD Turkish-BOUN test, CC BY-SA 4.0).
 
 ## Önceki notlardan kalanlar
