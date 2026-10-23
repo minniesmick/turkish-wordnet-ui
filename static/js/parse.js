@@ -1,5 +1,6 @@
 // Ayrıştırma: Lecture 3 (CFG, PCFG, CKY). Gramer yaz, cümle ver; CKY tablosunu, ayrıştırma ağaçlarını ve olasılıkları gör. Tamamı tarayıcıda.
-import {$, $$, esc, registerView, MODE} from "./core.js";
+import {$, $$, esc, registerView, MODE, toast} from "./core.js";
+import {parseTrees, learn, toGrammar} from "./mle.js";
 
 const PRESETS = {
   inclass2: {stu:true, label:"InClass 2 · PCFG", sent:"Alice said the scientist that believed the student proved the experiment", ex:["Alice said the student proved the experiment"], grammar:
@@ -34,7 +35,7 @@ N -> kids | birds | binoculars | fish
 V -> saw
 P -> with`}
 };
-const PS = {grammar:PRESETS.inclass2.grammar, sent:PRESETS.inclass2.sent, start:"", preset:"inclass2", sel:"", all:false, fill:false, ans:{}, chk:false, show:false, hints:0, fk:""};
+const PS = {grammar:PRESETS.inclass2.grammar, sent:PRESETS.inclass2.sent, start:"", preset:"inclass2", sel:"", all:false, fill:false, ans:{}, chk:false, show:false, hints:0, fk:"", mle:"(S (NP (Det the) (N dog)) (VP (V barks)))\n(S (NP (Det the) (N cat)) (VP (V saw) (NP (Det the) (N dog))))\n(S (NP (Det a) (N dog)) (VP (V saw) (NP (Det a) (N cat))))"};
 const KEY = "wn:parse";
 let root = null, run = null;
 
@@ -207,7 +208,7 @@ function grammarInfo(r){
   if(r.rules.length){
     const mixed = r.rules.some(x => x.p != null) && !r.hasProb;
     h += `<p class="ck-meta">${r.rules.length} kural · ${r.lhs.length} sol taraf simgesi · ${r.hasProb ? "<b>PCFG</b> (olasılıklı)" : "<b>CFG</b> (olasılıksız)"}${mixed ? ' · <b>bazı kurallarda olasılık yok, CFG sayıldı</b>' : ""}</p>`;
-    if(r.hasProb) h += `<div class="chips stu">${r.lhs.map(s => { const v = r.sums.get(s), ok = Math.abs(v - 1) < 1e-9; return `<span class="chip" title="${esc(s)} kurallarının olasılık toplamı 1 olmalı">${esc(s)} <small>Σ ${+v.toFixed(4)}${ok ? " ✓" : " ✗"}</small></span>`; }).join("")}</div>`;
+    if(r.hasProb) h += `<div class="chips stu">${r.lhs.map(s => { const v = r.sums.get(s), ok = Math.abs(v - 1) < 5e-4; return `<span class="chip" title="${esc(s)} kurallarının olasılık toplamı 1 olmalı">${esc(s)} <small>Σ ${+v.toFixed(4)}${ok ? " ✓" : " ✗"}</small></span>`; }).join("")}</div>`;
   }
   return h;
 }
@@ -260,6 +261,25 @@ function hintCell(r){
   }
   return null;
 }
+// ───────────────────────── ağaçlardan olasılık öğren (MLE)
+const fmtFrac = r => `${r.c}/${r.total}`;
+function mleHTML(){
+  let trees;
+  try{ trees = parseTrees(PS.mle); }catch(e){ return `<div class="notice warn">${esc(e.message)}</div>`; }
+  if(!trees.length) return '<p class="ck-meta">Parantezli ağaçları yaz (her ağaç bir satır olabilir).</p>';
+  const L = learn(trees), order = [...new Set(L.rules.map(r => r.lhs))];
+  const rows = L.rules.slice().sort((a, b) => order.indexOf(a.lhs) - order.indexOf(b.lhs) || b.c - a.c);
+  const g = toGrammar(L);
+  return `<p class="ng-formula stu">P(A → β) = C(A → β) / C(A): bir kuralın kaç kez kullanıldığı, sol tarafın toplam kaç kez türetildiğine bölünür.</p>
+    <div class="ck-scroll"><table class="ng-tbl"><tr><th>Kural</th><th>C(kural)</th><th>C(sol)</th><th>Kesir</th><th>P</th></tr>
+    ${rows.map(r => `<tr><td>${esc(r.lhs)} → ${esc(r.rhs.join(" "))}</td><td>${r.c}</td><td>${r.total}</td><td>${fmtFrac(r)}</td><td><b>${+r.p.toFixed(4)}</b></td></tr>`).join("")}</table></div>
+    <h3 class="ng-h3">Ağaç olasılıkları <small>kural olasılıklarının çarpımı</small></h3>
+    <div class="chips">${trees.map((t, i) => `<span class="chip" style="cursor:default">Ağaç ${i + 1} <small>${L.probs[i] >= .001 ? +L.probs[i].toFixed(5) : L.probs[i].toExponential(3)}</small></span>`).join("")}</div>
+    <h3 class="ng-h3">Gramer metni</h3><pre class="mp-fsm">${esc(g)}</pre>
+    <div class="row"><button class="btn pri sm" data-mle="use">Bu gramerle ayrıştır</button><button class="btn sm ghost" data-copy="${esc(g)}">Gramer metnini kopyala</button></div>`;
+}
+const leaves = n => typeof n === "string" ? [n] : n.kids.flatMap(leaves);
+
 // CKY tablosu: satır = aralık uzunluğu, sütun = başlangıç sözcüğü
 function chartMarkdown(r){
   const n = r.toks.length, head = `| uzunluk | ${r.toks.map((t, i) => `${i} ${t}`).join(" | ")} |`;
@@ -342,6 +362,7 @@ function renderAll(){
   if(fk !== PS.fk){ PS.fk = fk; PS.ans = {}; PS.chk = false; PS.show = false; PS.hints = 0; }
   $("#pgChart", root).innerHTML = chartHTML(r);
   $("#pgTrees", root).innerHTML = treesHTML(r);
+  $("#pgMleOut", root).innerHTML = mleHTML();
   save();
 }
 
@@ -365,13 +386,28 @@ function mount(){
     <div id="pgChart" aria-live="polite"></div>
     <h2 class="ng-h">4 · Ayrıştırma ağaçları</h2>
     <div id="pgTrees" aria-live="polite"></div>
+    <h2 class="ng-h">5 · Ağaçlardan olasılık öğren <small>MLE</small></h2>
+    <p class="ng-formula" style="margin:0 0 8px">Parantezli ağaçları yaz; kural olasılıkları sayımlardan hesaplanır, çıkan grameri yukarıdaki ayrıştırıcıda kullanabilirsin.</p>
+    <textarea class="ta" id="pgMle" rows="5" spellcheck="false" style="font:500 .88rem/1.55 var(--font-mono)" aria-label="Parantezli ağaçlar"></textarea>
+    <div id="pgMleOut" style="margin-top:12px"></div>
     <div style="height:56px"></div></div>`;
   let t;
   $("#pgGrammar", root).addEventListener("input", e => { PS.grammar = e.target.value; PS.sel = ""; clearTimeout(t); t = setTimeout(renderAll, 200); });
   $("#pgSent", root).addEventListener("input", e => { PS.sent = e.target.value; PS.sel = ""; clearTimeout(t); t = setTimeout(renderAll, 150); });
   $("#pgStart", root).addEventListener("change", e => { PS.start = e.target.value; renderAll(); });
+  $("#pgMle", root).addEventListener("input", e => { PS.mle = e.target.value; clearTimeout(t); t = setTimeout(() => { $("#pgMleOut", root).innerHTML = mleHTML(); save(); }, 200); });
   root.addEventListener("input", e => { const k = e.target.dataset?.fc; if(k){ PS.ans[k] = e.target.value; PS.chk = false; save(); } });
   root.addEventListener("click", e => {
+    const ml = e.target.closest("[data-mle]");
+    if(ml){
+      try{
+        const trees = parseTrees(PS.mle), L = learn(trees);
+        Object.assign(PS, {grammar:toGrammar(L), start:trees[0].label, preset:"", sent:leaves(trees[0]).join(" "), sel:""});
+        sync(); renderAll(); toast("Gramer yukarıya aktarıldı");
+        $("#pgGrammar", root).scrollIntoView({behavior:"smooth", block:"center"});
+      }catch(_){}
+      return;
+    }
     const fa = e.target.closest("[data-fa]");
     if(fa){
       const a = fa.dataset.fa;
@@ -390,7 +426,7 @@ function mount(){
     renderAll();
   });
 }
-function sync(){ $("#pgGrammar", root).value = PS.grammar; $("#pgSent", root).value = PS.sent; }
+function sync(){ $("#pgGrammar", root).value = PS.grammar; $("#pgSent", root).value = PS.sent; $("#pgMle", root).value = PS.mle; }
 
 export const view = {
   apply(){},
