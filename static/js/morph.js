@@ -3,11 +3,11 @@ import {$, $$, esc, api, registerView, MODE} from "./core.js";
 import {trace, stepStates, STATE_NAME} from "./fsm.js";
 import {SUF, GROUP_NAME, CURATED, generate, analyze, nextOptions, lexiconFromLemmas, stateName} from "./turkish.js";
 
-const MS = {word:"okullarım", stem:"okul", pos:"N", ids:[], engine:"zem", sent:"Ben dün akşam kitabı okudum.", quiz:{kind:"uret", q:null, score:0, n:0, done:false}};
+const MS = {word:"okullarım", stem:"okul", pos:"N", ids:[], engine:"zem", zpos:"Noun", zids:[], sent:"Ben dün akşam kitabı okudum.", quiz:{kind:"uret", q:null, score:0, n:0, done:false}};
 const KEY = "wn:morph";
 let root = null, LEX = CURATED, zem = null;   // zem: null bilinmiyor, false yok, true var
-const load = () => { try{ const v = JSON.parse(localStorage.getItem(KEY)) || {}; for(const k of ["word", "stem", "pos", "ids", "engine", "sent"]) if(v[k] != null) MS[k] = v[k]; }catch(_){} };
-const save = () => { try{ localStorage.setItem(KEY, JSON.stringify({word:MS.word, stem:MS.stem, pos:MS.pos, ids:MS.ids, engine:MS.engine, sent:MS.sent})); }catch(_){} };
+const load = () => { try{ const v = JSON.parse(localStorage.getItem(KEY)) || {}; for(const k of ["word", "stem", "pos", "ids", "engine", "sent", "zpos", "zids"]) if(v[k] != null) MS[k] = v[k]; }catch(_){} };
+const save = () => { try{ localStorage.setItem(KEY, JSON.stringify({word:MS.word, stem:MS.stem, pos:MS.pos, ids:MS.ids, engine:MS.engine, sent:MS.sent, zpos:MS.zpos, zids:MS.zids})); }catch(_){} };
 const lc = s => s.toLocaleLowerCase("tr").trim();
 const POSN = {N:"isim", A:"sıfat", V:"fiil"};
 const short = id => (SUF[id]?.name || id).replace(/ \(.*\)$/, "");
@@ -125,6 +125,52 @@ async function runSent(){
   try{ out.innerHTML = sentHTML(await api("/api/zemberek", {s:t})); }catch(_){ out.innerHTML = ""; }
 }
 
+// ───────────────────────── Zemberek ile üretim (WordGenerator)
+const usingZ = () => zem === true && MS.engine === "zem";
+// Zemberek ek kimliklerini gruplara ayırır (arayüzdeki seçenekler)
+const ZG = {};
+for(const [g, ids] of Object.entries({
+  num:["A3pl"], poss:["P1sg", "P2sg", "P3sg", "P1pl", "P2pl", "P3pl"], case:["Gen", "Acc", "Dat", "Loc", "Abl", "Ins", "Equ", "Rel"],
+  deriv:["Dim", "Ness", "With", "Without", "Agt", "Become", "Acquire", "Inf1", "Inf2", "Inf3", "PastPart", "PresPart", "FutPart", "AorPart", "NarrPart", "AfterDoing", "ByDoingSo", "When", "While", "Ly"],
+  voice:["Caus", "Pass", "Reflex", "Recip", "Able"], neg:["Neg"], tam:["Aor", "Prog1", "Prog2", "Past", "Narr", "Fut", "Cond", "Imp", "Opt", "Neces", "Desr", "Cop"], pers:["A1sg", "A2sg", "A1pl", "A2pl"]
+})) for(const id of ids) ZG[id] = g;
+let zgenSeq = 0;
+const zOpts = (lemma, pos, ids) => api("/api/zemberek", {o:lemma, pos, ids:ids.join(",")});
+const uniqRes = list => { const seen = new Set(); return list.filter(r => { const k = r.surface + "|" + r.analysis.oflazer; if(seen.has(k)) return false; seen.add(k); return true; }); };
+const pieceOf = (res, id) => res?.analysis.morphemes.find(m => m.id === id)?.surface || "";
+async function loadItems(){
+  const sel = $("#mpItem", root);
+  if(!usingZ()){ sel.classList.add("hidden"); return; }
+  try{
+    const j = await api("/api/zemberek", {i:MS.stem});
+    const items = j.items || [];
+    sel.innerHTML = items.map(x => `<option value="${esc(x.pos)}">${esc(x.lemma)} · ${esc(x.pos)}</option>`).join("");
+    sel.classList.toggle("hidden", items.length < 2);
+    if(items.length && !items.some(x => x.pos === MS.zpos)){ MS.zpos = items[0].pos; MS.zids = []; }
+    sel.value = MS.zpos;
+  }catch(_){}
+}
+async function renderGenZ(){
+  const my = ++zgenSeq, out = $("#mpGOut", root);
+  out.innerHTML = '<div class="skeleton" style="height:110px"></div>';
+  let j;
+  try{ j = await zOpts(MS.stem, MS.zpos, MS.zids); }catch(_){ return; }
+  if(my !== zgenSeq) return;
+  if(j.error){ out.innerHTML = `<div class="notice warn"><b>${esc(MS.stem)}</b> Zemberek sözlüğünde yok. Fiilleri kök olarak yaz (gel, oku); sözlük maddesi mastarla kayıtlıdır.</div>`; return; }
+  const base = uniqRes(j.base || []);
+  if(!base.length && MS.zids.length){ MS.zids = []; return renderGenZ(); }
+  MS.zpos = j.item.pos;
+  const groups = {};
+  for(const o of j.options) (groups[ZG[o.id] || "deriv"] = groups[ZG[o.id] || "deriv"] || []).push(o);
+  const first = base[0];
+  const chain = `<span class="mp-ch root">${esc(MS.stem)}</span>` + MS.zids.map((id, i) => `<button class="mp-ch" data-act="del" data-i="${i}" title="Kaldır">+${esc(pieceOf(first, id) || "∅")}<small>${esc(gl(id) || id)} ×</small></button>`).join("");
+  const pal = Object.entries(groups).map(([grp, os]) => `<div class="mp-grp"><h4>${esc(GROUP_NAME[grp] || grp)}</h4><div class="chips">${os.map(o => `<button class="chip" data-act="add" data-id="${esc(o.id)}" title="${esc([...new Set(o.results.map(r => r.surface))].join(" / "))}">+${esc(pieceOf(o.results[0], o.id) || "∅")} <small>${esc(gl(o.id) || o.id)}</small></button>`).join("")}</div></div>`).join("") || '<p class="ck-meta">Bu durumdan sonra ek gelemez.</p>';
+  out.innerHTML = `<div class="mp-chain">${chain}</div>
+    <div class="row" style="margin:10px 0"><button class="btn sm" data-act="undo" ${MS.zids.length ? "" : "disabled"}>Son eki geri al</button><button class="btn sm ghost" data-act="clear" ${MS.zids.length ? "" : "disabled"}>Sıfırla</button></div>
+    ${base.slice(0, 3).map(r => `<article class="mp-card"><div class="mp-surf">${esc(r.surface)}</div><div class="mp-lex">${esc(r.analysis.oflazer)}</div>${zSegs(r.analysis)}${zTags(r.analysis)}${zStudent(r.analysis)}</article>`).join("") || '<div class="empty">Zemberek bu zincir için sözcük üretmedi.</div>'}
+    <h3 class="ng-h3">Eklenebilecek ekler <small>Zemberek'in bu zincirden sonra geçerli saydıkları</small></h3>${pal}`;
+  save();
+}
 // ───────────────────────── üretim
 function genHTML(){
   const stem = stemOf(MS.stem, MS.pos), g = generate(stem, MS.ids);
@@ -139,7 +185,7 @@ function genHTML(){
     <article class="mp-card"><div class="mp-surf">${esc(g.surface)}</div><div class="mp-lex">${esc(g.lex)}</div>${segsHTML(a)}${traceHTML(a)}</article>
     <h3 class="ng-h3">Eklenebilecek ekler <small>yalnızca bu durumdan sonra geçerli olanlar</small></h3>${pal}`;
 }
-function renderGen(){ $("#mpGOut", root).innerHTML = genHTML(); save(); }
+function renderGen(){ if(usingZ()){ renderGenZ(); return; } zgenSeq++; $("#mpGOut", root).innerHTML = genHTML(); save(); }
 
 // ───────────────────────── öğrenci: kurallar ve notlar
 const TEST_N = ["ev", "okul", "göz", "kapı", "masa", "ütü"].map(w => ({w, pos:"N"})), TEST_V = ["gel", "yap", "gör", "oku", "bak", "ara"].map(w => ({w, pos:"V"}));
@@ -177,8 +223,11 @@ function notesHTML(){
 }
 
 // ───────────────────────── öğrenci: alıştırma
+// Soru nesnesi: {src, stemText, posText, tagNames, surfaces, lex, valid:Set, analysis?, small?, opts?}
+// "Geçerli" çözümlemeler gerçek çözümleyiciden gelir; çözümleme sorusunda tek seçenek geçerlidir, cevap sayılan çözümleme birden çok olabilir.
 const pick = a => a[Math.floor(Math.random() * a.length)];
-function makeQuestion(){
+let quizSeq = 0;
+function makeSmall(){
   for(let tries = 0; tries < 40; tries++){
     const stem = pick(CURATED.filter(e => !e.dey)), ids = [];
     const add = (grp, p = 1) => { if(Math.random() > p) return; const o = nextOptions(stem, ids).filter(id => SUF[id].grp === grp); if(o.length) ids.push(pick(o)); };
@@ -190,29 +239,71 @@ function makeQuestion(){
   }
   const stem = CURATED[0], ids = ["PLU", "ABL"]; return {stem, ids, g:generate(stem, ids)};
 }
+function smallQuestion(kind){
+  const q = makeSmall(), {stem, ids, g} = q, valid = new Set(analyze(g.surface, CURATED).map(a => a.lex)); valid.add(g.lex);
+  const o = {src:"s", stemText:stem.w, posText:POSN[stem.pos], tagNames:ids.map(short), surfaces:[g.surface], lex:g.lex, valid, small:q};
+  if(kind === "coz"){
+    const set = new Set([g.lex]);
+    for(let i = 0; i < 60 && set.size < 4; i++){ const x = makeSmall(); const lx = x.stem.w === stem.w ? x.g.lex : x.g.lex.replace(/^[^+]+/, stem.w); if(!valid.has(lx)) set.add(lx); }
+    o.opts = [...set].sort(() => Math.random() - .5);
+  }
+  return o;
+}
+async function zemQuestion(kind){
+  for(let tries = 0; tries < 10; tries++){
+    const e = pick(CURATED.filter(x => !x.dey && x.pos !== "A")), pos = e.pos === "V" ? "Verb" : "Noun";
+    const walk = async () => {
+      const ids = [], trail = []; let cur = await zOpts(e.w, pos, ids);
+      const add = async (gs, p = 1) => { if(Math.random() > p) return; const c = (cur.options || []).filter(o => gs.includes(ZG[o.id])); if(!c.length) return; trail.push(c); ids.push(pick(c).id); cur = await zOpts(e.w, pos, ids); };
+      if(pos === "Verb"){ await add(["voice"], .3); await add(["neg"], .35); await add(["tam"], 1); await add(["pers"], .75); }
+      else{ await add(["num"], .5); await add(["poss"], .5); await add(["case"], .8); }
+      return {ids, trail, base:uniqRes(cur.base || [])};
+    };
+    const w = await walk();
+    if(w.ids.length < 2 || !w.base.length) continue;
+    const surfaces = [...new Set(w.base.map(r => r.surface))];
+    const an = (await api("/api/zemberek", {w:surfaces[0]})).analyses || [], valid = new Set(an.map(x => x.oflazer));
+    const lex = w.base[0].analysis.oflazer; valid.add(lex);
+    const o = {src:"z", stemText:e.w, posText:pos === "Verb" ? "fiil" : "isim", tagNames:w.ids.map(id => gl(id) || id), surfaces, lex, valid, analysis:w.base[0].analysis};
+    if(kind === "coz"){
+      // çeldiriciler: zincirin son iki adımında Zemberek'in geçerli saydığı öteki ekler (ek çağrı gerekmez)
+      const pool = [...new Set(w.trail.slice(-2).flat().map(x => x.results[0]?.analysis.oflazer).filter(x => x && !valid.has(x)))].sort(() => Math.random() - .5);
+      if(pool.length < 3) continue;
+      const set = new Set([lex, ...pool.slice(0, 3)]);
+      o.opts = [...set].sort(() => Math.random() - .5);
+    }
+    return o;
+  }
+  return smallQuestion(kind);
+}
+async function newQuestion(){
+  const Q = MS.quiz, my = ++quizSeq;
+  $("#mpQuiz", root).innerHTML = '<div class="skeleton" style="height:120px"></div>';
+  const q = usingZ() ? await zemQuestion(Q.kind) : smallQuestion(Q.kind);
+  if(my !== quizSeq) return;
+  Q.q = q; Q.done = false; Q.pickd = null; renderQuiz();
+}
 function quizHTML(){
-  const Q = MS.quiz;
-  if(!Q.q) Q.q = makeQuestion();
-  const {stem, ids, g} = Q.q;
-  const head = `<div class="row" style="margin-bottom:12px"><div class="seg"><button data-act="qk" data-k="uret" aria-pressed="${Q.kind === "uret"}">Eklerden sözcük yaz</button><button data-act="qk" data-k="coz" aria-pressed="${Q.kind === "coz"}">Sözcükten çözümleme seç</button></div><span class="muted" style="font-size:.9rem">${Q.score} / ${Q.n} doğru</span></div>`;
+  const Q = MS.quiz, q = Q.q;
+  const head = `<div class="row" style="margin-bottom:12px"><div class="seg"><button data-act="qk" data-k="uret" aria-pressed="${Q.kind === "uret"}">Eklerden sözcük yaz</button><button data-act="qk" data-k="coz" aria-pressed="${Q.kind === "coz"}">Sözcükten çözümleme seç</button></div><span class="muted" style="font-size:.9rem">${Q.score} / ${Q.n} doğru · ${q.src === "z" ? "cevap anahtarı: Zemberek" : "cevap anahtarı: küçük model"}</span></div>`;
   let body;
   if(Q.kind === "uret"){
-    body = `<p class="mp-q"><b>${esc(stem.w)}</b> <small class="muted">(${POSN[stem.pos]})</small> + ${ids.map(id => `<span class="tag">${esc(short(id))}</span>`).join(" + ")}</p>
+    body = `<p class="mp-q"><b>${esc(q.stemText)}</b> <small class="muted">(${q.posText})</small> + ${q.tagNames.map(t => `<span class="tag">${esc(t)}</span>`).join(" + ")}</p>
       <div class="pair" style="grid-template-columns:1fr auto"><label class="field sm"><input id="mpQIn" type="text" autocomplete="off" spellcheck="false" placeholder="Yüzey biçimi" ${Q.done ? "disabled" : ""}></label><button class="btn pri sm" data-act="qcheck" ${Q.done ? "disabled" : ""}>Kontrol et</button></div>`;
   }else{
-    if(!Q.opts){
-      const set = new Set([g.lex]);
-      for(let i = 0; i < 30 && set.size < 4; i++){ const o = makeQuestion(); if(o.stem.w === stem.w && o.g.lex !== g.lex) set.add(o.g.lex); }
-      for(let i = 0; i < 30 && set.size < 4; i++){ const o = makeQuestion(); set.add(o.g.lex.replace(/^[^+]+/, stem.w)); }
-      Q.opts = [...set].sort(() => Math.random() - .5);
-    }
-    body = `<p class="mp-q">Yüzey biçimi: <b class="mp-surf" style="font-size:1.6rem">${esc(g.surface)}</b> <small class="muted">(kök ${esc(stem.w)})</small></p>
-      <div class="mp-opts">${Q.opts.map((o, i) => `<button class="mp-opt ${Q.done ? (o === g.lex ? "ok" : Q.pickd === o ? "bad" : "") : ""}" data-act="qopt" data-i="${i}" ${Q.done ? "disabled" : ""}>${esc(o)}</button>`).join("")}</div>`;
+    body = `<p class="mp-q">Yüzey biçimi: <b class="mp-surf" style="font-size:1.6rem">${esc(q.surfaces[0])}</b> <small class="muted">(kök ${esc(q.stemText)})</small></p>
+      <div class="mp-opts">${q.opts.map((o, i) => `<button class="mp-opt ${Q.done ? (q.valid.has(o) ? "ok" : Q.pickd === o ? "bad" : "") : ""}" data-act="qopt" data-i="${i}" ${Q.done ? "disabled" : ""}>${esc(o)}</button>`).join("")}</div>`;
   }
-  const res = Q.done ? `<p class="verdict" style="margin-top:12px">${Q.right ? "Doğru ✓" : "Yanlış ✗"} · cevap <b>${esc(g.surface)}</b> <span class="mp-lex" style="display:inline">${esc(g.lex)}</span></p>${traceHTML({stem, ids, segs:g.segs, trace:g.trace})}<button class="btn pri sm" data-act="qnext" style="margin-top:10px">Sonraki soru</button>` : "";
+  const others = [...q.valid].filter(x => x !== q.lex);
+  const res = Q.done ? `<p class="verdict" style="margin-top:12px">${Q.right ? "Doğru ✓" : "Yanlış ✗"} · cevap <b>${esc(q.surfaces.join(" / "))}</b> <span class="mp-lex" style="display:inline">${esc(q.lex)}</span></p>${others.length ? `<p class="ck-meta">Bu yüzeyin başka geçerli çözümlemeleri de var: ${others.map(x => `<span class="mp-lex" style="display:inline;font-size:.84rem">${esc(x)}</span>`).join(", ")}.</p>` : ""}${q.analysis ? `<div class="mp-card">${zSegs(q.analysis)}${zStudent(q.analysis)}</div>` : q.small ? traceHTML({stem:q.small.stem, ids:q.small.ids, segs:q.small.g.segs, trace:q.small.g.trace}) : ""}<button class="btn pri sm" data-act="qnext" style="margin-top:10px">Sonraki soru</button>` : "";
   return head + body + res;
 }
-function renderQuiz(){ $("#mpQuiz", root).innerHTML = quizHTML(); const i = $("#mpQIn", root); if(i && !MS.quiz.done) i.focus(); }
+function renderQuiz(){
+  const Q = MS.quiz;
+  if(!Q.q || (Q.kind === "coz" && !Q.q.opts)){ newQuestion(); return; }
+  $("#mpQuiz", root).innerHTML = quizHTML();
+  const i = $("#mpQIn", root); if(i && !Q.done) i.focus();
+}
 
 // ───────────────────────── kabuk
 function mount(){
@@ -231,9 +322,9 @@ function mount(){
       <div class="pair" style="grid-template-columns:1fr auto"><label class="field sm"><input id="mpSin" type="text" autocomplete="off" spellcheck="false" placeholder="Bir Türkçe cümle"></label><button class="btn pri sm" id="mpSgo">Çözümle</button></div>
       <div class="chips" style="margin-top:10px">${["Ben dün akşam kitabı okudum.", "Gözleri yaşlı bir adam bana baktı.", "Yarın okula gidecek miyiz?"].map(t => `<button class="chip" data-act="sex" data-t="${esc(t)}">${esc(t)}</button>`).join("")}</div>
       <div id="mpSOut" aria-live="polite" style="margin-top:12px"></div></div>
-    <h2 class="ng-h">3 · Üret <small>küçük kural modeliyle</small></h2>
+    <h2 class="ng-h">3 · Üret <small id="mpGenNote">kök + ekler → sözcük</small></h2>
     <div class="ng-ctl" style="margin-top:0"><label class="field sm" style="flex:1 1 220px">Kök<input id="mpStem" type="text" list="mpStems" autocomplete="off" spellcheck="false"></label><datalist id="mpStems">${CURATED.map(e => `<option value="${esc(e.w)}">`).join("")}</datalist>
-      <div class="seg" id="mpPos"><button data-act="pos" data-p="N">isim / sıfat</button><button data-act="pos" data-p="V">fiil</button></div></div>
+      <div class="seg" id="mpPos"><button data-act="pos" data-p="N">isim / sıfat</button><button data-act="pos" data-p="V">fiil</button></div><select id="mpItem" class="btn sm hidden" aria-label="Sözlük maddesi"></select></div>
     <div id="mpGOut"></div>
     <div class="stu"><h2 class="ng-h">4 · Kurallar <small>motorun ses ve ek bilgisi</small></h2><div id="mpRules"></div>
     <h2 class="ng-h">5 · Kavramlar <small>slayt notları</small></h2><div id="mpNotes"></div>
@@ -242,26 +333,27 @@ function mount(){
   const w = $("#mpWord", root), st = $("#mpStem", root);
   w.addEventListener("keydown", e => { if(e.key === "Enter") go(); });
   $("#mpGo", root).addEventListener("click", go);
+  $("#mpItem", root).addEventListener("change", e => { MS.zpos = e.target.value; MS.zids = []; renderGen(); });
   w.addEventListener("input", e => { MS.word = e.target.value; });
   $("#mpSgo", root).addEventListener("click", () => { MS.sent = $("#mpSin", root).value; runSent(); });
   $("#mpSin", root).addEventListener("keydown", e => { if(e.key === "Enter"){ MS.sent = e.target.value; runSent(); } });
-  st.addEventListener("input", e => { const v = lc(e.target.value); if(!v) return; const hit = CURATED.find(x => x.w === v); MS.stem = v; if(hit) MS.pos = hit.pos === "V" ? "V" : "N"; MS.ids = []; syncPos(); renderGen(); });
+  st.addEventListener("input", e => { const v = lc(e.target.value); if(!v) return; const hit = CURATED.find(x => x.w === v); MS.stem = v; if(hit) MS.pos = hit.pos === "V" ? "V" : "N"; MS.ids = []; MS.zids = []; MS.zpos = hit ? (hit.pos === "V" ? "Verb" : "Noun") : MS.zpos; syncPos(); renderGen(); loadItems(); });
   root.addEventListener("click", e => {
     const b = e.target.closest("[data-act]"); if(!b) return;
     const d = b.dataset, Q = MS.quiz;
     switch(d.act){
-      case "eng": MS.engine = d.e; syncEng(); runAnalyze(); break;
+      case "eng": MS.engine = d.e; syncEng(); runAnalyze(); loadItems(); renderGen(); MS.quiz.q = null; if(MODE.student) renderQuiz(); break;
       case "sex": MS.sent = d.t; $("#mpSin", root).value = d.t; runSent(); break;
       case "ex": MS.word = d.w; $("#mpWord", root).value = d.w; go(); break;
-      case "add": MS.ids.push(d.id); renderGen(); break;
-      case "del": MS.ids.splice(+d.i); renderGen(); break;
-      case "undo": MS.ids.pop(); renderGen(); break;
-      case "clear": MS.ids = []; renderGen(); break;
+      case "add": (usingZ() ? MS.zids : MS.ids).push(d.id); renderGen(); break;
+      case "del": (usingZ() ? MS.zids : MS.ids).splice(+d.i); renderGen(); break;
+      case "undo": (usingZ() ? MS.zids : MS.ids).pop(); renderGen(); break;
+      case "clear": if(usingZ()) MS.zids = []; else MS.ids = []; renderGen(); break;
       case "pos": MS.pos = d.p; MS.ids = []; syncPos(); renderGen(); break;
-      case "qk": Q.kind = d.k; Q.q = null; Q.opts = null; Q.done = false; renderQuiz(); break;
-      case "qnext": Q.q = null; Q.opts = null; Q.done = false; renderQuiz(); break;
-      case "qcheck": { const v = lc($("#mpQIn", root).value); if(!v) break; Q.done = true; Q.n++; Q.right = v === Q.q.g.surface; if(Q.right) Q.score++; renderQuiz(); break; }
-      case "qopt": { Q.done = true; Q.n++; Q.pickd = Q.opts[+d.i]; Q.right = Q.pickd === Q.q.g.lex; if(Q.right) Q.score++; renderQuiz(); break; }
+      case "qk": Q.kind = d.k; Q.q = null; renderQuiz(); break;
+      case "qnext": Q.q = null; renderQuiz(); break;
+      case "qcheck": { const v = lc($("#mpQIn", root).value); if(!v) break; Q.done = true; Q.n++; Q.right = Q.q.surfaces.includes(v); if(Q.right) Q.score++; renderQuiz(); break; }
+      case "qopt": { Q.done = true; Q.n++; Q.pickd = Q.q.opts[+d.i]; Q.right = Q.q.valid.has(Q.pickd); if(Q.right) Q.score++; renderQuiz(); break; }
     }
   });
   root.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.id === "mpQIn") root.querySelector('[data-act="qcheck"]')?.click(); });
@@ -274,6 +366,9 @@ function syncEng(){
   $$("#mpEng [data-e='zem']", root).forEach(b => b.disabled = !on);
   $("#mpEngNote", root).textContent = on ? "Zemberek: açık kaynak (Apache 2.0) gerçek çözümleyici." : "Zemberek bulunamadı (lib/zemberek-full.jar ve JDK gerekir); küçük kural modeli kullanılıyor.";
   $("#mpSent", root).classList.toggle("hidden", !on);
+  const z = usingZ();
+  $("#mpPos", root).classList.toggle("hidden", z);
+  $("#mpGenNote", root).textContent = z ? "Zemberek WordGenerator ile" : "küçük kural modeliyle";
 }
 function syncPos(){ $$("#mpPos button", root).forEach(b => b.setAttribute("aria-pressed", b.dataset.p === (MS.pos === "V" ? "V" : "N"))); $("#mpStem", root).value = MS.stem; }
 function renderStudent(){ $("#mpRules", root).innerHTML = rulesHTML(); $("#mpNotes", root).innerHTML = notesHTML(); renderQuiz(); }
@@ -285,7 +380,7 @@ export const view = {
     $("#mpWord", root).value = MS.word; $("#mpSin", root).value = MS.sent; syncPos(); renderGen(); syncEng();
     if(zem === null){
       try{ const j = await api("/api/zemberek", {}); zem = !!j.available; }catch(_){ zem = false; }
-      syncEng();
+      syncEng(); loadItems(); renderGen();
     }
     runAnalyze(); if(zem) runSent();
     if(MODE.student) renderStudent();

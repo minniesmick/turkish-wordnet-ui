@@ -24,7 +24,8 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [x] Morfoloji sekmesi (`static/js/morph.js`, `turkish.js`, `g m`); motor denetimi: `node scripts/test_turkish.mjs`.
 - [x] Zemberek köprüsü (`scripts/ZemberekBridge.java`, `/api/zemberek`, `lib/zemberek-full.jar` git'te yok) + cümle belirsizlik giderme + Oflazer FSM yolu (`static/js/fsm.js`, test `node scripts/test_fsm.mjs`; Sample.pdf yolları birebir tutuyor).
 - [ ] FSM: Prog2, Neg+Aor (111), bileşik zamanlar (132/133), ^DB sonrası türemiş sıfatlar şekilde kodlanmadı; 101→104 (Caus) şekilde yok, varsayım olarak işaretli.
-- [ ] Morfoloji kapsamı (küçük motor): sıfat-fiil -DHk, zarf-fiil -ArAk/-Ip, ki, ek-fiil (-DHr, -(y)Hm), birleşik zaman; sıklıkla yanlış çözümlenen ilk 100 BOUN sözcüğünü incele.
+- [x] Zemberek WordGenerator ile üretim (`G`/`O` komutları, `/api/zemberek?g=&o=&i=`); alıştırma cevap anahtarı Zemberek'ten, çözümleme sorusunda geçerli çözümleme tek seçeneğe indirildi (belirsiz yüzey sorunu giderildi).
+- [ ] Morfoloji kapsamı (küçük motor, yalnızca yedek): sıfat-fiil -DHk, zarf-fiil -ArAk/-Ip, ki, ek-fiil (-DHr, -(y)Hm), birleşik zaman; sıklıkla yanlış çözümlenen ilk 100 BOUN sözcüğünü incele.
 - [ ] Morfolojik belirsizlik giderme (slayt 31–32): BOUN etiketlerinden en olası çözümlemeyi seç.
 - [ ] Öğrenci kipi: Ders sekmesini Lecture 1, 2, 3 ve 5 için genişlet; CKY / n-gram için "kendin doldur, kontrol et" alıştırması.
 

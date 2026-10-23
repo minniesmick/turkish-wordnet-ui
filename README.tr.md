@@ -115,7 +115,7 @@ Türkçe iki XML dosyasını indirmek için:
 - **Anlam seçimi (WSD)**: basitleştirilmiş / genişletilmiş **Lesk** (bağlam–tanım örtüşmesi, idf ağırlıklı).
   Doğruluğu sınırlıdır; yöntemin zayıf yanlarını görmek için tasarlandı.
 - **Morfoloji**: Türkçe sözcüğü gerçek [Zemberek](https://github.com/ahmetaa/zemberek-nlp) çözümleyicisiyle (Apache 2.0; isteğe bağlı: `zemberek-full.jar` dosyasını `lib/` içine koy ve bir JDK kur) ya da küçük yerleşik kural motoruyla morfemlerine ayır (`okul+Noun+A3sg+P1sg+Nom`),
-  cümle bağlamında belirsizlik gider, kök + eklerden sözcük üret; yanında BOUN'daki gerçek çözümlemeler. Öğrenci kipi: kural izi, dersteki `From State a-State b` biçiminde Oflazer FSM yolu, etiket sözlüğü, alıştırma (Lecture 2).
+  cümle bağlamında belirsizlik gider, kök + eklerden Zemberek'in WordGenerator'ıyla sözcük üret (küçük yerleşik motor yalnızca çevrimdışı yedek); yanında BOUN'daki gerçek çözümlemeler. Öğrenci kipi: kural izi, dersteki `From State a-State b` biçiminde Oflazer FSM yolu, etiket sözlüğü, alıştırma (Lecture 2).
 - **Ayrıştırma**: CFG / PCFG yaz (kuralın sonuna `[olasılık]`), cümle ver; CKY tablosu hücre hücre dolar, tüm ayrıştırma ağaçları SVG çizilir,
   PCFG en olası ağacı ve cümle olasılığını bulur (Lecture 3, InClass 2 ve 3). Tarayıcıda çalışır.
 - **Bağımlılık**: UD Turkish-BOUN (test kümesi, 979 cümle) cümlesi seç ya da CoNLL-U yapıştır; bağımlılık okları ve baş–bağımlı ağacı çizilir,
