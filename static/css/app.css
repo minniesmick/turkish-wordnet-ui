@@ -507,3 +507,112 @@ body.present .rail:hover,body.present .topbar:hover{opacity:1;pointer-events:aut
 #gcanvas.lo .gn:not(.center) .p{display:none}
 #gcanvas.lo .gn.center .d{display:none}
 .gview{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 36px,#000 calc(100% - 36px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 36px,#000 calc(100% - 36px),transparent 100%)}
+
+/* N-gram laboratuvarı */
+.ng-h{margin:38px 0 12px;font:700 1.25rem/1.2 var(--font-ui);letter-spacing:-.02em}
+.ng-h small,.ng-h3 small{margin-left:8px;font:italic 400 .88rem var(--font-text);color:var(--ink-3);letter-spacing:0}
+.ng-h3{margin:22px 0 8px;font:600 .72rem var(--font-ui);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.ng-t{font:500 .9em var(--font-mono);padding:0 4px;border-radius:var(--r-sm);background:var(--sunk);color:var(--ink)}
+.ng-ctl{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;margin:14px 0}
+.ng-ctl .chips{flex:1 1 100%}
+.ng-formula{margin:10px 0;font:italic 400 1rem var(--font-text);color:var(--ink-2)}
+.ng-formula small{font-size:.86rem;color:var(--ink-3)}
+.ng-stats{display:flex;flex-wrap:wrap;gap:0;margin:6px 0 0;border:1px solid var(--rule);border-radius:var(--r);background:var(--page);overflow:hidden}
+.ng-stats div{flex:1 1 110px;display:flex;flex-direction:column;padding:10px 14px;border-right:1px solid var(--rule)}
+.ng-stats div:last-child{border-right:0}
+.ng-stats b{font:700 1.3rem/1.2 var(--font-ui);letter-spacing:-.02em}
+.ng-stats span{font-size:.76rem;color:var(--ink-3)}
+.ng-scroll{overflow-x:auto;margin:12px 0}
+.ng-tbl,.ng-mx{width:100%;border-collapse:collapse;font-size:.92rem}
+.ng-tbl caption,.ng-mx caption{caption-side:top;text-align:left;padding:0 0 8px;font:italic 400 .95rem var(--font-text);color:var(--ink-2)}
+.ng-tbl th,.ng-mx th{padding:7px 10px;text-align:left;font:600 .72rem var(--font-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--ink)}
+.ng-tbl td{padding:7px 10px;border-bottom:1px solid var(--rule);font-variant-numeric:tabular-nums}
+.ng-tbl .ng-bar{width:26%}
+.ng-tbl tr.sum td{border-top:1px solid var(--ink);border-bottom:0;font-weight:600;color:var(--ink-2)}
+.ng-tbl tr.bad td{background:var(--wash)}
+.ng-ok{color:var(--spot);font-weight:600}.ng-bad{font-weight:700}
+.ng-mx{text-align:center}
+.ng-mx td,.ng-mx tbody th{padding:6px 8px;border:1px solid var(--rule);text-align:center;vertical-align:middle}
+.ng-mx tr[data-hist]{cursor:pointer}
+.ng-mx tr[data-hist]:hover td,.ng-mx tr[data-hist]:hover th{background:var(--sunk)}
+.ng-mx tr.sel td,.ng-mx tr.sel th{background:var(--wash)}
+.ng-mx td b{display:block;font:600 .92rem var(--font-ui)}
+.ng-mx td small{display:block;font:500 .72rem var(--font-mono);color:var(--ink-3)}
+.ng-mx td.z{color:var(--ink-3)}.ng-mx td.z b{font-weight:400;opacity:.5}
+.ng-mx td.sum{font:600 .8rem var(--font-mono);color:var(--ink-2)}
+.ng-pred{margin:16px 0 4px;font:400 1.3rem var(--font-text)}
+.ng-blank{display:inline-block;min-width:2.2em;padding:0 8px;text-align:center;border-bottom:2px solid var(--spot);font:700 1.1rem var(--font-ui);color:var(--spot)}
+@media(max-width:700px){.ng-stats div{flex:1 1 45%}.ng-tbl .ng-bar{display:none}}
+.ng-mx th .ng-t{text-transform:none;letter-spacing:0}
+
+/* Ayrıştırma (CFG / PCFG / CKY) */
+.page.wide{max-width:1240px}
+.ck-meta{margin:10px 0;font-size:.92rem;color:var(--ink-2)}
+.ck-scroll{overflow-x:auto;margin:12px 0}
+.ck{border-collapse:separate;border-spacing:0;margin:0}
+.ck td{min-width:96px;max-width:150px;vertical-align:top;padding:16px 6px 6px;border:1px solid var(--rule);background:var(--page);position:relative;cursor:pointer;text-align:left}
+.ck td:hover{border-color:var(--spot)}
+.ck td.sel{background:var(--wash);border-color:var(--spot)}
+.ck td.top{box-shadow:inset 0 0 0 2px var(--spot)}
+.ck td.e{color:var(--ink-3);text-align:center;background:var(--sunk)}
+.ck td small{position:absolute;left:5px;top:2px;font:500 .62rem var(--font-mono);color:var(--ink-3)}
+.ck th{padding:8px 6px;border:1px solid var(--rule);border-top:2px solid var(--ink);font:italic 600 1rem var(--font-text);text-align:center;position:relative}
+.ck th small{font:500 .62rem var(--font-mono);color:var(--ink-3);position:absolute;top:2px}
+.ck th small:first-child{left:5px}.ck th small:last-child{right:5px}
+.ck-s{display:inline-block;margin:1px 3px 1px 0;padding:0 6px;border:1px solid var(--rule-2);border-radius:var(--r-sm);font:600 .78rem/1.5 var(--font-ui);background:var(--page);color:var(--ink)}
+.ck-s.st{border-color:var(--spot);background:var(--spot);color:var(--on-spot)}
+.pt-card{margin:16px 0;padding:14px 16px;border:1px solid var(--rule);border-radius:var(--r);background:var(--page)}
+.pt-card header{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pt-card header .btn{margin-left:auto}
+.pt-card summary{cursor:pointer;color:var(--ink-2);font-size:.9rem;font-weight:550}
+.pt-best{border-color:var(--spot);color:var(--spot)}
+svg.pt{display:block;margin:6px auto;max-width:none}
+svg.pt line{stroke:var(--ink-3);stroke-width:1.2}
+svg.pt line.dash{stroke-dasharray:3 3}
+svg.pt text{text-anchor:middle;fill:var(--ink)}
+svg.pt .pt-n{font:700 13px var(--font-ui)}
+svg.pt .pt-w{font:italic 500 15px var(--font-text);fill:var(--spot)}
+
+/* Bağımlılık ağacı */
+.dp-scroll{overflow-x:auto}
+.dp-fig{margin:12px 0;padding:6px 0;border:1px solid var(--rule);border-radius:var(--r);background:var(--page)}
+.dp-text{margin:2px 0 6px;font:400 1.3rem/1.35 var(--font-text)}
+.dp-num{width:56px;height:30px;padding:0 6px;border:1px solid var(--rule-2);border-radius:var(--r);background:var(--page)}
+.dp-list{display:flex;flex-direction:column;max-height:300px;overflow-y:auto;margin:10px 0;border:1px solid var(--rule);border-radius:var(--r);background:var(--page)}
+.dp-pick{display:flex;justify-content:space-between;gap:14px;padding:8px 12px;border:0;border-bottom:1px solid var(--rule);background:none;text-align:left;color:var(--ink-2);font:400 .98rem/1.35 var(--font-text)}
+.dp-pick:last-child{border-bottom:0}
+.dp-pick:hover{background:var(--sunk);color:var(--ink)}
+.dp-pick.on{background:var(--wash);color:var(--ink);box-shadow:inset 3px 0 0 var(--spot)}
+.dp-pick small{flex:none;font:500 .72rem var(--font-mono);color:var(--ink-3)}
+svg.dp{display:block;margin:0 auto;max-width:none}
+svg.dp text{text-anchor:middle;fill:var(--ink)}
+svg.dp .dp-lbl{font:600 11px var(--font-ui);fill:var(--ink-2)}
+svg.dp .dp-lbl.halo{paint-order:stroke;stroke:var(--page);stroke-width:5px;stroke-linejoin:round}
+svg.dp .dp-f{font:600 15px var(--font-text)}
+svg.dp .dp-p{font:600 10.5px var(--font-ui);fill:var(--ink-3);letter-spacing:.04em}
+svg.dp .dp-i{font:500 9.5px var(--font-mono);fill:var(--ink-3)}
+svg.dp .dp-arc{cursor:pointer}
+svg.dp .dp-arc path:not(.hd),svg.dp .dp-arc line{fill:none;stroke:var(--ink-3);stroke-width:1.3}
+svg.dp .dp-arc .hd{fill:var(--ink-3)}
+svg.dp .dp-arc.np path:not(.hd){stroke-dasharray:4 3}
+svg.dp .dp-arc.on path:not(.hd),svg.dp .dp-arc.on line{stroke:var(--spot);stroke-width:2}
+svg.dp .dp-arc.on .hd{fill:var(--spot)}
+svg.dp .dp-arc.on .dp-lbl{fill:var(--spot)}
+svg.dp .dp-word,svg.dp .dp-node{cursor:pointer}
+svg.dp .dp-word.on .dp-f,svg.dp .dp-node.on .dp-f{fill:var(--spot)}
+svg.dp .dp-node rect{fill:var(--page);stroke:var(--rule-2);stroke-width:1.2}
+svg.dp .dp-node:hover rect{stroke:var(--spot)}
+svg.dp .dp-node.on rect{stroke:var(--spot);fill:var(--wash);stroke-width:2}
+.dp-checks{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.dp-checks li{display:flex;gap:10px;align-items:baseline;font-size:.95rem}
+.dp-checks li small{color:var(--ink-3);margin-left:6px}
+.dp-checks li.ok b:first-child{color:var(--spot)}
+.dp-checks li.bad{font-weight:600}
+.dp-rels{display:flex;flex-wrap:wrap;gap:8px 18px}
+.dp-rel{font-size:.9rem;color:var(--ink-2)}
+.dp-tbl td.f{font-size:.78rem;color:var(--ink-3);max-width:340px}
+.dp-tbl tr[data-tok]{cursor:pointer}
+.dp-tbl tr[data-tok]:hover td{background:var(--sunk)}
+.dp-tbl tr.sel td{background:var(--wash)}
+.dp-hide .dp-lbl,.dp-hide .dp-rels,.dp-hide #dpSel,.dp-hide .sec{visibility:hidden}
+.dp-hide .dp-rels,.dp-hide .dp-checks{display:none}

@@ -77,6 +77,8 @@ const P = {
   present:'<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/>',
   plus:'<path d="M12 5v14M5 12h14"/>', minus:'<path d="M5 12h14"/>',
   fit:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  deps:'<path d="M3.5 19h17"/><path d="M5.5 19V12a4 4 0 0 1 4-4h5a4 4 0 0 1 4 4v7"/><path d="M10 19v-3a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v3"/>',
+  tree:'<circle cx="12" cy="5" r="2.2"/><circle cx="5.5" cy="19" r="2.2"/><circle cx="18.5" cy="19" r="2.2"/><path d="M12 7.2V12M12 12H5.5v4.8M12 12h6.5v4.8"/>',
   list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".9"/><circle cx="4.5" cy="12" r=".9"/><circle cx="4.5" cy="18" r=".9"/>',
   swap:'<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
   check:'<path d="M5 12.5l4.5 4.5L19 7"/>', dice:'<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="15" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/><circle cx="9" cy="15" r="1" fill="currentColor"/>',
@@ -87,10 +89,10 @@ const P = {
 export const icon = (n, cls = "") => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n] || ""}</svg>`;
 
 // ───────────────────────── durum
-export const VIEWS = ["search","graph","relate","wsd","roles","frames","learn"];
-export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", learn:"Ders"};
-export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"target", roles:"tag", frames:"frame", learn:"book"};
-export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", learn:"d"};
+export const VIEWS = ["search","graph","relate","wsd","roles","frames","parse","deps","ngram","learn"];
+export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", parse:"Ayrıştırma", deps:"Bağımlılık", ngram:"N-gram", learn:"Ders"};
+export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"target", roles:"tag", frames:"frame", parse:"tree", deps:"deps", ngram:"list", learn:"book"};
+export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", parse:"c", deps:"k", ngram:"n", learn:"d"};
 export const DS_VIEWS = ["search","graph","relate","wsd"];
 
 export const state = {

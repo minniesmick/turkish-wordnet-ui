@@ -8,6 +8,9 @@ import "./relate.js";
 import "./wsd.js";
 import "./roles.js";
 import "./frames.js";
+import "./parse.js";
+import "./deps.js";
+import "./ngram.js";
 import "./learn.js";
 
 async function boot(){

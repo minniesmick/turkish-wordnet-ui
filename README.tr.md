@@ -114,6 +114,12 @@ Türkçe iki XML dosyasını indirmek için:
   yol uzunluğu, path benzerliği (1/(yol+1)) ve Wu-Palmer; hiyerarşi yolu görsel olarak çizilir.
 - **Anlam seçimi (WSD)**: basitleştirilmiş / genişletilmiş **Lesk** (bağlam–tanım örtüşmesi, idf ağırlıklı).
   Doğruluğu sınırlıdır; yöntemin zayıf yanlarını görmek için tasarlandı.
+- **Ayrıştırma**: CFG / PCFG yaz (kuralın sonuna `[olasılık]`), cümle ver; CKY tablosu hücre hücre dolar, tüm ayrıştırma ağaçları SVG çizilir,
+  PCFG en olası ağacı ve cümle olasılığını bulur (Lecture 3, InClass 2 ve 3). Tarayıcıda çalışır.
+- **Bağımlılık**: UD Turkish-BOUN (test kümesi, 979 cümle) cümlesi seç ya da CoNLL-U yapıştır; bağımlılık okları ve baş–bağımlı ağacı çizilir,
+  ağaç özellikleri (tek kök, bağlı, tek başlı, döngüsüz, projektif) kontrol edilir, ilişkiler açıklanır, etiketler gizlenip kendin deneyebilirsin (Lecture 3, InClass 4).
+- **N-gram**: korpustan unigram / bigram / trigram sayımları, koşullu olasılık tabloları (kesir + ondalık, satır toplamı 1),
+  sonraki sözcük tahmini, log uzayında adım adım cümle olasılığı, Laplace (add-one) yumuşatma ve perplexity (Lecture 5). Tarayıcıda çalışır.
 - **Ders**: slayt kavramları (homonymy, polysemy, synonymy, antonymy, hypernym/hyponym, ilişki tabloları, bass yolları,
   ID alıştırması, Q/A zorlukları) hazır sorgularla; veriden otomatik üretilen quiz (üst kavram / ilişki türü).
 - Kartlarda **↑ üst kavram** ipucu, çoklu hypernym yolları ve sözcük başlığında çok anlamlılık özeti.

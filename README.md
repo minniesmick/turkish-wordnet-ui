@@ -58,6 +58,9 @@ Per-file sources, licenses and re-download commands: **[data/README.md](data/REA
 | **WSD** | Simplified and extended **Lesk**, and a supervised **Naive Bayes** classifier trained on SemCor and SENSEVAL-2 with 5-fold cross-validation, compared with the most-frequent-sense baseline. |
 | **Roles** | PropBank rolesets, Turkish PropBank (TRopBank), VerbNet 3.3, a rule-based Turkish sentence labeller (case suffixes to ARG0/ARG1) and a role quiz. |
 | **Frames** | FrameNet 1.7 and Turkish FrameNet: frames, frame elements, lexical units with annotated examples, frame relations. |
+| **Parsing** | Write a CFG or PCFG (rules with `[probability]`), type a sentence: the CKY chart fills cell by cell, every parse tree is drawn as SVG, PCFG picks the most probable tree and reports sentence probability (COMP 451 Lecture 3, InClass 2 and 3). Runs in the browser. |
+| **Dependency** | Pick a sentence from UD Turkish-BOUN (test set, 979 sentences) or paste CoNLL-U: dependency arcs and a head-dependent tree are drawn, tree properties (single root, connected, single-headed, acyclic, projective) are checked, relations are explained, labels can be hidden for self-practice (COMP 451 Lecture 3, InClass 4). |
+| **N-gram** | Corpus to n-gram counts: unigram / bigram / trigram tables, conditional probabilities (fraction and decimal), next-word prediction, step-by-step sentence probability in log space, Laplace smoothing and perplexity (COMP 451 Lecture 5). Runs in the browser. |
 | **Lesson** | Lecture concepts (homonymy, polysemy, hypernymy, ...) as ready-made queries, plus quizzes generated from the data. |
 
 Extras: **⌘K** command palette, favourites / notes / trail saved in the browser (no account), Markdown export, presentation mode (`P`), keyboard shortcuts (`?`), light/dark theme (`?theme=dark`), and a shareable URL for every view.
