@@ -67,7 +67,7 @@ Per-file sources, licenses and re-download commands: **[data/README.md](data/REA
 
 **Two modes.** The *Tool* / *Öğrenci (Student)* switch in the top bar separates plain use from studying. Tool mode only gives results; Student mode adds course links, formulas, step-by-step explanations, rule traces, practice and quizzes (and the Lesson tab): fill the CKY chart yourself and have it checked cell by cell, compute n-gram probabilities and table rows by hand, hide dependency labels and try first. Teaching UI is tagged `.stu` and hidden by CSS in Tool mode.
 
-Extras: **⌘K** command palette, favourites / notes / trail saved in the browser (no account), Markdown export, presentation mode (`P`), keyboard shortcuts (`?`), light/dark theme (`?theme=dark`), and a shareable URL for every view.
+Extras: **⌘K** command palette, favourites / notes / trail saved in the browser (no account), Markdown export, SVG / PNG download of parse trees, dependency diagrams and Zipf plots (white background, ready for homework) and copy-as-Markdown for the CKY chart and n-gram tables, presentation mode (`P`), keyboard shortcuts (`?`), light/dark theme (`?theme=dark`), and a shareable URL for every view.
 
 Design direction: *İki Renkli Sözlük* (a two-colour dictionary): cool paper, blue-black ink, a single ultramarine accent, categories told apart by line style instead of colour. See [DESIGN.md](DESIGN.md) and [PRODUCT.md](PRODUCT.md).
 

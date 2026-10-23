@@ -18,6 +18,11 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [x] Korpus gezgini (`static/js/corpus.js`, `g o`): BOUN ve Brown, sıklık, Zipf, KWIC; `/api/corpus` (gzip).
 - [ ] N-gram: Katz / Kneser-Ney (normalize edilmiş backoff), λ'ları held-out veriden öğrenme (deleted interpolation), SemCor dışı İngilizce korpus.
 
+## Dışa aktarma
+
+- [x] Ağaç, bağımlılık şeması ve Zipf için SVG / PNG indirme (`static/js/exportfig.js`); CKY tablosu ve n-gram tablosu Markdown kopyalama; CoNLL-U kopyalama.
+- [ ] CKY tablosu ve n-gram matrisi için PNG; yazı tiplerini SVG'ye göm (şu an indirilen dosyada sistem yazı tipi kullanılır).
+
 ## Kullanım kipi ve morfoloji (Lecture 2)
 
 - [x] Araç / Öğrenci kipi (`MODE`, `.stu`, `STUDENT_VIEWS` in `core.js`); öğretici öğeler Araç kipinde gizli.
