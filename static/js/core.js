@@ -77,6 +77,7 @@ const P = {
   present:'<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/>',
   plus:'<path d="M12 5v14M5 12h14"/>', minus:'<path d="M5 12h14"/>',
   fit:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  fork:'<circle cx="5" cy="12" r="2"/><path d="M7 12h3.5c2 0 2.5-6 6-6M10.5 12c2 0 2.5 6 6 6"/><path d="M15.5 4l2 2-2 2M15.5 16l2 2-2 2"/>',
   morph:'<rect x="3.5" y="8" width="6" height="8" rx="1.2"/><rect x="10.5" y="8" width="4" height="8" rx="1.2"/><rect x="15.5" y="8" width="5" height="8" rx="1.2"/>',
   corpus:'<path d="M4 6h16M4 10h10M4 14h16M4 18h9"/>',
   deps:'<path d="M3.5 19h17"/><path d="M5.5 19V12a4 4 0 0 1 4-4h5a4 4 0 0 1 4 4v7"/><path d="M10 19v-3a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v3"/>',
@@ -91,10 +92,10 @@ const P = {
 export const icon = (n, cls = "") => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n] || ""}</svg>`;
 
 // ───────────────────────── durum
-export const VIEWS = ["search","graph","relate","wsd","roles","frames","morph","parse","deps","corpus","ngram","learn"];
-export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", morph:"Morfoloji", parse:"Ayrıştırma", deps:"Bağımlılık", corpus:"Korpus", ngram:"N-gram", learn:"Ders"};
-export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"target", roles:"tag", frames:"frame", morph:"morph", parse:"tree", deps:"deps", corpus:"corpus", ngram:"list", learn:"book"};
-export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", morph:"m", parse:"c", deps:"k", corpus:"o", ngram:"n", learn:"d"};
+export const VIEWS = ["search","graph","relate","wsd","roles","frames","morph","disamb","parse","deps","corpus","ngram","learn"];
+export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", morph:"Morfoloji", disamb:"Belirsizlik", parse:"Ayrıştırma", deps:"Bağımlılık", corpus:"Korpus", ngram:"N-gram", learn:"Ders"};
+export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"target", roles:"tag", frames:"frame", morph:"morph", disamb:"fork", parse:"tree", deps:"deps", corpus:"corpus", ngram:"list", learn:"book"};
+export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", morph:"m", disamb:"z", parse:"c", deps:"k", corpus:"o", ngram:"n", learn:"d"};
 export const DS_VIEWS = ["search","graph","relate","wsd"];
 
 // Kullanım kipi: "Araç" (client) yalnızca sonuçları verir; "Öğrenci" ders bağlantılarını, formülleri, adım adım açıklamayı, alıştırma ve sınavı da açar.
