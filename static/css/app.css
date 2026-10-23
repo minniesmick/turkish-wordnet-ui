@@ -710,3 +710,10 @@ input.nq-cell.bad{border-style:dashed;background:var(--sunk)}
 .pt-card header .fig-actions{margin-left:auto}
 .pt-card header .fig-actions .btn{margin-left:0}
 .fig-box{position:relative}
+
+/* ayrıştırma yöntemleri izi */
+.mt-tbl td{padding:5px 10px;vertical-align:top}
+.mt-tbl .mt-g{font:600 .85rem var(--font-mono)}
+.mt-tbl tr.now td{background:var(--wash)}
+.mt-tbl tr.mt-fail td,.mt-tbl tr.mt-back td,.mt-tbl tr.mt-exhaust td,.mt-tbl tr.mt-cap td{color:var(--ink-3)}
+.mt-tbl tr.mt-accept td{font-weight:700;color:var(--spot)}

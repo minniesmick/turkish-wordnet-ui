@@ -1,6 +1,7 @@
 // Ayrıştırma: Lecture 3 (CFG, PCFG, CKY). Gramer yaz, cümle ver; CKY tablosunu, ayrıştırma ağaçlarını ve olasılıkları gör. Tamamı tarayıcıda.
 import {$, $$, esc, registerView, MODE, toast} from "./core.js";
 import {parseTrees, learn, toGrammar} from "./mle.js";
+import {topDown, shiftReduce} from "./parsers.js";
 
 const PRESETS = {
   inclass2: {stu:true, label:"InClass 2 · PCFG", sent:"Alice said the scientist that believed the student proved the experiment", ex:["Alice said the student proved the experiment"], grammar:
@@ -35,7 +36,7 @@ N -> kids | birds | binoculars | fish
 V -> saw
 P -> with`}
 };
-const PS = {grammar:PRESETS.inclass2.grammar, sent:PRESETS.inclass2.sent, start:"", preset:"inclass2", sel:"", all:false, fill:false, ans:{}, chk:false, show:false, hints:0, fk:"", mle:"(S (NP (Det the) (N dog)) (VP (V barks)))\n(S (NP (Det the) (N cat)) (VP (V saw) (NP (Det the) (N dog))))\n(S (NP (Det a) (N dog)) (VP (V saw) (NP (Det a) (N cat))))"};
+const PS = {grammar:PRESETS.inclass2.grammar, sent:PRESETS.inclass2.sent, start:"", preset:"inclass2", sel:"", all:false, fill:false, ans:{}, chk:false, show:false, hints:0, fk:"", meth:"td", prune:false, stp:null, mle:"(S (NP (Det the) (N dog)) (VP (V barks)))\n(S (NP (Det the) (N cat)) (VP (V saw) (NP (Det the) (N dog))))\n(S (NP (Det a) (N dog)) (VP (V saw) (NP (Det a) (N cat))))"};
 const KEY = "wn:parse";
 let root = null, run = null;
 
@@ -280,6 +281,32 @@ function mleHTML(){
 }
 const leaves = n => typeof n === "string" ? [n] : n.kids.flatMap(leaves);
 
+// ───────────────────────── ayrıştırma yöntemleri, adım adım (öğrenci kipi)
+let METH = null;
+const KIND = {expand:"Genişlet", match:"Eşleştir", fail:"Başarısız", retry:"Geri dön", accept:"Kabul", init:"Başla", exhaust:"Tükendi", cap:"Sınır", shift:"Shift", reduce:"Reduce", back:"Geri dön"};
+function methTable(r){
+  if(!METH) return "";
+  const res = METH, total = res.steps.length, k = PS.stp == null ? total : Math.max(1, Math.min(PS.stp, total));
+  const td = PS.meth === "td";
+  const rows = res.steps.slice(0, k).map((st, i) => {
+    const input = `${r.toks.slice(0, st.pos).map(x => `<span class="muted">${esc(x)}</span>`).join(" ")} <b>${r.toks.slice(st.pos).map(esc).join(" ")}</b>`;
+    const goals = td ? esc(st.goals.join(" ")) : esc(st.stack.join(" "));
+    return `<tr class="mt-${st.kind} ${i === k - 1 ? "now" : ""}"><td>${i + 1}</td><td class="mt-g">${goals || "·"}</td><td>${input}</td><td><span class="tag">${esc(KIND[st.kind] || st.kind)}</span> ${esc(st.note)}</td></tr>`;
+  }).join("");
+  const verdict = res.ok ? `<span class="ng-ok">Başarı ✓</span> · ${total - 1} adımda ayrıştırıldı` : res.capped ? `<b>Sınıra takıldı</b>: bu yöntem ${total - 1} adımda bitiremedi` : "<b>Ayrıştırılamadı</b>: tüm seçenekler tükendi";
+  return `<p class="verdict" style="font-size:1.1rem">${verdict}</p><div class="ck-scroll"><table class="ng-tbl mt-tbl"><tr><th>#</th><th>${td ? "Hedefler" : "Yığın"}</th><th>Girdi</th><th>Eylem</th></tr>${rows}</table></div>`;
+}
+function methHTML(r){
+  if(!r.rules.length || !r.toks.length) return '<div class="empty" style="padding:24px 0">Gramer ve cümle yaz.</div>';
+  const rules = r.rules.map(x => ({lhs:x.lhs, rhs:x.rhs}));
+  METH = PS.meth === "td" ? topDown(rules, r.toks, PS.start, {cap:400, prune:PS.prune}) : shiftReduce(rules, r.toks, PS.start, {cap:500});
+  const total = METH.steps.length, k = PS.stp == null ? total : Math.max(1, Math.min(PS.stp, total));
+  return `<div class="ng-ctl" style="margin-top:0"><div class="seg" role="group" aria-label="Yöntem"><button data-meth="td" aria-pressed="${PS.meth === "td"}">Üstten alta (özyinelemeli iniş)</button><button data-meth="sr" aria-pressed="${PS.meth === "sr"}">Alttan üste (shift-reduce)</button></div>
+    ${PS.meth === "td" ? `<label class="chk"><input type="checkbox" id="pgPrune" ${PS.prune ? "checked" : ""}> gereksiz dalları ele (kalan hedef sayısı kalan sözcükten çoksa)</label>` : ""}
+    <label class="muted" style="font-size:.88rem;display:inline-flex;gap:8px;align-items:center">Adım <input type="range" id="pgStep" min="1" max="${total}" value="${k}" style="width:180px"> <b id="pgStepN">${k} / ${total}</b></label></div>
+    <p class="ck-meta">${PS.meth === "td" ? "Başlangıç simgesinden başlanır: sol baştaki simge bir kuralla genişletilir ya da bir sözcükle eşleştirilir; çıkmaza girilince son seçime geri dönülür (derinlik öncelikli arama). Sol özyinelemeli gramerde budama kapalıyken sonsuz döngü oluşur." : "Sözcükler tek tek yığına konur (shift); yığının tepesi bir kuralın sağ tarafıysa sol tarafıyla değiştirilir (reduce). Hedef: yığında yalnızca başlangıç simgesi kalması. Çıkmazda geri dönülür."} CKY ise tüm alt aralıkları bir kez hesaplar, geri dönüş yoktur.</p>
+    <div id="pgMethTbl">${methTable(r)}</div>`;
+}
 // CKY tablosu: satır = aralık uzunluğu, sütun = başlangıç sözcüğü
 function chartMarkdown(r){
   const n = r.toks.length, head = `| uzunluk | ${r.toks.map((t, i) => `${i} ${t}`).join(" | ")} |`;
@@ -363,6 +390,7 @@ function renderAll(){
   $("#pgChart", root).innerHTML = chartHTML(r);
   $("#pgTrees", root).innerHTML = treesHTML(r);
   $("#pgMleOut", root).innerHTML = mleHTML();
+  if(MODE.student){ PS.stp = null; $("#pgMeth", root).innerHTML = methHTML(r); }
   save();
 }
 
@@ -386,7 +414,8 @@ function mount(){
     <div id="pgChart" aria-live="polite"></div>
     <h2 class="ng-h">4 · Ayrıştırma ağaçları</h2>
     <div id="pgTrees" aria-live="polite"></div>
-    <h2 class="ng-h">5 · Ağaçlardan olasılık öğren <small>MLE</small></h2>
+    <div class="stu"><h2 class="ng-h">5 · Ayrıştırma yöntemleri <small>adım adım: üstten alta ve alttan üste</small></h2><div id="pgMeth"></div></div>
+    <h2 class="ng-h">6 · Ağaçlardan olasılık öğren <small>MLE</small></h2>
     <p class="ng-formula" style="margin:0 0 8px">Parantezli ağaçları yaz; kural olasılıkları sayımlardan hesaplanır, çıkan grameri yukarıdaki ayrıştırıcıda kullanabilirsin.</p>
     <textarea class="ta" id="pgMle" rows="5" spellcheck="false" style="font:500 .88rem/1.55 var(--font-mono)" aria-label="Parantezli ağaçlar"></textarea>
     <div id="pgMleOut" style="margin-top:12px"></div>
@@ -396,8 +425,14 @@ function mount(){
   $("#pgSent", root).addEventListener("input", e => { PS.sent = e.target.value; PS.sel = ""; clearTimeout(t); t = setTimeout(renderAll, 150); });
   $("#pgStart", root).addEventListener("change", e => { PS.start = e.target.value; renderAll(); });
   $("#pgMle", root).addEventListener("input", e => { PS.mle = e.target.value; clearTimeout(t); t = setTimeout(() => { $("#pgMleOut", root).innerHTML = mleHTML(); save(); }, 200); });
-  root.addEventListener("input", e => { const k = e.target.dataset?.fc; if(k){ PS.ans[k] = e.target.value; PS.chk = false; save(); } });
+  root.addEventListener("input", e => {
+    if(e.target.id === "pgStep"){ PS.stp = +e.target.value; $("#pgMethTbl", root).innerHTML = methTable(run); $("#pgStepN", root).textContent = `${PS.stp} / ${METH.steps.length}`; return; }
+    if(e.target.id === "pgPrune"){ PS.prune = e.target.checked; PS.stp = null; $("#pgMeth", root).innerHTML = methHTML(run); return; }
+    const k = e.target.dataset?.fc; if(k){ PS.ans[k] = e.target.value; PS.chk = false; save(); }
+  });
   root.addEventListener("click", e => {
+    const mt = e.target.closest("[data-meth]");
+    if(mt){ PS.meth = mt.dataset.meth; PS.stp = null; $("#pgMeth", root).innerHTML = methHTML(run); return; }
     const ml = e.target.closest("[data-mle]");
     if(ml){
       try{
