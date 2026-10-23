@@ -306,9 +306,11 @@ function renderQuiz(){
 }
 
 // ───────────────────────── kabuk
+let loaded = false;
+const ensure = () => { if(!loaded){ loaded = true; load(); } };   // apply() mount'tan önce çağrılabilir; kayıtlı durum onu ezmesin
 function mount(){
   if(root) return;
-  load();
+  ensure();
   root = $("#v-morph");
   root.innerHTML = `<div class="page wide">
     <h1 class="page-title">Morfoloji</h1>
@@ -374,7 +376,7 @@ function syncPos(){ $$("#mpPos button", root).forEach(b => b.setAttribute("aria-
 function renderStudent(){ $("#mpRules", root).innerHTML = rulesHTML(); $("#mpNotes", root).innerHTML = notesHTML(); renderQuiz(); }
 
 export const view = {
-  apply(){},
+  apply(p){ ensure(); if(p.word) MS.word = p.word; if(p.sent) MS.sent = p.sent; },
   async enter(){
     mount();
     $("#mpWord", root).value = MS.word; $("#mpSin", root).value = MS.sent; syncPos(); renderGen(); syncEng();

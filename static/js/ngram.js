@@ -314,9 +314,11 @@ async function refresh(){
 const sync = () => { $("#ngText", root).value = NG.text; $("#ngPred", root).value = NG.pred; $("#ngSent", root).value = NG.sent; };
 function keep(id){ const el = $("#" + id, root); if(el){ el.focus(); const v = el.value; el.value = ""; el.value = v; } }
 
+let loaded = false;
+const ensure = () => { if(!loaded){ loaded = true; load(); } };   // apply() mount'tan önce çağrılabilir; kayıtlı durum onu ezmesin
 function mount(){
   if(root) return;
-  load();
+  ensure();
   root = $("#v-ngram");
   root.innerHTML = `<div class="page wide">
     <h1 class="page-title">N-gram dil modeli</h1>
@@ -390,7 +392,15 @@ function mount(){
 }
 
 export const view = {
-  apply(p){ if(p.src){ NG.src = p.src; NG.hist = ""; if(p.limit != null) NG.limit = p.limit; } },
+  apply(p){
+    ensure();
+    const q = PRESETS[p.preset];
+    if(q) Object.assign(NG, {src:"text", preset:p.preset, text:q.text, n:q.n, pred:q.pred, sent:q.sent, hist:""});
+    if(p.src && (p.src === "text" || CORPORA[p.src])){ NG.src = p.src; NG.hist = ""; if(p.limit != null) NG.limit = +p.limit; if(p.src !== "text") NG.lower = true; }
+    if(p.smooth && SM[p.smooth]) NG.smooth = p.smooth;
+    if(p.unk != null) NG.unk = +p.unk;
+    if(p.n) NG.n = +p.n;
+  },
   async enter(){ mount(); sync(); await refresh(); }
 };
 registerView("ngram", view);

@@ -278,5 +278,6 @@ export function act(d){
     case "label": return setView("roles", {sub:"label", text:d.text});
     case "fn": return setView("frames", {lang:d.lang || "en", field:d.field || "name", q:d.name || d.q, mode:d.mode || ((d.name || (d.field || "name") === "name") ? "exact" : "contains"), open:d.name || ((d.field === "name" || !d.field) ? d.q : "")});
     case "learn": return setView("learn");
+    case "go": return setView(d.v, {...d});
   }
 }

@@ -394,9 +394,11 @@ function renderAll(){
   save();
 }
 
+let loaded = false;
+const ensure = () => { if(!loaded){ loaded = true; load(); } };   // apply() mount'tan önce çağrılabilir; kayıtlı durum onu ezmesin
 function mount(){
   if(root) return;
-  load();
+  ensure();
   root = $("#v-parse");
   root.innerHTML = `<div class="page wide">
     <h1 class="page-title">CFG, PCFG ve CKY</h1>
@@ -464,7 +466,11 @@ function mount(){
 function sync(){ $("#pgGrammar", root).value = PS.grammar; $("#pgSent", root).value = PS.sent; $("#pgMle", root).value = PS.mle; }
 
 export const view = {
-  apply(){},
+  apply(p){
+    ensure();
+    const q = PRESETS[p.preset];
+    if(q) Object.assign(PS, {preset:p.preset, grammar:q.grammar, sent:q.sent, start:"", sel:"", all:false});
+  },
   async enter(){ mount(); sync(); renderAll(); }
 };
 registerView("parse", view);

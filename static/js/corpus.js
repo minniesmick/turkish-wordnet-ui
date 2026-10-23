@@ -126,9 +126,11 @@ function syncControls(){
   $("#cpSize", root).value = String(CS.n);
 }
 
+let loaded = false;
+const ensure = () => { if(!loaded){ loaded = true; load(); } };   // apply() mount'tan önce çağrılabilir; kayıtlı durum onu ezmesin
 function mount(){
   if(root) return;
-  load();
+  ensure();
   root = $("#v-corpus");
   root.innerHTML = `<div class="page wide">
     <h1 class="page-title">Korpus gezgini</h1>
@@ -176,7 +178,7 @@ function mount(){
 }
 
 export const view = {
-  apply(){},
+  apply(p){ ensure(); if(p.name && CORPORA[p.name]){ CS.name = p.name; CS.upos = ""; if(p.name === "brown") CS.unit = "form"; } if(p.kw !== undefined) CS.kw = p.kw; },
   async enter(){
     mount();
     $("#cpQ", root).value = CS.q; $("#cpMin", root).value = CS.minf; $("#cpKw", root).value = CS.kw; $("#cpWin", root).value = CS.win;
