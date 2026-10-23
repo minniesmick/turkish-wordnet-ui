@@ -7,6 +7,7 @@ Haftalık InClass soruları ve slaytlar geldikçe uygulamaya taşınacak işler.
 Rakamlar 2026-10-23'te 500 gerçek BOUN sözcüğü ve 400 rastgele üretimle ölçüldü; ölçüm betikleri repoda yok, yeniden ölçmek için yöntem: BOUN'dan sözcük örnekle, Zemberek'le çözümle, `fsm.js` / `turkish.js` çıktısıyla karşılaştır.
 
 **Morfoloji**
+- Belirsizlik sekmesi (ölçüm 2026-10-23, BOUN test kümesinin 784 / 195 cümlelik bölümü): aday kümesi çözümleyiciden değil eğitim sözlüğünden geliyor; sınama sözcüklerinin %51'i eğitimde yok ve onlarda doğru çözümleme aday kümesinde yalnızca %78 oranında (tavan). Tam çözümlemede (636 farklı UPOS + FEATS birleşimi) doğruluk taban çizgisi %67,4, karar listesi %68,4, perceptron %69,8; belirsiz bilinen sözcüklerde %83,7 / %85,9 / %86,6. Veri küçük olduğu için yöntemler arası fark az; ayrı bir dev kümesi olmadığından hiperparametreler (6 devir, tohum 7) önceden sabitlendi, sınamaya göre ayarlanmadı. Perceptron eğitimde öğrenilen "önceki çözümleme" özelliklerini sınamada kendi tahminleriyle kullanır (hata yayılabilir).
 - Küçük kural motoru yalnızca çevrimdışı yedek: bilinen 491 sözcükten %72'sinde çözümleme veriyor, %67'sinde kök Zemberek'le örtüşüyor. Bağlaç, edat, zamir, özel ad, -DHk sıfat-fiil ve zarf-fiil yok. Sözlüğü BOUN test lemmalarından ve ~70 elle yazılmış kökten oluşuyor; yumuşama sezgisel (çok heceli p/ç/k ile bitenler yumuşar), ünlü düşmesi yalnızca 3 kökte. Üretimde Zemberek'le etiketler %93 örtüşüyor, farkın çoğu adlandırma (Cond / Desr).
 - Zemberek (0.17.1, 2019) için JDK ve `lib/zemberek-full.jar` gerekir; jar git'te yok. Yoksa uygulama küçük motora düşer, yani aynı sözcük makineden makineye farklı sonuç verebilir. Zemberek Pnon / Nom / Pos yazmaz (`fsm.js` tamamlar); etiket adları `Sample.pdf`'teki eski sürümden farklı olabilir. Cümle bağlamında belirsizlik giderme olasılıksaldır, yanlış seçebilir.
 - Oflazer FSM yolu şekillerden elle kodlandı. `Sample.pdf`'teki 3 yol birebir doğrulandı; geri kalan yollar doğrulanmadı. 1031 analizin %86'sı için yol çıkıyor. Şekilde olmayanlar: Pron / Adverb / Num / Conj kökleri, noktalama, isimden fiile türetme (lAş, lAn), AorPart, kısaltma; Caus'un köke bağlanışı şekilde yok (varsayım olarak işaretli). Zemberek etiketlerini şekil kenarlarına eşleme kararları bana ait.
@@ -25,7 +26,7 @@ Rakamlar 2026-10-23'te 500 gerçek BOUN sözcüğü ve 400 rastgele üretimle ö
 **Genel**
 - İndirilen SVG / PNG sitenin yazı tiplerini taşımaz, açıldığı bilgisayarın yazı tipiyle çizilir.
 - Ders sayfaları ve soruları ders slaytlarının metninden yazıldı; slayt görselleri (şekiller, tablolar) tek tek taranmadı.
-- Testler: `scripts/test_*.mjs` (turkish 43, fsm 4 yol, lm 41, mle 19, parsers 13 denetim); arayüz otomatik test edilmiyor, preview'da elle denendi.
+- Testler: `scripts/test_*.mjs` (turkish 43, fsm 4 yol, lm 41, mle 19, parsers 13, md 34 denetim); arayüz otomatik test edilmiyor, preview'da elle denendi.
 
 ## N-gram dil modeli laboratuvarı (InClass 5, Güz 2026)
 
@@ -56,9 +57,10 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [ ] FSM: Prog2, Neg+Aor (111), bileşik zamanlar (132/133), ^DB sonrası türemiş sıfatlar şekilde kodlanmadı; 101→104 (Caus) şekilde yok, varsayım olarak işaretli.
 - [x] Zemberek WordGenerator ile üretim (`G`/`O` komutları, `/api/zemberek?g=&o=&i=`); alıştırma cevap anahtarı Zemberek'ten, çözümleme sorusunda geçerli çözümleme tek seçeneğe indirildi (belirsiz yüzey sorunu giderildi).
 - [ ] Morfoloji kapsamı (küçük motor, yalnızca yedek): sıfat-fiil -DHk, zarf-fiil -ArAk/-Ip, ki, ek-fiil (-DHr, -(y)Hm), birleşik zaman; sıklıkla yanlış çözümlenen ilk 100 BOUN sözcüğünü incele.
-- [ ] Morfolojik belirsizlik giderme (slayt 31–32): BOUN etiketlerinden en olası çözümlemeyi seç.
+- [x] Morfolojik belirsizlik giderme (slayt 31–32): sekme **Belirsizlik** (`static/js/disamb.js`, hesap `static/js/md.js`, `g z`, test `node scripts/test_md.mjs`). Taban çizgisi, karar listesi (Yüret ve Türe) ve ortalama perceptron (Sak ve ark.) BOUN'la eğitilir; sınama doğruluğu, cümle içi karşılaştırma, sözcük başına aday ve "neden" açıklaması, öğrenci kipinde kural listesi ve sınav.
+- [ ] Belirsizlik: aday kümesini Zemberek çözümlemelerinden al ve Zemberek'in kendi seçimiyle karşılaştır (etiket eşlemesi gerekir); BOUN train/dev kümesiyle eğit; lemma de seçilsin; sinir ağı yöntemi (slayt 32'deki üçüncü yöntem).
 - [x] "Kendin doldur, kontrol et": CKY tablosu (Ayrıştırma, hücre hücre kontrol, ipucu) ve n-gram (tek olasılık, tablo satırı).
-- [x] Ders sekmesi Lecture 1, 2, 3 ve 5 için genişletildi (`static/js/lessons.js`: bölümler + 34 çoktan seçmeli soru; düğmeler `act: go` ile araçları hazır örnekle açar).
+- [x] Ders sekmesi Lecture 1, 2, 3 ve 5 için genişletildi (`static/js/lessons.js`: bölümler + 38 çoktan seçmeli soru; düğmeler `act: go` ile araçları hazır örnekle açar).
 - [ ] Kendin-doldur'u bağımlılık ağacına (kenar ekleme) ve Morfoloji FSM yoluna da taşı; Ders sorularını slayt görsellerinden ek sorularla zenginleştir.
 
 ## Ayrıştırma laboratuvarı (InClass 2, 3, 4; Lecture 3)
