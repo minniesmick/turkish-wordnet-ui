@@ -80,4 +80,5 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 
 - [ ] Benzerlik: ortak taban karşılaştırması ve A↔B çevirme.
 - [ ] Kenar kâğıdı bağlam sekmelerini görselle doğrula.
-- [ ] Telefonda harita kontrollerinin düğümlerin üstüne binmesini gider.
+- [x] Telefonda harita kontrollerini diyagramdan ayır; dar ekranda araç çubuğu artık kendi satırında ve grafik alanı altında başlıyor.
+- [ ] Fiziksel telefonda dokunma hareketlerini; ekran okuyucu/klavye akışını ve 200% yakınlaştırmayı doğrula.

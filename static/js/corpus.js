@@ -23,7 +23,15 @@ function ngrams(sents, g){
 async function recompute(){
   const my = ++busy;
   $("#cpState", root).textContent = "yükleniyor…";
-  C = await loadCorpus(CS.name, CS.n);
+  try{ C = await loadCorpus(CS.name, CS.n); }
+  catch(_){
+    if(my !== busy) return;
+    C = T = FREQ = null;
+    $("#cpState", root).textContent = "yüklenemedi";
+    $("#cpStats", root).innerHTML = '<p class="notice warn">Korpus verisi alınamadı. Yerel sunucuyu kontrol edip başka bir korpus seçerek yeniden deneyin.</p>';
+    $("#cpMeta", root).innerHTML = $("#cpFreq", root).innerHTML = $("#cpZipf", root).innerHTML = $("#cpKwic", root).innerHTML = "";
+    return;
+  }
   if(my !== busy) return;
   const opt = {lemma:CS.unit === "lemma" && CS.name === "boun", lower:CS.lower, punct:CS.punct};
   T = tokensOf(C, opt);                                                   // KWIC ve istatistikler için süzgeçsiz birim dizisi
@@ -54,15 +62,15 @@ function metaHTML(){
     for(const x of C.sents){ const p = x.id.split("_")[0]; pre.set(p, (pre.get(p) || 0) + 1); }
     return [["Ortam (modality)", "yazılı"], ["Dil", "Türkçe"], ["Boyut", `${num(C.total)} cümle (küçük)`], ["Kaynak etiketi", [...pre].sort((a, b) => b[1] - a[1]).map(([p, c]) => `${p}_ (${c})`).join(", ")], ["Anotasyon", "lemma, UPOS, FEATS, bağımlılık ağacı (çok düzeyli)"], ["Kullanım", "bağımlılık ayrıştırıcı eğitimi ve değerlendirmesi (test kümesi)"]];
   })() : [["Ortam (modality)", "yazılı"], ["Dil", "İngilizce"], ["Boyut", `${num(C.total)} cümle; Brown Corpus 500 metin, ~1M sözcük, 15 tür (slayt 7)`], ["Kaynak", "SemCor: Brown Corpus'un anlam etiketli alt kümesi"], ["Anotasyon", "WordNet anlam etiketi (bu ekranda yalnızca düz metin)"], ["Kullanım", "anlam belirsizliği giderme, dil modeli"]];
-  return `<div class="stu"><h3 class="ng-h3">Korpus özellikleri <small>slayt 3–4</small></h3><table class="ng-tbl">${rows.map(([a, b]) => `<tr><td><b>${esc(a)}</b></td><td>${esc(b)}</td></tr>`).join("")}</table></div>`;
+  return `<div class="stu"><h3 class="ng-h3">Korpus özellikleri <small>slayt 3–4</small></h3><div class="ng-scroll" role="region" tabindex="0" aria-label="Korpus özellikleri tablosu"><table class="ng-tbl">${rows.map(([a, b]) => `<tr><td><b>${esc(a)}</b></td><td>${esc(b)}</td></tr>`).join("")}</table></div></div>`;
 }
 function freqHTML(){
   const N = [...FREQ.list.values()].reduce((a, b) => a + b, 0);
   let rows = [...FREQ.list].filter(([w, c]) => c >= CS.minf && (!CS.q || w.includes(lowerOf(CS.q)))).sort((a, b) => b[1] - a[1] || cmp()(a[0], b[0]));
   const total = rows.length, top = rows.slice(0, 40), max = top[0]?.[1] || 1;
-  return `<p class="ck-meta" style="margin:0 0 6px">${num(total)} ${CS.ngram === 1 ? "sözcük" : CS.ngram + "-gram"} türü${total > 40 ? ", ilk 40 gösteriliyor" : ""}. Satıra tıklayınca bağlamını (KWIC) görürsün.</p>
-    <div class="ck-scroll"><table class="ng-tbl cp-tbl"><tr><th>#</th><th>${CS.ngram === 1 ? "Sözcük" : CS.ngram + "-gram"}</th><th>Sıklık</th><th>Milyonda</th><th class="ng-bar"></th></tr>
-    ${top.map(([w, c], i) => `<tr data-act="kw" data-w="${esc(w)}"><td class="muted">${i + 1}</td><td><b>${esc(w)}</b></td><td>${num(c)}</td><td>${num(Math.round(c / N * 1e6))}</td><td class="ng-bar"><div class="meter"><i><b style="width:${c / max * 100}%"></b></i></div></td></tr>`).join("")}</table></div>`;
+  return `<p class="ck-meta" style="margin:0 0 6px">${num(total)} ${CS.ngram === 1 ? "sözcük" : CS.ngram + "-gram"} türü${total > 40 ? ", ilk 40 gösteriliyor" : ""}. Bir sözcüğün bağlamını KWIC'te açmak için seç.</p>
+    <div class="ck-scroll" role="region" tabindex="0" aria-label="Sıklık listesi, yatay kaydırılabilir"><table class="ng-tbl cp-tbl"><tr><th>#</th><th>${CS.ngram === 1 ? "Sözcük" : CS.ngram + "-gram"}</th><th>Sıklık</th><th>Milyonda</th><th class="ng-bar"></th></tr>
+    ${top.length ? top.map(([w, c], i) => `<tr><td class="muted">${i + 1}</td><td><button class="cp-word" data-act="kw" data-w="${esc(w)}">${esc(w)}</button></td><td>${num(c)}</td><td>${num(Math.round(c / N * 1e6))}</td><td class="ng-bar"><div class="meter"><i><b style="width:${c / max * 100}%"></b></i></div></td></tr>`).join("") : '<tr><td colspan="5" class="muted">Bu süzgeçlerle eşleşen sözcük yok.</td></tr>'}</table></div>`;
 }
 function zipfHTML(){
   const f = [...FREQ.list.values()].sort((a, b) => b - a), V = f.length;
@@ -135,12 +143,15 @@ function mount(){
   root.innerHTML = `<div class="page wide">
     <h1 class="page-title">Korpus gezgini</h1>
     <p class="lesson-intro" style="margin:0">Gerçek metin üzerinde sözcük sıklıkları, Zipf dağılımı ve bağlam satırları (KWIC). Türkçe için BOUN treebank'i (lemma ve UPOS etiketli), İngilizce için Brown cümleleri.<span class="stu"> Lecture 5: korpus.</span></p>
-    <h2 class="ng-h">1 · Korpus <small id="cpState"></small></h2>
+    <details class="section-index"><summary>Bu görünümde</summary><nav aria-label="Korpus bölümleri">
+      <a href="#cpSecCorpus">Korpus</a><a href="#cpSecFrequency">Sıklık listesi</a><a href="#cpSecContext">Bağlam (KWIC)</a>
+    </nav></details>
+    <h2 class="ng-h" id="cpSecCorpus" tabindex="-1">1 · Korpus <small id="cpState" role="status" aria-live="polite"></small></h2>
     <div class="ng-ctl" style="margin-top:0"><div class="seg" role="group" aria-label="Korpus">${Object.entries(CORPORA).map(([k, c]) => `<button data-act="corp" data-c="${k}">${esc(c.label)}</button>`).join("")}</div>
       <label id="cpBrown" class="muted hidden" style="font-size:.88rem">Cümle sayısı <select id="cpSize" class="btn sm"><option value="1000">1.000</option><option value="5000">5.000</option><option value="20000">20.000</option><option value="0">tümü (35.795)</option></select></label>
       <button class="btn sm" data-act="ngram">Bu korpusta n-gram modeli kur →</button></div>
     <div id="cpStats"></div><div id="cpMeta"></div>
-    <h2 class="ng-h">2 · Sıklık listesi</h2>
+    <h2 class="ng-h" id="cpSecFrequency" tabindex="-1">2 · Sıklık listesi</h2>
     <div class="ng-ctl" style="margin-top:0">
       <div class="seg" role="group" aria-label="Birim"><button data-act="gram" data-g="1">Sözcük</button><button data-act="gram" data-g="2">Bigram</button><button data-act="gram" data-g="3">Trigram</button></div>
       <span id="cpBounOnly"><div class="seg" role="group" aria-label="Biçim ya da lemma" style="display:inline-flex"><button data-act="unit" data-u="form">Biçim</button><button data-act="unit" data-u="lemma">Lemma</button></div> <label class="chk"><input type="checkbox" id="cpPunct"> noktalama dahil</label></span>
@@ -148,7 +159,7 @@ function mount(){
       <label class="muted" style="font-size:.88rem">en az <input id="cpMin" class="dp-num" type="number" min="1" value="1"> kez</label>
       <label class="field sm" style="flex:1 1 180px;min-width:150px"><input id="cpQ" type="text" placeholder="Süz (örn. ler)" autocomplete="off" spellcheck="false"></label></div>
     <div class="cp-two"><div id="cpFreq"></div><div id="cpZipf"></div></div>
-    <h2 class="ng-h">3 · Bağlam <small>KWIC: anahtar sözcük ve çevresi</small></h2>
+    <h2 class="ng-h" id="cpSecContext" tabindex="-1">3 · Bağlam <small>KWIC: anahtar sözcük ve çevresi</small></h2>
     <div class="ng-ctl" style="margin-top:0"><label class="field sm" style="flex:1 1 220px"><input id="cpKw" type="text" placeholder="Anahtar sözcük (birden çok sözcük de olur)" autocomplete="off" spellcheck="false"></label>
       <label class="muted" style="font-size:.88rem">pencere ±<input id="cpWin" class="dp-num" type="number" min="1" max="12" value="5"></label>
       <div class="seg" role="group" aria-label="Sıralama"><button data-act="sort" data-s="pos">Metin sırası</button><button data-act="sort" data-s="right">Sağa göre</button><button data-act="sort" data-s="left">Sola göre</button></div></div>

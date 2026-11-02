@@ -19,8 +19,8 @@ function mount(){
   root = $("#v-roles");
   root.innerHTML = `<div class="page">
     <h1 class="page-title">Fiil kimin neyle ne yaptığını söyler</h1>
-    <div class="row"><div class="seg" id="rSub"><button data-v="dict">Çerçeve sözlüğü</button><button data-v="label">Cümle etiketle · TR</button><button data-v="quiz" class="stu">Rol sınavı · EN</button></div>
-      <div class="seg" id="rLang"><button data-v="en">English PropBank</button><button data-v="tr">Türkçe PropBank</button><button data-v="vn">VerbNet 3.3</button></div></div>
+    <div class="row roles-switches"><div class="seg" id="rSub" role="group" aria-label="Rol aracı"><button data-v="dict">Çerçeve sözlüğü</button><button data-v="label">Cümle etiketle · TR</button><button data-v="quiz" class="stu">Rol sınavı · EN</button></div>
+      <div class="seg" id="rLang" role="group" aria-label="Rol kaynağı"><button data-v="en">English PropBank</button><button data-v="tr">Türkçe PropBank</button><button data-v="vn">VerbNet 3.3</button></div></div>
 
     <div id="rDict">
       <div class="row" style="margin-top:18px"><label class="field" style="flex:1;min-width:240px">${icon("search")}<input id="pbq" type="text" autocomplete="off" spellcheck="false"></label>

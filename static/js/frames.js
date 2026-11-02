@@ -80,8 +80,8 @@ async function openFrame(i){
   if(d.en){
     const en = d.en;
     h += `<p class="def">${esc(en.d)}</p>` + en.ex.map(e => `<div class="fx">${fxHtml(e.t, e.sp, en.fes)}</div>`).join("");
-    h += `<h4 class="lbl" style="margin:18px 0 4px">Çerçeve elemanları</h4><table class="argtbl"><tr><th>Eleman</th><th>Tür</th><th>Tanım</th></tr>` +
-      en.fes.map((f, k) => `<tr><td><span class="rl-a u${k % 5}">${esc(f.n)}</span>${f.ab && f.ab !== f.n ? `<br><span class="vt">${esc(f.ab)}</span>` : ""}</td><td><span class="${f.c === "Core" ? "fecore" : "feper"}">${esc(f.c.replace("Extra-Thematic", "Extra-Th."))}</span>${f.st ? `<br><span class="vt">${esc(f.st)}</span>` : ""}</td><td>${esc(f.d.slice(0, 260))}${f.d.length > 260 ? "…" : ""}</td></tr>`).join("") + "</table>";
+    h += `<h4 class="lbl" style="margin:18px 0 4px">Çerçeve elemanları</h4><div class="ck-scroll" role="region" tabindex="0" aria-label="Çerçeve elemanları tablosu"><table class="argtbl"><tr><th>Eleman</th><th>Tür</th><th>Tanım</th></tr>` +
+      en.fes.map((f, k) => `<tr><td><span class="rl-a u${k % 5}">${esc(f.n)}</span>${f.ab && f.ab !== f.n ? `<br><span class="vt">${esc(f.ab)}</span>` : ""}</td><td><span class="${f.c === "Core" ? "fecore" : "feper"}">${esc(f.c.replace("Extra-Thematic", "Extra-Th."))}</span>${f.st ? `<br><span class="vt">${esc(f.st)}</span>` : ""}</td><td>${esc(f.d.slice(0, 260))}${f.d.length > 260 ? "…" : ""}</td></tr>`).join("") + "</table></div>";
     h += `<h4 class="lbl" style="margin:18px 0 6px">Sözcük birimleri (LU)</h4>` + Object.entries(en.lus).map(([p, l]) => `<div style="margin:4px 0"><span class="muted" style="font:italic .9rem var(--font-text);margin-right:6px">${esc(FN_POS[p] || p)}</span>${l.map(x => d.lux && d.lux[x] ? `<button class="lu m" data-lux="${esc(x)}" title="anotasyonlu örnekleri göster">${esc(x)}</button>` : `<button class="lu" data-act="fn" data-field="lu" data-q="${esc(x)}" data-mode="contains" data-lang="en">${esc(x)}</button>`).join("")}</div>`).join("") + '<div class="luxbox"></div>';
     const grp = {}; en.rels.forEach(r => (grp[`${r.t}:${r.as}`] = grp[`${r.t}:${r.as}`] || []).push(r.o));
     const rg = Object.entries(grp);

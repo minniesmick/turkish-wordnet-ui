@@ -252,7 +252,7 @@ function fillHTML(r){
     rows += `<tr>${tds}</tr>`;
   }
   const words = `<tr class="ck-w">${r.toks.map((t, i) => `<th><small>${i}</small>${esc(t)}<small>${i + 1}</small></th>`).join("")}</tr>`;
-  return `${toolbar(r)}<div class="ck-scroll"><table class="ck">${rows}${words}</table></div>`;
+  return `${toolbar(r)}<div class="ck-scroll" role="region" tabindex="0" aria-label="CKY alıştırma tablosu, yatay kaydırılabilir"><table class="ck">${rows}${words}</table></div>`;
 }
 function hintCell(r){
   const n = r.toks.length;
@@ -272,7 +272,7 @@ function mleHTML(){
   const rows = L.rules.slice().sort((a, b) => order.indexOf(a.lhs) - order.indexOf(b.lhs) || b.c - a.c);
   const g = toGrammar(L);
   return `<p class="ng-formula stu">P(A → β) = C(A → β) / C(A): bir kuralın kaç kez kullanıldığı, sol tarafın toplam kaç kez türetildiğine bölünür.</p>
-    <div class="ck-scroll"><table class="ng-tbl"><tr><th>Kural</th><th>C(kural)</th><th>C(sol)</th><th>Kesir</th><th>P</th></tr>
+    <div class="ck-scroll" role="region" tabindex="0" aria-label="MLE kural olasılıkları tablosu"><table class="ng-tbl"><tr><th>Kural</th><th>C(kural)</th><th>C(sol)</th><th>Kesir</th><th>P</th></tr>
     ${rows.map(r => `<tr><td>${esc(r.lhs)} → ${esc(r.rhs.join(" "))}</td><td>${r.c}</td><td>${r.total}</td><td>${fmtFrac(r)}</td><td><b>${+r.p.toFixed(4)}</b></td></tr>`).join("")}</table></div>
     <h3 class="ng-h3">Ağaç olasılıkları <small>kural olasılıklarının çarpımı</small></h3>
     <div class="chips">${trees.map((t, i) => `<span class="chip" style="cursor:default">Ağaç ${i + 1} <small>${L.probs[i] >= .001 ? +L.probs[i].toFixed(5) : L.probs[i].toExponential(3)}</small></span>`).join("")}</div>
@@ -294,7 +294,7 @@ function methTable(r){
     return `<tr class="mt-${st.kind} ${i === k - 1 ? "now" : ""}"><td>${i + 1}</td><td class="mt-g">${goals || "·"}</td><td>${input}</td><td><span class="tag">${esc(KIND[st.kind] || st.kind)}</span> ${esc(st.note)}</td></tr>`;
   }).join("");
   const verdict = res.ok ? `<span class="ng-ok">Başarı ✓</span> · ${total - 1} adımda ayrıştırıldı` : res.capped ? `<b>Sınıra takıldı</b>: bu yöntem ${total - 1} adımda bitiremedi` : "<b>Ayrıştırılamadı</b>: tüm seçenekler tükendi";
-  return `<p class="verdict" style="font-size:1.1rem">${verdict}</p><div class="ck-scroll"><table class="ng-tbl mt-tbl"><tr><th>#</th><th>${td ? "Hedefler" : "Yığın"}</th><th>Girdi</th><th>Eylem</th></tr>${rows}</table></div>`;
+  return `<p class="verdict" style="font-size:1.1rem">${verdict}</p><div class="ck-scroll" role="region" tabindex="0" aria-label="Ayrıştırma adımları tablosu"><table class="ng-tbl mt-tbl"><tr><th>#</th><th>${td ? "Hedefler" : "Yığın"}</th><th>Girdi</th><th>Eylem</th></tr>${rows}</table></div>`;
 }
 function methHTML(r){
   if(!r.rules.length || !r.toks.length) return '<div class="empty" style="padding:24px 0">Gramer ve cümle yaz.</div>';
@@ -334,7 +334,7 @@ function chartHTML(r){
     rows += `<tr>${tds}</tr>`;
   }
   const words = `<tr class="ck-w">${r.toks.map((t, i) => `<th><small>${i}</small>${esc(t)}<small>${i + 1}</small></th>`).join("")}</tr>`;
-  return `${toolbar(r)}<div class="ck-tool"><button class="btn sm ghost" data-copy="${esc(chartMarkdown(r))}">Tabloyu Markdown olarak kopyala</button></div><div class="ck-scroll"><table class="ck">${rows}${words}</table></div><div class="stu">${detail(r, si, sj)}</div>`;
+  return `${toolbar(r)}<div class="ck-tool"><button class="btn sm ghost" data-copy="${esc(chartMarkdown(r))}">Tabloyu Markdown olarak kopyala</button></div><div class="ck-scroll" role="region" tabindex="0" aria-label="CKY tablosu, yatay kaydırılabilir"><table class="ck">${rows}${words}</table></div><div class="stu">${detail(r, si, sj)}</div>`;
 }
 function detail(r, i, j){
   const cell = r.chart[i]?.[j]; if(!cell) return "";
@@ -351,7 +351,7 @@ function detail(r, i, j){
     }).join("");
   }).join("");
   return `<h3 class="ng-h3">Hücre [${i},${j}] “${esc(span)}” <small>nasıl dolduğu</small></h3>
-    <div class="ck-scroll"><table class="ng-tbl"><tr><th>Simge</th><th>Kural</th><th>Parçalar</th><th>Ağaç</th>${r.hasProb ? "<th>En iyi P</th>" : ""}</tr>${rowsH}</table></div>`;
+    <div class="ck-scroll" role="region" tabindex="0" aria-label="Ayrıştırma açıklamaları tablosu"><table class="ng-tbl"><tr><th>Simge</th><th>Kural</th><th>Parçalar</th><th>Ağaç</th>${r.hasProb ? "<th>En iyi P</th>" : ""}</tr>${rowsH}</table></div>`;
 }
 function treesHTML(r){
   if(!r.chart) return "";
@@ -369,10 +369,10 @@ function treesHTML(r){
   h += show.map((t, k) => {
     const rl = used(t);
     return `<article class="pt-card fig-box"><header><b>Ağaç ${k + 1}</b>${r.hasProb ? ` <span class="tag">P = ${fmtP(t.tp)}</span> <span class="tag">toplamın %${(100 * t.tp / total).toFixed(1)}'i</span>${k === 0 ? ' <span class="tag pt-best">en olası</span>' : ""}` : ""}<span class="fig-actions"><button class="btn sm ghost" data-copy="${esc(bracket(t))}">[ ] kopyala</button><button class="btn sm ghost" data-export="svg" data-name="agac-${k + 1}">SVG</button><button class="btn sm ghost" data-export="png" data-name="agac-${k + 1}">PNG</button></span></header>
-      <div class="ck-scroll">${treeSVG(t)}</div>
+      <div class="ck-scroll" role="region" tabindex="0" aria-label="Ayrıştırma ağacı, yatay kaydırılabilir">${treeSVG(t)}</div>
       <details><summary>${r.hasProb ? "Kurallar ve olasılık çarpımı" : "Kullanılan kurallar"}</summary>
       <p class="ng-formula" style="margin:8px 0 4px">${r.hasProb ? rl.map(x => fmtP(x.p)).join(" × ") + " = " + fmtP(t.tp) : ""}</p>
-      <div class="ck-scroll"><table class="ng-tbl"><tr><th>Kural</th>${r.hasProb ? "<th>P</th>" : ""}</tr>${rl.map(x => { const o = r.rules[x.rule]; return `<tr><td>${esc(o ? ruleText({lhs:x.sym, rhs:x.kids.map(c => c.leaf ? c.word : c.sym)}) : x.sym)}</td>${r.hasProb ? `<td>${x.p}</td>` : ""}</tr>`; }).join("")}</table></div></details></article>`;
+      <div class="ck-scroll" role="region" tabindex="0" aria-label="Ağaçta kullanılan kurallar"><table class="ng-tbl"><tr><th>Kural</th>${r.hasProb ? "<th>P</th>" : ""}</tr>${rl.map(x => { const o = r.rules[x.rule]; return `<tr><td>${esc(o ? ruleText({lhs:x.sym, rhs:x.kids.map(c => c.leaf ? c.word : c.sym)}) : x.sym)}</td>${r.hasProb ? `<td>${x.p}</td>` : ""}</tr>`; }).join("")}</table></div></details></article>`;
   }).join("");
   if(list.length > 3) h += `<button class="btn sm" id="pt-more">${PS.all ? "Yalnızca ilk 3 ağaç" : `Tüm ağaçları göster (${Math.min(30, list.length)})`}</button>`;
   return h;
@@ -403,21 +403,25 @@ function mount(){
   root.innerHTML = `<div class="page wide">
     <h1 class="page-title">CFG, PCFG ve CKY</h1>
     <p class="lesson-intro" style="margin:0">Bir gramer ve bir cümle ver: CKY tablosu hücre hücre dolar, ayrıştırma ağaçları çizilir; kurallara olasılık yazarsan (PCFG) en olası ağaç seçilir. <span class="stu">Lecture 3, InClass 2 ve 3.</span></p>
-    <h2 class="ng-h">1 · Gramer</h2>
+    <details class="section-index"><summary>Bu görünümde</summary><nav aria-label="Ayrıştırma bölümleri">
+      <a href="#pgSecGrammar">Gramer</a><a href="#pgSecSentence">Cümle</a><a href="#pgSecChart">CKY tablosu</a>
+      <a href="#pgSecTrees">Ayrıştırma ağaçları</a><a class="stu" href="#pgSecMethods">Yöntemler</a><a href="#pgSecMle">MLE</a>
+    </nav></details>
+    <h2 class="ng-h" id="pgSecGrammar" tabindex="-1">1 · Gramer</h2>
     <textarea class="ta" id="pgGrammar" rows="10" spellcheck="false" style="font:500 .92rem/1.55 var(--font-mono)" aria-label="Gramer kuralları"></textarea>
     <p class="ng-formula" style="margin:6px 0 0">Her satır <span class="ng-t">A -&gt; B C | D</span> (ok olarak → da olur). Kuralın sonuna <span class="ng-t">[0.6]</span> yazarsan PCFG olur. Sol tarafta olmayan simgeler sözcüktür.</p>
     <div class="ng-ctl"><div class="chips">${Object.entries(PRESETS).map(([k, p]) => `<button class="chip${p.stu ? " stu" : ""}" data-preset="${k}">${esc(p.label)}</button>`).join("")}</div>
       <label class="muted" style="font-size:.88rem">Başlangıç simgesi <select id="pgStart" class="btn sm"></select></label></div>
     <div id="pgInfo"></div>
-    <h2 class="ng-h">2 · Cümle</h2>
+    <h2 class="ng-h" id="pgSecSentence" tabindex="-1">2 · Cümle</h2>
     <label class="field sm">Cümle<input id="pgSent" type="text" autocomplete="off" spellcheck="false"></label>
     <div class="chips" id="pgEx" style="margin-top:10px"></div>
-    <h2 class="ng-h">3 · CKY tablosu <small class="stu">satır: aralık uzunluğu, alt satır: sözcükler (hücre <i>i,j</i> = i. ile j. sözcük arası)</small></h2>
+    <h2 class="ng-h" id="pgSecChart" tabindex="-1">3 · CKY tablosu <small class="stu">satır: aralık uzunluğu, alt satır: sözcükler (hücre <i>i,j</i> = i. ile j. sözcük arası)</small></h2>
     <div id="pgChart" aria-live="polite"></div>
-    <h2 class="ng-h">4 · Ayrıştırma ağaçları</h2>
+    <h2 class="ng-h" id="pgSecTrees" tabindex="-1">4 · Ayrıştırma ağaçları</h2>
     <div id="pgTrees" aria-live="polite"></div>
-    <div class="stu"><h2 class="ng-h">5 · Ayrıştırma yöntemleri <small>adım adım: üstten alta ve alttan üste</small></h2><div id="pgMeth"></div></div>
-    <h2 class="ng-h">6 · Ağaçlardan olasılık öğren <small>MLE</small></h2>
+    <div class="stu"><h2 class="ng-h" id="pgSecMethods" tabindex="-1">5 · Ayrıştırma yöntemleri <small>adım adım: üstten alta ve alttan üste</small></h2><div id="pgMeth"></div></div>
+    <h2 class="ng-h" id="pgSecMle" tabindex="-1">6 · Ağaçlardan olasılık öğren <small>MLE</small></h2>
     <p class="ng-formula" style="margin:0 0 8px">Parantezli ağaçları yaz; kural olasılıkları sayımlardan hesaplanır, çıkan grameri yukarıdaki ayrıştırıcıda kullanabilirsin.</p>
     <textarea class="ta" id="pgMle" rows="5" spellcheck="false" style="font:500 .88rem/1.55 var(--font-mono)" aria-label="Parantezli ağaçlar"></textarea>
     <div id="pgMleOut" style="margin-top:12px"></div>

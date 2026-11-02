@@ -9,7 +9,7 @@ colors:
   ink-2: "#3b4357"
   ink-3: "#586079"
   rule: "#d6dbe8"
-  rule-2: "#aeb6cc"
+  rule-2: "#7a849a"
   spot: "#2b3bd6"
   on-spot: "#ffffff"
   wash: "#e7eafb"
@@ -23,7 +23,7 @@ colors:
   dark-ink-2: "#b9c0d4"
   dark-ink-3: "#8f99b3"
   dark-rule: "#232b44"
-  dark-rule-2: "#3a4468"
+  dark-rule-2: "#606b89"
   dark-spot: "#8f9cff"
   dark-on-spot: "#0a0e19"
   dark-wash: "#171e3c"
@@ -85,11 +85,14 @@ rounded:
   lg: "10px"
   pill: "999px"
 spacing:
-  xs: "6px"
-  sm: "10px"
-  md: "14px"
-  lg: "20px"
-  xl: "32px"
+  xs: "4px"
+  sm: "8px"
+  md: "12px"
+  lg: "16px"
+  xl: "24px"
+  2xl: "32px"
+  3xl: "40px"
+  4xl: "48px"
   rail-w: "216px"
   sheet-w: "432px"
   top-h: "56px"
@@ -155,7 +158,7 @@ components:
 
 A two-colour printed dictionary rendered as a local NLP workbench: cool thin paper, blue-black ink, and a single ultramarine spot that marks interaction and focus. Hierarchy comes from weight, size, rules and line style, not a rainbow. The same restrained visual language spans the 13 lexical, morphology, parsing, dependency, corpus, n-gram and lesson views. Schibsted Grotesk carries interface structure, Spectral carries reading, and JetBrains Mono carries codes, counts and keys.
 
-Density is calm but reference-grade: a 15px root, 980px reading column (1240px for wide views), hairline borders, and generous row padding. It is used on a projector, laptop and mobile screen in light and dark themes; presentation scale (x1.22) is a first-class state.
+Density is calm but reference-grade: a 15px root, 980px reading column (1240px for wide views), hairline borders, and generous row padding. It is used on a projector, laptop and mobile screen in light and dark themes; presentation scale (x1.22) is a first-class state. Navigation follows course flow, and long labs use in-page section indexes, progressive disclosure and local table scrollers.
 
 Categories (hypernym, part, derivation, antonym, cause) are told apart by line style: solid, dashed, dotted, double, dash-dot. Colour is never the carrier of category.
 
@@ -181,7 +184,7 @@ Cool paper, blue-black ink, one ultramarine. Dark mode swaps paper and ink and l
 - **Sunk Paper** (`sunk`): hover fills, segmented-control tray, notices, skeleton base.
 - **Blue-Black Ink** (`ink`): headwords, body text, heavy rules (2px under the entry head, 1px under running head and table heads).
 - **Ink 2 / Ink 3** (`ink-2`, `ink-3`): secondary text and edge strokes; tertiary labels, metadata and placeholders.
-- **Rule / Rule 2** (`rule`, `rule-2`): hairlines for row dividers; stronger borders for controls and nodes.
+- **Rule / Rule 2** (`rule`, `rule-2`): `rule` is a decorative hairline; `rule-2` (`#7a849a` light, `#606b89` dark) is the stronger border for controls, nodes and visible interaction boundaries.
 - **Verdict Green / Red** (`ok`, `bad`): used only for correct / wrong feedback in quizzes, as a 2px border plus a faint tinted fill.
 
 ### Named Rules
@@ -216,9 +219,9 @@ Cool paper, blue-black ink, one ultramarine. Dark mode swaps paper and ink and l
 
 App shell is a three-column grid: rail (216px), stage (fluid), sheet (0 or 432px), with a 0.32s house ease on the grid transition. A 56px sticky topbar carries the omnibox (max 560px), dictionary selection on relevant lexical views, mode selection, and utility actions. Content pages centre at 980px (1240px wide variant) with 30px / 32px padding. Dictionary entries use a three-column sense grid: 34px numeral, fluid main text, 220px translation seam, separated by a 1px rule. NLP views reuse the same page frame for controls, long-form results, data tables, diagrams and student-only explanations rather than forcing each into the dictionary layout.
 
-Spacing is a loose 6 / 10 / 14 / 20 / 32px rhythm; row padding is 14-18px; hairline-divided lists rather than cards. Graph view fills viewport minus the topbar on a 22px dot-grid paper.
+Spacing follows the CSS token scale 4 / 8 / 12 / 16 / 24 / 32 / 40 / 48px; row padding is 14-18px; hairline-divided lists rather than card stacks. Graph view fills viewport minus the topbar on a 22px dot-grid paper. Grouped navigation and section indexes orient users without changing the app's single-page flow.
 
-Responsive: at 1180px the sheet overlays instead of reflowing; at 860px the rail becomes an off-canvas drawer, the translation seam drops below the sense with a dashed top rule, the sheet becomes a bottom sheet (78vh, 50vh over graph) with 14px top corners, and the graph legend hides. At 520px the omnibox collapses to an icon and the mode control compacts. Tables and diagrams retain their own horizontal scroll containers where their full structure cannot fit. Presentation mode scales the root by 1.22 and fades the chrome.
+Responsive: at 1180px the sheet overlays instead of reflowing; at 860px the rail becomes an off-canvas drawer, the translation seam drops below the sense with a dashed top rule, the sheet becomes a bottom sheet (78vh, 50vh over graph) with 14px top corners, and the graph legend hides. At 520px the omnibox moves to its own row and the mode, dictionary-language and theme controls remain visible in a second row. In the mobile layout, primary controls and touch targets are at least 40px high. Tables and diagrams retain their own keyboard-focusable horizontal scroll containers where their full structure cannot fit. Presentation mode scales the root by 1.22 while preserving an accessible exit control.
 
 ## Elevation & Depth
 
@@ -248,17 +251,22 @@ Small, precise radii: 3px for numerals, tags and small controls; 6px for buttons
 - **Focus:** spot border plus a 3px `wash-2` halo. Caret is spot.
 
 ### Navigation
-- **Rail:** paper background, right hairline, wordmark in 800 grotesk, vertical tabs for all 13 views; the current tab is page-coloured and fused to the edge with a spot half-circle notch; mono keyboard hints appear on hover. Recent-trail list and saved concepts remain below the tabs.
+- **Rail:** paper background, right hairline, wordmark in 800 grotesk, vertical tabs grouped into Sözcük anlamı, Lecture 2, Lecture 3, Lecture 5 and Ders; the current tab is page-coloured and fused to the edge with a spot half-circle notch; mono keyboard hints appear on hover. Recent-trail list and saved concepts appear only on relevant WordNet views.
 - **Underline tabs / segmented control:** 2px spot underline for the current tab; segmented control is a sunk tray with a page-coloured pressed segment.
 
 ### Tool and Student Modes
-- **Mode switch:** a compact, explicitly labelled Araç / Öğrenci segmented control in the topbar. Its pressed state uses the page-on-sunk treatment.
+- **Mode switch:** an explicitly labelled Araç / Öğrenci segmented control in the topbar, with visible supporting text that describes its effect. Its pressed state uses the page-on-sunk treatment and remains available at narrow widths.
 - **Instructional content:** `.stu` content is visible only in Student mode; the Ders view is Student-only. The mode distinction changes explanation density, not the underlying calculation or data.
 
 ### NLP Controls and Results
 - **Controls:** grouped fields and segmented choices sit close to their related output; use existing button, field, chip and tag primitives.
-- **Results:** tables use tabular numerals, restrained header labels and hairline row rules. Wide matrices and parse / dependency diagrams scroll inside their own wrappers instead of widening the page.
-- **Study sections:** explanations, method notes, exercises and lesson prose follow the same ink / paper hierarchy and are not decorated as a second visual product.
+- **Results:** tables use tabular numerals, restrained header labels and hairline row rules. Wide matrices and parse / dependency diagrams scroll inside their own focusable wrappers instead of widening the page; scroll affordances remain visible.
+- **Study sections:** explanations, method notes, exercises and lesson prose follow the same ink / paper hierarchy and are not decorated as a second visual product. `.stu` marks all instructional content; it is hidden in Araç and visible in Öğrenci mode. Long Morfoloji, Ayrıştırma and N-gram views use in-page section indexes; advanced controls use native disclosure.
+- **Status and errors:** asynchronous loading, empty and failure messages use clear Turkish copy and status semantics; error states do not masquerade as empty results.
+- **Navigation groups:** rail sections follow Sözcük anlamı / Lecture 2 / Lecture 3 / Lecture 5 / Ders; recent WordNet history and saved concepts appear only where they are relevant.
+- **Section index:** native `details.section-index` reveals anchored links within long views; keep section headings focusable and offset below the sticky topbar.
+- **Advanced controls:** native `details.ng-advanced` keeps secondary N-gram settings available without competing with its primary controls.
+- **Touch and focus:** mobile action targets reach 40px minimum height; all focusable local scroll regions have an accessible name and visible focus ring.
 
 ### Sense Entry (signature)
 Heavy 2px ink rule under the headword; each sense has a boxed numeral, bold synonym buttons separated by pale slashes, a Spectral definition, italic example in curly quotes, and a mirrored English seam column on the right. Focusing a sense fades the others to 65%, fills it with wash, turns its numeral solid spot and reveals the expanded body.

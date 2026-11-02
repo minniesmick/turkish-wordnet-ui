@@ -8,7 +8,7 @@
 
 **Bağlamsal kabuk:** İz ve çalışma listesi yalnızca WordNet kavram yüzeylerinde görünür. Kullanım kipi düğmeleri kendi görünür adlarını korur, açıklamaları erişilebilir ad ve yardım metniyle sunulur. Sunum modunda üst/yan kabuğu gizlemek yerine kullanıcıya daima erişilebilir bir çıkış yolu bırakılır.
 
-**Dar ekran:** 520 px altında arama ilk satırda; sözlük dili, kip ve tema ikinci satırda. Dil ve kip seçenekleri gizlenmez. Kenar menüsü kendi içinde kayar; ana sayfa 320 px'te de yatay taşma üretmemelidir. Tablolar yalnızca kendi kaydırma alanlarında taşar ve kenar maskesi/sonraki içerik ipucuyla kaydırılabilir olduğu anlaşılır.
+**Dar ekran:** 520 px altında arama ilk satırda; sözlük dili, kip ve tema ikinci satırda. Dil ve kip seçenekleri gizlenmez. Kenar menüsü kendi içinde kayar; ana sayfa 320 px'te de yatay taşma üretmemelidir. Harita araç çubuğu dar ekranda kendi akış satırında kalır; kavram ağacı denetimlerin altındaki ayrı, kırpılmış graf alanında pan/zoom ile çalışır. Görünür etkileşim hedefleri en az 40 px hit alanına çıkar. Tablolar yalnızca kendi kaydırma alanlarında taşar ve kenar maskesi/sonraki içerik ipucuyla kaydırılabilir olduğu anlaşılır.
 
 **Hareket ve yoğunluk:** yalnızca yerleşim/bağlam geçişi için kısa hareket; azaltılmış hareket tercihi mekânsal hareketi kaldırırken odak, renk ve durum farkını korur. Deneysel kontroller özellik olarak kalır, fakat ana göreve göre gruplanır ve gerektiğinde açıklama açılırına taşınır.
 

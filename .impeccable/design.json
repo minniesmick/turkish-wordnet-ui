@@ -124,6 +124,13 @@
           "#f3f5f9"
         ]
       },
+      "rule-2": {
+        "role": "neutral",
+        "displayName": "Strong Control Border",
+        "canonical": "#7a849a",
+        "darkCanonical": "#606b89",
+        "purpose": "Interactive control and focus-adjacent borders; decorative hairlines continue to use rule."
+      },
       "ok": {
         "role": "feedback",
         "displayName": "Verdict Green",
@@ -193,6 +200,44 @@
         "purpose": "Language tags, counts, shortcuts."
       }
     },
+    "spacing": [
+      {
+        "name": "space-1",
+        "value": "4px"
+      },
+      {
+        "name": "space-2",
+        "value": "8px"
+      },
+      {
+        "name": "space-3",
+        "value": "12px"
+      },
+      {
+        "name": "space-4",
+        "value": "16px"
+      },
+      {
+        "name": "space-6",
+        "value": "24px"
+      },
+      {
+        "name": "space-8",
+        "value": "32px"
+      },
+      {
+        "name": "space-10",
+        "value": "40px"
+      },
+      {
+        "name": "space-12",
+        "value": "48px"
+      },
+      {
+        "name": "touch-target-min",
+        "value": "40px"
+      }
+    ],
     "shadows": [
       {
         "name": "float",
@@ -316,17 +361,51 @@
       "description": "White node; central node gets 2px ink border and wash ring.",
       "html": "<div class=\"ds-gn\"><b>kitap</b><i>isim</i></div>",
       "css": ".ds-gn{display:flex;flex-direction:column;width:176px;padding:9px 12px 10px;border:1px solid var(--rule-2);border-radius:6px;background:var(--page);color:var(--ink);box-shadow:0 1px 2px rgba(13,18,32,.05)}.ds-gn:hover{border-color:var(--spot)}.ds-gn b{font:700 1rem/1.15 var(--font-ui)}.ds-gn i{font:italic 400 .86rem var(--font-text);color:var(--ink-3)}"
+    },
+    {
+      "name": "Course Navigation Group",
+      "kind": "navigation",
+      "refersTo": "rail-tab-current",
+      "description": "Course-flow heading groups related views without changing their stable shortcut keys.",
+      "html": "<div class=\"tab-group\"><h2 class=\"tab-group-title\">Lecture 2</h2><button class=\"tab\">Morfoloji</button><button class=\"tab\">Belirsizlik</button></div>",
+      "css": ".tab-group{display:flex;flex-direction:column;gap:2px}.tab-group+.tab-group{margin-top:8px;padding-top:8px;border-top:1px solid var(--rule)}.tab-group-title{margin:0 18px 4px 12px;color:var(--ink-3);font:600 .75rem/1.35 var(--font-ui)}"
+    },
+    {
+      "name": "In-page Section Index",
+      "kind": "navigation",
+      "refersTo": "rail-tab-current",
+      "description": "Native disclosure containing links to sections in long lab views.",
+      "html": "<details class=\"section-index\"><summary>Bu görünümde</summary><nav aria-label=\"Morfoloji bölümleri\"><a href=\"#\">Çözümleme</a></nav></details>",
+      "css": ".section-index{margin:18px 0 0;border-bottom:1px solid var(--rule)}.section-index nav{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 12px}.section-index nav a{display:inline-flex;align-items:center;min-height:34px;padding:4px 9px;border:1px solid var(--rule);border-radius:var(--r-sm)}"
+    },
+    {
+      "name": "Advanced Controls Disclosure",
+      "kind": "disclosure",
+      "refersTo": "field",
+      "description": "Keeps secondary N-gram options available without competing with the primary task.",
+      "html": "<details class=\"ng-advanced\"><summary>Diğer seçenekler</summary><div class=\"ng-ctl\">...</div></details>",
+      "css": ".ng-advanced{flex:1 1 100%;padding-top:8px;border-top:1px solid var(--rule)}.ng-advanced>summary{display:flex;align-items:center;gap:8px;min-height:36px;color:var(--ink-2);font-size:.88rem;font-weight:550;cursor:pointer}"
+    },
+    {
+      "name": "Scrollable Results Region",
+      "kind": "data",
+      "refersTo": "field",
+      "description": "Keyboard-focusable, named local scroller for wide tables and diagrams; prevents page-level horizontal overflow.",
+      "html": "<div class=\"ng-scroll\" role=\"region\" tabindex=\"0\" aria-label=\"Sonraki sözcük tablosu, yatay kaydırılabilir\"><table>...</table></div>",
+      "css": ".ng-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;margin:12px 0}.ng-scroll:focus-visible{outline:2px solid var(--spot);outline-offset:2px}"
     }
   ],
   "narrative": {
     "northStar": "İki Renkli Sözlük",
-    "overview": "A two-colour printed dictionary rendered as software: cool thin paper, blue-black ink, and a single ultramarine spot that appears only on what can be clicked or what currently has focus. Categories are told apart by line style, not colour. Flat at rest, hairline rules, Spectral definitions under heavy Schibsted Grotesk headwords, JetBrains Mono for codes.",
+    "overview": "A two-colour printed dictionary language extended into a local Turkish NLP workbench: cool thin paper, blue-black ink, and a single ultramarine spot for interaction and focus. Categories are told apart by line style, not colour. Flat at rest, hairline rules, Schibsted Grotesk for interface and words, Spectral for definitions and lessons, JetBrains Mono for codes. Course-grouped navigation, progressive lab controls, and Araç/Öğrenci mode support both focused tool use and classroom explanation.",
     "keyCharacteristics": [
       "One spot colour (ultramarine) on interactive or focused things only.",
       "Category by line style; ink-grey strokes for all relation kinds.",
       "Boxed sense numerals, a mirrored TR | EN seam column, a right-hand side sheet, a thumb-index notch on the rail.",
       "Flat at rest; hairlines for structure, one soft float shadow for overlays.",
-      "Light and dark are the same two-colour system with inverted paper and ink."
+      "Light and dark are the same two-colour system with inverted paper and ink.",
+      "Thirteen views grouped by course flow; long labs use section indexes and local table scrollers.",
+      "Araç mode hides all .stu instructional content; Öğrenci mode reveals it without changing calculations."
     ],
     "rules": [
       {

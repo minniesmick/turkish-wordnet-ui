@@ -125,7 +125,7 @@ Arayüz, ayrı bir ürüne kolayca uyarlanabilecek genel panel değil: sözlük 
 - İlk yük byte/süre, uzun tablo render süresi ve cihaz CPU'su ölçülmedi; bu yüzden performans puanı 4 değil ve optimize adımı yalnızca ölçülebilir güvenli kazançlarla yapılmalı.
 - Üç detector istisnası arasından `.kbd` ve yüzen yüzeyler için niyet gerekçesi doğrulandı; `.impeccable/config.json` içindeki başka ignore kayıtları da Aşama 6'da yeniden değerlendirilecek.
 
-## Birleşik yapılacaklar listesi
+## Birleşik yapılacaklar listesi (başlangıç)
 
 1. **P1 · Kabukta mobil reflow + mod erişimi:** 320–768 px üst çubuk; kip/dil/tema denetimleri; sunum kipinden dokunma/klavye ile çıkış.
 2. **P1 · Kontrast ve hareket:** koyu yer tutucu ≥4,5:1; reduced-motion'da durağan durum göstergeleri.
@@ -134,3 +134,34 @@ Arayüz, ayrı bir ürüne kolayca uyarlanabilecek genel panel değil: sözlük 
 5. **P2 · Dokunma ve tipografi:** 40 px hedefe yaklaşma, 11 px işlevsel metin tabanı, uzun Türkçe sözcük ve 200% zoom testi.
 6. **P3 · Token/anti-pattern belgeleme:** eski detector istisna gerekçelerini yenile; tekrar eden ortak yüzeyleri CSS bileşeni/token olarak adlandır.
 7. **Son doğrulama:** iki temada, iki kipte, 375/768/1280/1920 px'te sayfa taşması ve `.stu` görünürlüğü; detector tekrar; SVG/PNG indirme; yedi test.
+
+## Son doğrulama ve kapanış — 2026-11-03
+
+Başlangıç puanı ve bulguları tarihsel taban çizgisidir; aşağıdaki son tur bunların kapanış durumunu kaydeder.
+
+| Başlangıç bulgusu | Son durum | Kanıt |
+|---|---|---|
+| P1 · Koyu yer tutucu kontrastı | Kapandı | Koyu arama yer tutucusu `--page` üzerinde **6,33:1** ölçüldü (rgb(143,153,179) / #101626). |
+| P1 · Mobil üst çubuk | Kapandı | 100 ekran durumu; 375 px ve 1280 px'te iki kip/tema. Ek 320, 768 ve 1920 px durumları da yatay taşmasız. |
+| P1 · Sunum kipinde erişim | Kapandı | `P` ile açıldı, görünür “Sunumdan çık” denetimi bulundu ve `Esc` ile kapandı. |
+| P2 · İşlevsel mikro metin | Kapandı | `İz` ve `⌘K` 11 px kalite tabanının üstüne çıkarıldı; final detector uyarı vermedi. |
+| P2 · Dokunma hedefleri | Kapandı | 375 px'te 13 görünümün görünür düğme, alan, seçim ve bölüm bağlantıları tarandı; 40×40 px altı hedef kalmadı. |
+| P2 · Gezinme ve laboratuvar yoğunluğu | Kapandı | Ders grupları ve laboratuvar içi gezinme eklendi; uzun tablolar kendi kaydırma alanlarında kaldı. |
+| P2 · Hareket | Kapandı | `prefers-reduced-motion: reduce` emülasyonu algılandı; durum göstergeleri metin/renk/odakla da kalıyor. |
+| P3 · Detector istisnaları | Kapandı | Tasarım gerekçeleri `.impeccable/config.json`'da yenilendi; son detector taraması bulgusuz. |
+
+### Son tur ölçümleri
+
+- **139 düzen durumu:** 13 görünüm (Ders yalnızca Öğrenci kipinde), 375/1280 px'te her iki kip ve tema; ayrıca 320/768/1920 px'te Öğrenci/açık tema. Sayfa yatay taşması: **0**; Araç kipinde `.stu` sızıntısı: **0**; tarayıcı sayfa hatası: **0**.
+- `docs/ui-review/after/` içindeki **100 ekran görüntüsü** son CSS/JS durumuyla yenilendi. Harita görüntüleri gerçek `köpek / it` kavram ağacını içeriyor.
+- Koyu arama yer tutucusu: **6,33:1**. Bu tek ölçüm tüm metin/komponent kontrastlarının manuel ölçüldüğü anlamına gelmez; kalan kontrast riski detector ve tasarım token denetimiyle sınırlandırılmıştır.
+- 375 px'lik görünür dokunma hedefi taraması **0** küçük hedef verdi; etiketli onay kutuları hedef alanı olarak değerlendirildi.
+- Sunum kipi `P` / `Esc`, sistem koyu teması (kayıtlı tercih temizlendikten sonra), reduced-motion tercihi ve Morfoloji'deki ilk açılış odağı kontrol edildi. İlk açılış artık sayfayı alıştırma bölümüne kaydırmıyor.
+- Yerel ortamda Java 25 ve `lib/zemberek-full.jar` mevcut; Morfoloji arayüzü gerçek Zemberek motorunu gösterdi. JAR/JDK bulunmayan ortam ayrı bir makinede simüle edilmedi.
+- Ayrıştırma ağacı, Bağımlılık ağacı ve Zipf için koyu temadan SVG/PNG indirme akışı çalıştırıldı. 3 SVG'nin her biri beyaz arka plan içerdi; 3 PNG doğru PNG imzası ve boş olmayan içerikle üretildi.
+- Yedi zorunlu `node scripts/test_*.mjs` testi, değişen JS dosyalarının `node --check` denetimi ve `git diff --check` geçti.
+- Impeccable detector'ın son URL taraması bulgusuz tamamlandı. Kurulu launcher `--help` yalnızca `detect` komutunu sunuyor; `audit` alt komutu desteklenmiyor. Bu nedenle teknik denetim DOM/viewport ölçümleri ve detector ile yapıldı.
+
+### Kalan doğrulama sınırları
+
+Fiziksel telefon/dokunma hareketleri, ekran okuyucu, klavye ile uçtan uca tüm görevler, 200% zoom ve cihaz performans profili burada ölçülmedi. Fiziksel cihaz ve yardımcı teknoloji kontrolü sürüm öncesi manuel doğrulama olarak kalıyor.

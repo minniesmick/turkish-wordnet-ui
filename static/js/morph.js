@@ -6,7 +6,7 @@ import {SUF, GROUP_NAME, CURATED, generate, analyze, nextOptions, lexiconFromLem
 
 const MS = {word:"okullarım", stem:"okul", pos:"N", ids:[], engine:"zem", zpos:"Noun", zids:[], sent:"Ben dün akşam kitabı okudum.", quiz:{kind:"uret", q:null, score:0, n:0, done:false}};
 const KEY = "wn:morph";
-let root = null, LEX = CURATED, zem = null, fsmq = null;   // zem: null bilinmiyor, false yok, true var
+let root = null, LEX = CURATED, zem = null, zemError = false, fsmq = null;   // zem: null bilinmiyor, false yok, true var
 const load = () => { try{ const v = JSON.parse(localStorage.getItem(KEY)) || {}; for(const k of ["word", "stem", "pos", "ids", "engine", "sent", "zpos", "zids"]) if(v[k] != null) MS[k] = v[k]; }catch(_){} };
 const save = () => { try{ localStorage.setItem(KEY, JSON.stringify({word:MS.word, stem:MS.stem, pos:MS.pos, ids:MS.ids, engine:MS.engine, sent:MS.sent, zpos:MS.zpos, zids:MS.zids})); }catch(_){} };
 const lc = s => s.toLocaleLowerCase("tr").trim();
@@ -45,16 +45,21 @@ async function runAnalyze(){
   if(zem && MS.engine === "zem"){
     out.innerHTML = '<div class="skeleton" style="height:90px;margin-top:14px"></div>';
     try{ out.innerHTML = zAnalysisHTML(await zemWord(MS.word.trim()), MS.word) + '<div id="mpBoun"></div>'; }
-    catch(_){ out.innerHTML = '<div id="mpBoun"></div>'; }
+    catch(_){ out.innerHTML = '<div class="notice warn">Zemberek isteği başarısız oldu. Küçük kural modelini seçip yeniden deneyin.</div><div id="mpBoun"></div>'; }
   }else{
     out.innerHTML = analysisHTML(analyze(w, LEX), MS.word) + '<div id="mpBoun"></div>';
   }
   try{
     const j = await api("/api/ud", {w:MS.word.trim()});
-    $("#mpBoun", root).innerHTML = j.results.length
-      ? `<h3 class="ng-h3">BOUN treebank'inde gerçek çözümlemeler <small>UD etiketleri</small></h3><div class="ck-scroll"><table class="ng-tbl"><tr><th>Lemma</th><th>UPOS</th><th>Özellikler</th><th>Sayı</th></tr>${j.results.map(r => `<tr><td><b>${esc(r.lemma)}</b></td><td>${esc(r.upos)}</td><td class="muted" style="font-size:.8rem">${esc(r.feats === "_" ? "" : r.feats.replace(/\|/g, " · "))}</td><td>${r.n}</td></tr>`).join("")}</table></div>`
+    const boun = $("#mpBoun", root);
+    if(!boun || w !== lc(MS.word)) return;
+    boun.innerHTML = j.results.length
+      ? `<h3 class="ng-h3">BOUN treebank'inde gerçek çözümlemeler <small>UD etiketleri</small></h3><div class="ck-scroll" role="region" tabindex="0" aria-label="BOUN çözümlemeleri tablosu"><table class="ng-tbl"><tr><th>Lemma</th><th>UPOS</th><th>Özellikler</th><th>Sayı</th></tr>${j.results.map(r => `<tr><td><b>${esc(r.lemma)}</b></td><td>${esc(r.upos)}</td><td class="muted" style="font-size:.8rem">${esc(r.feats === "_" ? "" : r.feats.replace(/\|/g, " · "))}</td><td>${r.n}</td></tr>`).join("")}</table></div>`
       : `<p class="ck-meta">“${esc(MS.word)}” BOUN test kümesinde geçmiyor.</p>`;
-  }catch(_){}
+  }catch(_){
+    const boun = $("#mpBoun", root);
+    if(boun && w === lc(MS.word)) boun.innerHTML = '<p class="notice warn">BOUN sonuçları yüklenemedi. Yerel sunucunun çalıştığını kontrol edin.</p>';
+  }
 }
 
 
@@ -112,7 +117,7 @@ const zemWord = w => api("/api/zemberek", {w});
 function sentHTML(j){
   const words = j.words || [];
   if(!words.length) return "";
-  return `<div class="ck-scroll"><table class="ng-tbl"><tr><th>Sözcük</th><th>Seçilen çözümleme</th><th>Aday</th></tr>${words.map(w => {
+  return `<div class="ck-scroll" role="region" tabindex="0" aria-label="Cümle çözümlemeleri tablosu"><table class="ng-tbl"><tr><th>Sözcük</th><th>Seçilen çözümleme</th><th>Aday</th></tr>${words.map(w => {
     const amb = w.all.length > 1;
     return `<tr><td><b>${esc(w.input)}</b></td><td><span class="mp-lex" style="font-size:.9rem">${esc(w.best.oflazer)}</span>${amb ? `<details class="mp-alts"><summary>diğer ${w.all.length - 1} aday</summary>${w.all.filter(a => a.oflazer !== w.best.oflazer).map(a => `<div class="mp-lex" style="font-size:.84rem;font-weight:500;color:var(--ink-2)">${esc(a.oflazer)}</div>`).join("")}</details>` : ""}</td><td>${amb ? `<span class="tag mp-deriv">${w.all.length}</span>` : '<span class="tag">1</span>'}</td></tr>`;
   }).join("")}</table></div>
@@ -123,7 +128,7 @@ async function runSent(){
   const out = $("#mpSOut", root);
   if(!t){ out.innerHTML = ""; return; }
   out.innerHTML = '<div class="skeleton" style="height:90px"></div>';
-  try{ out.innerHTML = sentHTML(await api("/api/zemberek", {s:t})); }catch(_){ out.innerHTML = ""; }
+  try{ out.innerHTML = sentHTML(await api("/api/zemberek", {s:t})); }catch(_){ out.innerHTML = '<p class="notice warn">Cümle çözümlemesi alınamadı. Yerel sunucunun çalıştığını kontrol edin.</p>'; }
 }
 
 // ───────────────────────── Zemberek ile üretim (WordGenerator)
@@ -199,16 +204,16 @@ function rulesHTML(){
   }).join("");
   const ex = [["masa", ["P1sg"], "masam", "kural 7: H, ünlüyle biten kökten sonra düşer"], ["kapa", ["PROG"], "kapıyor", "kural 8: -Iyor öncesi kök sonundaki a/e düşer"], ["ayak", ["GEN"], "ayağın", "kural 16: k → ğ"], ["renk", ["ACC"], "rengi", "kural 17: nk → ng"]];
   return `<div class="mp-rule-grid">
-    <div><h4>Arkifonemler (iki düzeyli morfoloji)</h4><table class="ng-tbl"><tr><th>Simge</th><th>Anlamı</th><th>Gerçekleşme</th></tr>
+    <div><h4>Arkifonemler (iki düzeyli morfoloji)</h4><div class="ng-scroll" role="region" tabindex="0" aria-label="Arkifonemler tablosu"><table class="ng-tbl"><tr><th>Simge</th><th>Anlamı</th><th>Gerçekleşme</th></tr>
       <tr><td><b>A</b></td><td>iki yönlü ünlü</td><td>a (kalın: a ı o u), e (ince: e i ö ü)</td></tr>
       <tr><td><b>H</b></td><td>dört yönlü ünlü</td><td>ı, i, u, ü (son ünlüye göre)</td></tr>
       <tr><td><b>D</b></td><td>d / t</td><td>sert ünsüzden (ç f h k p s ş t) sonra t, yoksa d</td></tr>
       <tr><td><b>C</b></td><td>c / ç</td><td>sert ünsüzden sonra ç, yoksa c</td></tr>
       <tr><td><b>(y) (n) (s)</b></td><td>tampon ünsüz</td><td>yalnızca ünlüyle biten gövdeden sonra gelir</td></tr>
-      <tr><td><b>(H) (A)</b></td><td>koşullu ünlü</td><td>yalnızca ünsüzle biten gövdeden sonra gelir</td></tr></table>
+      <tr><td><b>(H) (A)</b></td><td>koşullu ünlü</td><td>yalnızca ünsüzle biten gövdeden sonra gelir</td></tr></table></div>
     <h4 style="margin-top:18px">Slayt 25'teki kurallar, motorda</h4>
-    <table class="ng-tbl"><tr><th>Sözcüksel</th><th>Yüzey</th><th>Kural</th></tr>${ex.map(([s, ids, exp, why]) => { const g = generate(stemOf(s, ids[0] === "PROG" ? "V" : "N"), ids); return `<tr><td><span class="ng-t">${esc(s)}+${esc(SUF[ids[0]].t)}</span></td><td><b>${esc(g.surface)}</b></td><td class="muted">${esc(why)}</td></tr>`; }).join("")}</table></div>
-    <div><h4>Ekler ve alomorfları <small>motor test köklerinde ürettiği biçimler</small></h4><div class="ck-scroll" style="max-height:520px;overflow-y:auto"><table class="ng-tbl"><tr><th>Şablon</th><th>Ek</th><th>Tür</th><th>Alomorflar</th></tr>${rows}</table></div></div></div>`;
+    <div class="ng-scroll" role="region" tabindex="0" aria-label="Ses kuralı örnekleri tablosu"><table class="ng-tbl"><tr><th>Sözcüksel</th><th>Yüzey</th><th>Kural</th></tr>${ex.map(([s, ids, exp, why]) => { const g = generate(stemOf(s, ids[0] === "PROG" ? "V" : "N"), ids); return `<tr><td><span class="ng-t">${esc(s)}+${esc(SUF[ids[0]].t)}</span></td><td><b>${esc(g.surface)}</b></td><td class="muted">${esc(why)}</td></tr>`; }).join("")}</table></div></div>
+    <div><h4>Ekler ve alomorfları <small>motor test köklerinde ürettiği biçimler</small></h4><div class="ck-scroll" role="region" tabindex="0" aria-label="Ek ve alomorf tablosu" style="max-height:520px;overflow-y:auto"><table class="ng-tbl"><tr><th>Şablon</th><th>Ek</th><th>Tür</th><th>Alomorflar</th></tr>${rows}</table></div></div></div>`;
 }
 const NOTES = [
   ["Morfem, kök, ek", "Morfem: anlamı olan en küçük bölünmez birim. Kök: sözcüğün çekirdeği; ek: anlam ya da dilbilgisel işlev katan birim. Türkçede ekler yalnızca sonektir (önek, içek, çevreleyen ek yok).", ["okullarım", "kitapçılık"]],
@@ -277,12 +282,12 @@ async function zemQuestion(kind){
   }
   return smallQuestion(kind);
 }
-async function newQuestion(){
+async function newQuestion(focusInput = false){
   const Q = MS.quiz, my = ++quizSeq;
   $("#mpQuiz", root).innerHTML = '<div class="skeleton" style="height:120px"></div>';
   const q = usingZ() ? await zemQuestion(Q.kind) : smallQuestion(Q.kind);
   if(my !== quizSeq) return;
-  Q.q = q; Q.done = false; Q.pickd = null; renderQuiz();
+  Q.q = q; Q.done = false; Q.pickd = null; renderQuiz(focusInput);
 }
 function quizHTML(){
   const Q = MS.quiz, q = Q.q;
@@ -290,7 +295,7 @@ function quizHTML(){
   let body;
   if(Q.kind === "uret"){
     body = `<p class="mp-q"><b>${esc(q.stemText)}</b> <small class="muted">(${q.posText})</small> + ${q.tagNames.map(t => `<span class="tag">${esc(t)}</span>`).join(" + ")}</p>
-      <div class="pair" style="grid-template-columns:1fr auto"><label class="field sm"><input id="mpQIn" type="text" autocomplete="off" spellcheck="false" placeholder="Yüzey biçimi" ${Q.done ? "disabled" : ""}></label><button class="btn pri sm" data-act="qcheck" ${Q.done ? "disabled" : ""}>Kontrol et</button></div>`;
+      <div class="pair pair-one"><label class="field sm"><input id="mpQIn" type="text" autocomplete="off" spellcheck="false" placeholder="Yüzey biçimi" ${Q.done ? "disabled" : ""}></label><button class="btn pri sm" data-act="qcheck" ${Q.done ? "disabled" : ""}>Kontrol et</button></div>`;
   }else{
     body = `<p class="mp-q">Yüzey biçimi: <b class="mp-surf" style="font-size:1.6rem">${esc(q.surfaces[0])}</b> <small class="muted">(kök ${esc(q.stemText)})</small></p>
       <div class="mp-opts">${q.opts.map((o, i) => `<button class="mp-opt ${Q.done ? (q.valid.has(o) ? "ok" : Q.pickd === o ? "bad" : "") : ""}" data-act="qopt" data-i="${i}" ${Q.done ? "disabled" : ""}>${esc(o)}</button>`).join("")}</div>`;
@@ -299,11 +304,11 @@ function quizHTML(){
   const res = Q.done ? `<p class="verdict" style="margin-top:12px">${Q.right ? "Doğru ✓" : "Yanlış ✗"} · cevap <b>${esc(q.surfaces.join(" / "))}</b> <span class="mp-lex" style="display:inline">${esc(q.lex)}</span></p>${others.length ? `<p class="ck-meta">Bu yüzeyin başka geçerli çözümlemeleri de var: ${others.map(x => `<span class="mp-lex" style="display:inline;font-size:.84rem">${esc(x)}</span>`).join(", ")}.</p>` : ""}${q.analysis ? `<div class="mp-card">${zSegs(q.analysis)}${zStudent(q.analysis)}</div>` : q.small ? traceHTML({stem:q.small.stem, ids:q.small.ids, segs:q.small.g.segs, trace:q.small.g.trace}) : ""}<button class="btn pri sm" data-act="qnext" style="margin-top:10px">Sonraki soru</button>` : "";
   return head + body + res;
 }
-function renderQuiz(){
+function renderQuiz(focusInput = false){
   const Q = MS.quiz;
-  if(!Q.q || (Q.kind === "coz" && !Q.q.opts)){ newQuestion(); return; }
+  if(!Q.q || (Q.kind === "coz" && !Q.q.opts)){ newQuestion(focusInput); return; }
   $("#mpQuiz", root).innerHTML = quizHTML();
-  const i = $("#mpQIn", root); if(i && !Q.done) i.focus();
+  const i = $("#mpQIn", root); if(focusInput && i && !Q.done) i.focus();
 }
 
 // ───────────────────────── kabuk
@@ -316,23 +321,27 @@ function mount(){
   root.innerHTML = `<div class="page wide">
     <h1 class="page-title">Morfoloji</h1>
     <p class="lesson-intro" style="margin:0">Türkçe bir sözcüğü eklerine ayır ya da bir kökten ek ek sözcük üret. Kural tabanlı küçük bir model: kök sözlüğü, ek sıralama kuralları ve ses değişimleri. Gerçek bir çözümleyici (Zemberek, Nuve) değil; kapsamı sınırlıdır.<span class="stu"> Lecture 2.</span></p>
-    <h2 class="ng-h">1 · Çözümle <small id="mpLex"></small></h2>
+    <details class="section-index"><summary>Bu görünümde</summary><nav aria-label="Morfoloji bölümleri">
+      <a href="#mpSecLex">Çözümle</a><a id="mpSecSentLink" class="hidden" href="#mpSecSent">Cümlede çözümle</a><a href="#mpSecGen">Üret</a>
+      <a class="stu" href="#mpSecRules">Kurallar</a><a class="stu" href="#mpSecNotes">Kavramlar</a><a class="stu" href="#mpSecQuiz">Alıştırma</a><a class="stu" href="#mpSecFsm">FSM yolu</a>
+    </nav></details>
+    <h2 class="ng-h" id="mpSecLex" tabindex="-1">1 · Çözümle <small id="mpLex"></small></h2>
     <div class="ng-ctl hidden" id="mpEng" style="margin:0 0 12px"><div class="seg" role="group" aria-label="Çözümleyici"><button data-act="eng" data-e="zem">Zemberek</button><button data-act="eng" data-e="small">Küçük kural modeli</button></div><span class="muted" id="mpEngNote" style="font-size:.86rem"></span></div>
-    <div class="pair" style="grid-template-columns:1fr auto"><label class="field">${""}<input id="mpWord" type="text" autocomplete="off" spellcheck="false" placeholder="Bir Türkçe sözcük (örn. okullarım)"></label><button class="btn pri" id="mpGo" style="height:46px">Çözümle</button></div>
+    <div class="pair pair-one"><label class="field"><input id="mpWord" type="text" autocomplete="off" spellcheck="false" placeholder="Bir Türkçe sözcük (örn. okullarım)"></label><button class="btn pri" id="mpGo" style="height:46px">Çözümle</button></div>
     <div class="chips" style="margin-top:12px">${["okullarım", "sevindiriyor", "evleri", "gezme", "kitabımdan", "geleceğim", "kapıyor", "güzelliği"].map(w => `<button class="chip" data-act="ex" data-w="${w}">${w}</button>`).join("")}</div>
     <div id="mpAOut" aria-live="polite"></div>
-    <div id="mpSent" class="hidden"><h2 class="ng-h">2 · Cümlede çözümle <small>morfolojik belirsizlik giderme</small></h2>
-      <div class="pair" style="grid-template-columns:1fr auto"><label class="field sm"><input id="mpSin" type="text" autocomplete="off" spellcheck="false" placeholder="Bir Türkçe cümle"></label><button class="btn pri sm" id="mpSgo">Çözümle</button></div>
+    <div id="mpSent" class="hidden"><h2 class="ng-h" id="mpSecSent" tabindex="-1">2 · Cümlede çözümle <small>morfolojik belirsizlik giderme</small></h2>
+      <div class="pair pair-one"><label class="field sm"><input id="mpSin" type="text" autocomplete="off" spellcheck="false" placeholder="Bir Türkçe cümle"></label><button class="btn pri sm" id="mpSgo">Çözümle</button></div>
       <div class="chips" style="margin-top:10px">${["Ben dün akşam kitabı okudum.", "Gözleri yaşlı bir adam bana baktı.", "Yarın okula gidecek miyiz?"].map(t => `<button class="chip" data-act="sex" data-t="${esc(t)}">${esc(t)}</button>`).join("")}</div>
       <div id="mpSOut" aria-live="polite" style="margin-top:12px"></div></div>
-    <h2 class="ng-h">3 · Üret <small id="mpGenNote">kök + ekler → sözcük</small></h2>
+    <h2 class="ng-h" id="mpSecGen" tabindex="-1">3 · Üret <small id="mpGenNote">kök + ekler → sözcük</small></h2>
     <div class="ng-ctl" style="margin-top:0"><label class="field sm" style="flex:1 1 220px">Kök<input id="mpStem" type="text" list="mpStems" autocomplete="off" spellcheck="false"></label><datalist id="mpStems">${CURATED.map(e => `<option value="${esc(e.w)}">`).join("")}</datalist>
       <div class="seg" id="mpPos"><button data-act="pos" data-p="N">isim / sıfat</button><button data-act="pos" data-p="V">fiil</button></div><select id="mpItem" class="btn sm hidden" aria-label="Sözlük maddesi"></select></div>
     <div id="mpGOut"></div>
-    <div class="stu"><h2 class="ng-h">4 · Kurallar <small>motorun ses ve ek bilgisi</small></h2><div id="mpRules"></div>
-    <h2 class="ng-h">5 · Kavramlar <small>slayt notları</small></h2><div id="mpNotes"></div>
-    <h2 class="ng-h">6 · Alıştırma</h2><div id="mpQuiz"></div>
-    <h2 class="ng-h">7 · FSM yolunu kendin yaz <small>Sample.pdf</small></h2><div id="mpFsmq"></div></div>
+    <div class="stu"><h2 class="ng-h" id="mpSecRules" tabindex="-1">4 · Kurallar <small>motorun ses ve ek bilgisi</small></h2><div id="mpRules"></div>
+    <h2 class="ng-h" id="mpSecNotes" tabindex="-1">5 · Kavramlar <small>slayt notları</small></h2><div id="mpNotes"></div>
+    <h2 class="ng-h" id="mpSecQuiz" tabindex="-1">6 · Alıştırma</h2><div id="mpQuiz"></div>
+    <h2 class="ng-h" id="mpSecFsm" tabindex="-1">7 · FSM yolunu kendin yaz <small>Sample.pdf</small></h2><div id="mpFsmq"></div></div>
     <div style="height:56px"></div></div>`;
   fsmq = mountFsmQuiz($("#mpFsmq", root));
   const w = $("#mpWord", root), st = $("#mpStem", root);
@@ -355,8 +364,8 @@ function mount(){
       case "undo": (usingZ() ? MS.zids : MS.ids).pop(); renderGen(); break;
       case "clear": if(usingZ()) MS.zids = []; else MS.ids = []; renderGen(); break;
       case "pos": MS.pos = d.p; MS.ids = []; syncPos(); renderGen(); break;
-      case "qk": Q.kind = d.k; Q.q = null; renderQuiz(); break;
-      case "qnext": Q.q = null; renderQuiz(); break;
+      case "qk": Q.kind = d.k; Q.q = null; renderQuiz(true); break;
+      case "qnext": Q.q = null; renderQuiz(true); break;
       case "qcheck": { const v = lc($("#mpQIn", root).value); if(!v) break; Q.done = true; Q.n++; Q.right = Q.q.surfaces.includes(v); if(Q.right) Q.score++; renderQuiz(); break; }
       case "qopt": { Q.done = true; Q.n++; Q.pickd = Q.q.opts[+d.i]; Q.right = Q.q.valid.has(Q.pickd); if(Q.right) Q.score++; renderQuiz(); break; }
     }
@@ -369,8 +378,9 @@ function syncEng(){
   $("#mpEng", root).classList.toggle("hidden", zem === null);
   $$("#mpEng [data-e]", root).forEach(b => b.setAttribute("aria-pressed", b.dataset.e === (on ? MS.engine : "small")));
   $$("#mpEng [data-e='zem']", root).forEach(b => b.disabled = !on);
-  $("#mpEngNote", root).textContent = on ? "Zemberek: açık kaynak (Apache 2.0) gerçek çözümleyici." : "Zemberek bulunamadı (lib/zemberek-full.jar ve JDK gerekir); küçük kural modeli kullanılıyor.";
+  $("#mpEngNote", root).textContent = on ? "Zemberek: açık kaynak (Apache 2.0) gerçek çözümleyici." : zemError ? "Zemberek durumu alınamadı; sunucu bağlantısını kontrol edin." : "Zemberek bulunamadı (lib/zemberek-full.jar ve JDK gerekir); küçük kural modeli kullanılıyor.";
   $("#mpSent", root).classList.toggle("hidden", !on);
+  $("#mpSecSentLink", root).classList.toggle("hidden", !on);
   const z = usingZ();
   $("#mpPos", root).classList.toggle("hidden", z);
   $("#mpGenNote", root).textContent = z ? "Zemberek WordGenerator ile" : "küçük kural modeliyle";
@@ -384,7 +394,7 @@ export const view = {
     mount();
     $("#mpWord", root).value = MS.word; $("#mpSin", root).value = MS.sent; syncPos(); renderGen(); syncEng();
     if(zem === null){
-      try{ const j = await api("/api/zemberek", {}); zem = !!j.available; }catch(_){ zem = false; }
+      try{ const j = await api("/api/zemberek", {}); zem = !!j.available; }catch(_){ zem = false; zemError = true; }
       syncEng(); loadItems(); renderGen();
     }
     runAnalyze(); if(zem) runSent();

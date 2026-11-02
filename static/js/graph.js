@@ -127,10 +127,10 @@ function mount(){
   if(root) return;
   root = $("#v-graph");
   root.innerHTML = `<div class="gwrap" id="gwrap">
-    <div class="gbar"><div class="gcrumb" id="gCrumb"></div><span style="flex:1"></span>
+    <div class="gbar"><div class="gcrumb" id="gCrumb"></div>
       <div class="gtools">
-        <div class="seg" id="gMode"><button data-m="map">Şema</button><button data-m="outline">Ağaç</button></div>
-        <div class="seg" id="gZoom"><button data-z="out" aria-label="Uzaklaş">${icon("minus")}</button><button data-z="fit" aria-label="Sığdır">${icon("fit")}</button><button data-z="in" aria-label="Yaklaş">${icon("plus")}</button></div>
+        <div class="seg" id="gMode" role="group" aria-label="Harita görünümü"><button data-m="map">Şema</button><button data-m="outline">Ağaç</button></div>
+        <div class="seg" id="gZoom" role="group" aria-label="Harita yakınlaştırma"><button data-z="out" aria-label="Uzaklaş">${icon("minus")}</button><button data-z="fit" aria-label="Sığdır">${icon("fit")}</button><button data-z="in" aria-label="Yaklaş">${icon("plus")}</button></div>
       </div></div>
     <div class="gview" id="gview"><div class="gcanvas" id="gcanvas"></div></div>
     <div class="gside" id="gside"></div>
@@ -197,7 +197,7 @@ function fit(anim, force = true){
   const x0 = Math.min(...ns.map(n => n.x - n.wd / 2)), x1 = Math.max(...ns.map(n => n.x + n.wd / 2)), y0 = Math.min(...ns.map(n => n.y - n.ht / 2)), y1 = Math.max(...ns.map(n => n.y + n.ht / 2));
   const gbar = $("#gwrap .gbar", root), sh = document.querySelector("#sheet"), sheetOpen = document.querySelector("#app")?.classList.contains("sheet-open");
   const availW = innerWidth > 860 && sheetOpen ? Math.max(320, innerWidth - (sh?.offsetWidth || 432) - r.left) : r.width;   // kâğıdın solunda kalan görünür alan
-  const padX = 60, padTop = (gbar ? gbar.offsetHeight : 44) + 40, padBot = 60, FLOOR = .75;
+  const padX = 60, padTop = innerWidth <= 520 ? 24 : (gbar ? gbar.offsetHeight : 44) + 40, padBot = 60, FLOOR = .75;
   const fitK = Math.min(1.15, (availW - padX * 2) / (x1 - x0), (r.height - padTop - padBot) / (y1 - y0));
   gs.pan.k = Math.max(FLOOR, fitK);
   const mx = fitK < FLOOR ? 0 : (x0 + x1) / 2;        // çok genişse okunur ölçekte merkezde dur, kalanını kaydırarak gez

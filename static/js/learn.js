@@ -50,8 +50,8 @@ const lessons = () => `<section class="lesson"><div class="gut">slayt 3</div><di
 
   <section class="lesson"><div class="gut">slayt 21–22</div><div><h3>WordNet ilişki tabloları</h3>
     <p>İsim ve fiil ilişkileri; her satırda slayttaki örnek çifti canlı karşılaştırabilirsin (hangisinin gerçekten o ilişkide olduğunu arayüz bulur).</p>
-    <table class="argtbl"><tr><th>İlişki</th><th>Anlamı</th><th>Slayttaki örnek</th><th></th></tr>
-    ${REL_TABLE.map(r => `<tr><td><b>${r[0]}</b>${r[1] ? `<br><small class="muted">${r[1]}</small>` : ""}</td><td>${r[2]}</td><td><i>${r[3]} → ${r[4]}</i></td><td>${R_(r[3], r[4])}</td></tr>`).join("")}</table></div></section>
+    <div class="ck-scroll" role="region" tabindex="0" aria-label="WordNet ilişki örnekleri tablosu, yatay kaydırılabilir"><table class="argtbl"><tr><th>İlişki</th><th>Anlamı</th><th>Slayttaki örnek</th><th></th></tr>
+    ${REL_TABLE.map(r => `<tr><td><b>${r[0]}</b>${r[1] ? `<br><small class="muted">${r[1]}</small>` : ""}</td><td>${r[2]}</td><td><i>${r[3]} → ${r[4]}</i></td><td>${R_(r[3], r[4])}</td></tr>`).join("")}</table></div></div></section>
 
   <section class="lesson"><div class="gut">slayt 23</div><div><h3>WordNet yapısı: <i>bass</i></h3>
     <p>Bir anlamın kökten (<i>entity</i>) o anlama kadar <b>tüm hypernym yolları</b> slaytta olduğu gibi görülebilir: <i>bass</i>'in “en alçak sesli erkek şarkıcı” anlamı iki farklı dala ayrılır (<i>singer → … → person</i> ve <i>causal agent</i>). <b>Ara → bass → İlişkiler</b> ile yolları gör; “yol 1, yol 2” satırları çoklu hypernym'i gösterir.</p>
@@ -122,7 +122,7 @@ const chipOf = ([label, o]) => `<button class="chip" ${attr(o)}>${esc(label)}</b
 const secHTML = s => `<section class="lesson"><div class="gut">${esc(s.gut)}</div><div><h3>${esc(s.h)}</h3>${s.p.map(t => `<p>${t}</p>`).join("")}${s.list ? `<ul>${s.list.map(x => `<li>${x}</li>`).join("")}</ul>` : ""}${s.chips ? `<div class="chips">${s.chips.map(chipOf).join("")}</div>` : ""}</div></section>`;
 const lecQuizHTML = L => `<section class="lesson"><div class="gut">kendini sına</div><div><h3>Çoktan seçmeli sorular</h3>
   ${L.quiz.map((q, i) => `<div class="lq" data-qi="${i}"><p class="q" style="margin:14px 0 6px"><b>${i + 1}.</b> ${esc(q[0])}</p>${q[1].map((o, k) => `<button class="opt" data-lq="${i}" data-k="${k}">${esc(o)}</button>`).join("")}<p class="lq-why muted hidden" style="margin:6px 0 0;font-size:.92rem"></p></div>`).join("")}
-  <p class="verdict" id="lqScore" style="margin-top:16px"></p></div></section>`;
+  <p class="verdict" id="lqScore" role="status" aria-live="polite" style="margin-top:16px"></p></div></section>`;
 function renderLecture(){
   $$("#lecSeg button", root).forEach(b => b.setAttribute("aria-pressed", +b.dataset.lec === lec));
   lq = {score:0, done:new Set()};
@@ -132,7 +132,7 @@ function renderLecture(){
       <section class="lesson" id="quizBox"><div class="gut">kendini sına</div><div><h3>Veriden üretilen sorular</h3>
       <div class="row" style="margin-top:8px"><div class="seg" id="qKind"><button data-v="hyper" aria-pressed="true">Üst kavramı bul</button><button data-v="rel" aria-pressed="false">İlişki türünü bul</button></div>
       <div class="seg" id="qDs"><button data-v="en" aria-pressed="true">English</button><button data-v="kenet" aria-pressed="false">Türkçe</button></div>
-      <button class="btn pri" id="qGo">Başlat · 5 soru</button></div><div id="qOut"></div></div></section>`;
+      <button class="btn pri" id="qGo">Başlat · 5 soru</button></div><p id="qStatus" class="ck-meta" role="status" aria-live="polite"></p><div id="qOut"></div></div></section>`;
     return;
   }
   const L = LECTURES[lec];
@@ -145,6 +145,7 @@ function lecAnswer(btn){
   $$(".opt", box).forEach((b, j) => { b.disabled = true; if(j === q[2]) b.classList.add("ok"); else if(j === k) b.classList.add("no"); });
   if(k === q[2]) lq.score++;
   const why = $(".lq-why", box); why.textContent = (k === q[2] ? "Doğru. " : "Yanlış. ") + q[3]; why.classList.remove("hidden");
+  why.tabIndex = -1; why.focus();
   $("#lqScore", root).textContent = `${lq.done.size} / ${LECTURES[lec].quiz.length} soru yanıtlandı · ${lq.score} doğru`;
 }
 
@@ -170,24 +171,35 @@ function mount(){
   renderLecture();
 }
 async function quizStart(){
-  const j = await api("/api/quiz", {ds:quiz.ds, kind:quiz.kind, n:5});
-  Object.assign(quiz, {qs:j.questions, i:0, score:0}); quizShow();
+  const status = $("#qStatus", root);
+  status.textContent = "Sorular yükleniyor…";
+  try{
+    const j = await api("/api/quiz", {ds:quiz.ds, kind:quiz.kind, n:5});
+    Object.assign(quiz, {qs:j.questions, i:0, score:0});
+    status.textContent = "";
+    quizShow();
+  }catch(_){
+    status.textContent = "Sorular yüklenemedi. Sunucuyu kontrol edip yeniden deneyin.";
+  }
 }
 function quizShow(){
   const box = $("#qOut", root), q = quiz.qs[quiz.i];
-  if(!q){ box.innerHTML = `<p class="verdict">Bitti: <b>${quiz.score} / ${quiz.qs.length}</b></p>`; return; }
+  if(!q){ box.innerHTML = `<p class="verdict">Bitti: <b>${quiz.score} / ${quiz.qs.length}</b></p>`; box.tabIndex = -1; box.focus(); return; }
   const lit = b => b.lits.map(l => esc(l.w)).join(", ");
   const head = q.kind === "hyper"
     ? `<div class="q"><b>${lit(q.a)}</b> sözcüğünün üst kavramı hangisi?<br><span class="muted" style="font-size:.95rem">${esc(q.a.d)}</span></div>`
     : `<div class="q"><b>${lit(q.a)}</b> → <b>${lit(q.b)}</b> ilişkisi nedir?<br><span class="muted" style="font-size:.95rem">${esc(q.a.d)} → ${esc(q.b.d)}</span></div>`;
   const opts = q.options.map((o, k) => q.kind === "hyper" ? `<button class="opt" data-k="${k}">${lit(o)}<small>${esc(o.d)}</small></button>` : `<button class="opt" data-k="${k}">${esc(REL[o] || o)}</button>`).join("");
   box.innerHTML = `<p class="up" style="margin:14px 0 0">Soru ${quiz.i + 1} / ${quiz.qs.length} · puan ${quiz.score}</p>${head}${opts}`;
+  $("#qOut .opt", root)?.focus();
 }
 function quizAnswer(k){
   const q = quiz.qs[quiz.i];
   $$("#qOut .opt", root).forEach((b, i) => { b.disabled = true; if(i === q.answer) b.classList.add("ok"); else if(i === k) b.classList.add("no"); });
   if(k === q.answer) quiz.score++;
+  $("#qStatus", root).textContent = k === q.answer ? "Doğru yanıt." : "Yanlış yanıt.";
   $("#qOut", root).insertAdjacentHTML("beforeend", `<button class="btn pri" id="qNext" style="margin-top:10px">${quiz.i + 1 < quiz.qs.length ? "Sonraki" : "Sonucu gör"}</button>`);
+  $("#qNext", root).focus();
 }
 
 export const view = { async enter(){ mount(); } };

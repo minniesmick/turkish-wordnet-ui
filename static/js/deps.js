@@ -77,12 +77,12 @@ function arcSVG(toks, chk){
   for(const a of arcs){
     const x1 = xs.get(a.h) + off.get(`${a.h}:${a.d}`), x2 = xs.get(a.d) + off.get(`${a.d}:${a.d}`), hgt = a.level * LV, ty = y0 - hgt, r = 7, dir = x2 > x1 ? 1 : -1;
     const on = DS.sel === a.d || DS.sel === a.h;
-    svg += `<g class="dp-arc ${on ? "on" : ""} ${np.has(a.d) ? "np" : ""}" data-tok="${a.d}"><path d="M${x1} ${y0 - 16}V${ty + r}Q${x1} ${ty} ${x1 + dir * r} ${ty}H${x2 - dir * r}Q${x2} ${ty} ${x2} ${ty + r}V${y0 - 16}"/><path class="hd" d="M${x2 - 4} ${y0 - 22}L${x2} ${y0 - 14}L${x2 + 4} ${y0 - 22}Z"/><text class="dp-lbl" x="${(x1 + x2) / 2}" y="${ty - 4}">${esc(a.rel)}</text></g>`;
+    svg += `<g class="dp-arc ${on ? "on" : ""} ${np.has(a.d) ? "np" : ""}" data-tok="${a.d}" aria-hidden="true"><path d="M${x1} ${y0 - 16}V${ty + r}Q${x1} ${ty} ${x1 + dir * r} ${ty}H${x2 - dir * r}Q${x2} ${ty} ${x2} ${ty + r}V${y0 - 16}"/><path class="hd" d="M${x2 - 4} ${y0 - 22}L${x2} ${y0 - 14}L${x2 + 4} ${y0 - 22}Z"/><text class="dp-lbl" x="${(x1 + x2) / 2}" y="${ty - 4}">${esc(a.rel)}</text></g>`;
   }
   const rt = toks.find(t => t.head === 0);
-  if(rt){ const x = xs.get(rt.id), ty = y0 - (maxL + 1) * LV; svg += `<g class="dp-arc root ${DS.sel === rt.id ? "on" : ""}" data-tok="${rt.id}"><path d="M${x} ${ty}V${y0 - 16}"/><path class="hd" d="M${x - 4} ${y0 - 22}L${x} ${y0 - 14}L${x + 4} ${y0 - 22}Z"/><text class="dp-lbl" x="${x + 6}" y="${ty + 10}" style="text-anchor:start">root</text></g>`; }
-  for(const t of toks) svg += `<g class="dp-word ${DS.sel === t.id ? "on" : ""}" data-tok="${t.id}"><text class="dp-f" x="${xs.get(t.id)}" y="${y0 + 8}">${esc(t.form)}</text><text class="dp-p" x="${xs.get(t.id)}" y="${y0 + 26}">${esc(t.upos)}</text><text class="dp-i" x="${xs.get(t.id)}" y="${y0 + 42}">${t.id}</text></g>`;
-  return `<svg class="dp" viewBox="0 0 ${width} ${H}" width="${width}" height="${H}" role="img" aria-label="Bağımlılık okları">${svg}</svg>`;
+  if(rt){ const x = xs.get(rt.id), ty = y0 - (maxL + 1) * LV; svg += `<g class="dp-arc root ${DS.sel === rt.id ? "on" : ""}" data-tok="${rt.id}" aria-hidden="true"><path d="M${x} ${ty}V${y0 - 16}"/><path class="hd" d="M${x - 4} ${y0 - 22}L${x} ${y0 - 14}L${x + 4} ${y0 - 22}Z"/><text class="dp-lbl" x="${x + 6}" y="${ty + 10}" style="text-anchor:start">root</text></g>`; }
+  for(const t of toks) svg += `<g class="dp-word ${DS.sel === t.id ? "on" : ""}" data-tok="${t.id}" role="button" tabindex="0" aria-pressed="${DS.sel === t.id}" aria-label="Sözcük ${t.id}: ${esc(t.form)}, ${esc(t.upos)}"><text class="dp-f" x="${xs.get(t.id)}" y="${y0 + 8}">${esc(t.form)}</text><text class="dp-p" x="${xs.get(t.id)}" y="${y0 + 26}">${esc(t.upos)}</text><text class="dp-i" x="${xs.get(t.id)}" y="${y0 + 42}">${t.id}</text></g>`;
+  return `<svg class="dp" viewBox="0 0 ${width} ${H}" width="${width}" height="${H}" role="group" aria-label="Bağımlılık okları; sözcük seçmek için sekme ve Enter tuşlarını kullan">${svg}</svg>`;
 }
 function treeSVG(toks){
   const {xs, width} = layoutX(toks), by = new Map(toks.map(t => [t.id, t])), depth = new Map();
@@ -92,17 +92,17 @@ function treeSVG(toks){
   const py = t => top + (depth.get(t.id) - 1) * VY + 22;
   let lines = "", nodes = "";
   const rt = toks.find(t => t.head === 0);
-  if(rt) lines += `<g class="dp-arc root"><line x1="${xs.get(rt.id)}" y1="${top - 14}" x2="${xs.get(rt.id)}" y2="${py(rt) - 20}"/><text class="dp-lbl" x="${xs.get(rt.id) + 6}" y="${top + 2}" style="text-anchor:start">root</text></g>`;
+  if(rt) lines += `<g class="dp-arc root" aria-hidden="true"><line x1="${xs.get(rt.id)}" y1="${top - 14}" x2="${xs.get(rt.id)}" y2="${py(rt) - 20}"/><text class="dp-lbl" x="${xs.get(rt.id) + 6}" y="${top + 2}" style="text-anchor:start">root</text></g>`;
   for(const t of toks){
     const p = by.get(t.head); if(!p) continue;
     const x1 = xs.get(p.id), y1 = py(p) + 20, x2 = xs.get(t.id), y2 = py(t) - 20;
-    lines += `<g class="dp-arc ${DS.sel === t.id || DS.sel === p.id ? "on" : ""}" data-tok="${t.id}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/><text class="dp-lbl halo" x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2 + 4}">${esc(t.rel)}</text></g>`;
+    lines += `<g class="dp-arc ${DS.sel === t.id || DS.sel === p.id ? "on" : ""}" data-tok="${t.id}" aria-hidden="true"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/><text class="dp-lbl halo" x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2 + 4}">${esc(t.rel)}</text></g>`;
   }
   for(const t of toks){
     const w = wOf(t) - 8;
-    nodes += `<g class="dp-node ${DS.sel === t.id ? "on" : ""}" data-tok="${t.id}"><rect x="${xs.get(t.id) - w / 2}" y="${py(t) - 20}" width="${w}" height="40" rx="6"/><text class="dp-f" x="${xs.get(t.id)}" y="${py(t) - 2}">${esc(t.form)}</text><text class="dp-p" x="${xs.get(t.id)}" y="${py(t) + 13}">${esc(t.upos)}</text></g>`;
+    nodes += `<g class="dp-node ${DS.sel === t.id ? "on" : ""}" data-tok="${t.id}" role="button" tabindex="0" aria-pressed="${DS.sel === t.id}" aria-label="Sözcük ${t.id}: ${esc(t.form)}, ${esc(t.upos)}"><rect x="${xs.get(t.id) - w / 2}" y="${py(t) - 20}" width="${w}" height="40" rx="6"/><text class="dp-f" x="${xs.get(t.id)}" y="${py(t) - 2}">${esc(t.form)}</text><text class="dp-p" x="${xs.get(t.id)}" y="${py(t) + 13}">${esc(t.upos)}</text></g>`;
   }
-  return `<svg class="dp" viewBox="0 0 ${width} ${H}" width="${width}" height="${H}" role="img" aria-label="Bağımlılık ağacı">${lines}${nodes}</svg>`;
+  return `<svg class="dp" viewBox="0 0 ${width} ${H}" width="${width}" height="${H}" role="group" aria-label="Bağımlılık ağacı; sözcük seçmek için sekme ve Enter tuşlarını kullan">${lines}${nodes}</svg>`;
 }
 
 // ───────────────────────── çıktı
@@ -115,7 +115,7 @@ function checksHTML(toks, c){
     ${li(!c.nonproj.length, "Projektif", c.nonproj.length ? `kesişen ok: ${c.nonproj.map(i => `<i>${esc(toks.find(t => t.id === i)?.form)}</i>`).join(", ")}` : "kesişen ok yok; her alt ağaç ardışık bir aralık")}</ul>`;
 }
 function tableHTML(toks){
-  return `<div class="dp-scroll"><table class="ng-tbl dp-tbl"><tr><th>ID</th><th>FORM</th><th>LEMMA</th><th>UPOS</th><th>FEATS</th><th class="sec">HEAD</th><th class="sec">DEPREL</th></tr>
+  return `<div class="dp-scroll" role="region" tabindex="0" aria-label="CoNLL-U tablosu, yatay kaydırılabilir"><table class="ng-tbl dp-tbl"><tr><th>ID</th><th>FORM</th><th>LEMMA</th><th>UPOS</th><th>FEATS</th><th class="sec">HEAD</th><th class="sec">DEPREL</th></tr>
   ${toks.map(t => `<tr data-tok="${t.id}" class="${DS.sel === t.id ? "sel" : ""}"><td>${t.id}</td><td><b>${esc(t.form)}</b></td><td>${esc(t.lemma)}</td><td>${esc(t.upos)}</td><td class="f">${esc(t.feats === "_" ? "" : t.feats.replace(/\|/g, " · "))}</td><td class="sec">${t.head}${t.head ? ` <small>${esc(toks.find(x => x.id === t.head)?.form || "?")}</small>` : ""}</td><td class="sec">${esc(t.rel)}</td></tr>`).join("")}</table></div>`;
 }
 function relsHTML(toks){
@@ -136,8 +136,8 @@ function render(){
     <p class="dp-text">${esc(meta.text || toks.map(t => t.form).join(" "))}</p>
     <div class="ng-ctl"><div class="seg" role="group" aria-label="Görünüm"><button data-dv="arc" aria-pressed="${DS.view === "arc"}">Oklar</button><button data-dv="tree" aria-pressed="${DS.view === "tree"}">Ağaç</button></div>
       <label class="chk stu"><input type="checkbox" id="dpHide" ${DS.hide ? "checked" : ""}> etiketleri gizle (önce kendin dene)</label></div>
-    <div class="fig-box"><div class="fig-actions" style="margin:0 0 6px"><button class="btn sm ghost" data-export="svg" data-name="bagimlilik-${esc(meta.sent_id || "cumle")}">SVG indir</button><button class="btn sm ghost" data-export="png" data-name="bagimlilik-${esc(meta.sent_id || "cumle")}">PNG indir</button><button class="btn sm ghost" data-copy="${esc(DS.conllu)}">CoNLL-U kopyala</button></div><div class="dp-scroll dp-fig">${DS.view === "arc" ? arcSVG(toks, c) : treeSVG(toks)}</div></div>
-    <div id="dpSel">${selHTML(toks)}</div>
+    <div class="fig-box"><div class="fig-actions" style="margin:0 0 6px"><button class="btn sm ghost" data-export="svg" data-name="bagimlilik-${esc(meta.sent_id || "cumle")}">SVG indir</button><button class="btn sm ghost" data-export="png" data-name="bagimlilik-${esc(meta.sent_id || "cumle")}">PNG indir</button><button class="btn sm ghost" data-copy="${esc(DS.conllu)}">CoNLL-U kopyala</button></div><div class="dp-scroll dp-fig" role="region" tabindex="0" aria-label="Bağımlılık ağacı, yatay kaydırılabilir">${DS.view === "arc" ? arcSVG(toks, c) : treeSVG(toks)}</div></div>
+    <div id="dpSel" aria-live="polite">${selHTML(toks)}</div>
     <h3 class="ng-h3 stu">Özellikler <small>Lecture 3, bağımlılık ağacı</small></h3>${checksHTML(toks, c)}
     <h3 class="ng-h3 stu">Bu cümledeki ilişkiler</h3>${relsHTML(toks)}
     <h3 class="ng-h3">CoNLL-U tablosu</h3>${tableHTML(toks)}`;
@@ -173,7 +173,7 @@ function mount(){
       <p class="ng-formula" style="margin:6px 0 0">10 sütunlu CoNLL-U (sekme ya da boşlukla ayrılmış, en az 8 sütun). Çok sözcüklü belirteçler (1-2) atlanır.</p></div>
     <div class="dp-list" id="dpList"></div>
     <h2 class="ng-h">2 · Ağaç</h2>
-    <div id="dpOut" aria-live="polite"></div>
+    <div id="dpOut"></div>
     <div style="height:56px"></div></div>`;
   $("#dpQ", root).value = DS.q; $("#dpMin", root).value = DS.min; $("#dpMax", root).value = DS.max;
   let t;
@@ -193,6 +193,14 @@ function mount(){
     if(el.dataset.id) return pick(el.dataset.id);
     if(el.dataset.dv){ DS.view = el.dataset.dv; save(); return render(); }
     DS.sel = +el.dataset.tok; render();
+  });
+  root.addEventListener("keydown", e => {
+    const el = e.target.closest(".dp-word,.dp-node");
+    if(!el || (e.key !== "Enter" && e.key !== " ")) return;
+    e.preventDefault();
+    DS.sel = +el.dataset.tok;
+    render();
+    root.querySelector(`.dp-word[data-tok="${DS.sel}"],.dp-node[data-tok="${DS.sel}"]`)?.focus();
   });
   root.addEventListener("change", e => { if(e.target.id === "dpHide"){ DS.hide = e.target.checked; render(); } });
 }

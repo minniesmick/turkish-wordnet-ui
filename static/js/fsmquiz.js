@@ -43,7 +43,7 @@ function answerHTML(){
   return `<h4 style="margin:14px 0 6px">Cevap <small class="muted">Sample.pdf biçimi</small></h4><pre class="mp-fsm">${esc(sampleLines(cur.t).join("\n"))}</pre>
     <p class="muted" style="font-size:.84rem;margin:4px 0 0">${esc(cur.want.map(nm).join(" → "))}${flagNote(cur.t) ? " · " + esc(flagNote(cur.t)) : ""}</p>`;
 }
-function render(keepOwn = false){
+function render(keepOwn = false, focusInput = true){
   if(!box) return;
   if(!cur) fresh();
   const seg = `<div class="seg" role="group" aria-label="Kaynak"><button data-fq="src" data-s="pool" aria-pressed="${FQ.src === "pool"}">Hazır örnekler</button><button data-fq="src" data-s="own" aria-pressed="${FQ.src === "own"}">Kendi çözümlemem</button></div>`;
@@ -55,14 +55,14 @@ function render(keepOwn = false){
     const done = FQ.checked?.status === "ok" || FQ.reveal;
     body = `<p class="mp-q" style="margin:14px 0 4px">Çözümleme: <span class="mp-lex" style="display:inline;font-size:1.05rem">${esc(cur.lex)}</span></p>
       <p class="muted" style="margin:0 0 8px;font-size:.88rem">${FQ.src === "pool" ? (VERIFIED.has(cur.lex) ? "Cevap anahtarı Sample.pdf ile birebir doğrulandı." : "Cevap anahtarı şekillerden elle kodlandı; Sample.pdf'te bu yol yok, şekille karşılaştır.") : "Cevap anahtarı şekillerden elle kodlandı."} Başlangıç durumu 1'den bitiş durumuna kadar durum numaralarını sırayla yaz (sıfır morfemleri de say).</p>
-      <div class="pair" style="grid-template-columns:1fr auto auto auto"><label class="field sm"><input id="fqIn" type="text" autocomplete="off" spellcheck="false" placeholder="örn. 1 2 3 4 5 6" value="${esc(FQ.typed)}" ${done ? "disabled" : ""}></label>
+      <div class="pair pair-actions"><label class="field sm"><input id="fqIn" type="text" autocomplete="off" spellcheck="false" placeholder="örn. 1 2 3 4 5 6" value="${esc(FQ.typed)}" ${done ? "disabled" : ""}></label>
         <button class="btn pri sm" data-fq="check" ${done ? "disabled" : ""}>Kontrol et</button><button class="btn sm" data-fq="hint" ${done ? "disabled" : ""}>İpucu</button><button class="btn sm ghost" data-fq="reveal" ${FQ.reveal ? "disabled" : ""}>Cevabı göster</button></div>
       ${FQ.hintMsg && !done ? `<p class="fq-msg hint">${esc(FQ.hintMsg)}</p>` : ""}
       ${feedback()}${answerHTML()}
       ${FQ.checked || FQ.reveal ? `<button class="btn pri sm" data-fq="next" style="margin-top:12px">Sonraki</button>` : ""}`;
   }
   box.innerHTML = `<div class="row" style="margin-bottom:6px">${seg}<span class="muted" style="font-size:.9rem">${FQ.score} / ${FQ.n} doğru</span></div>${own}${body}${mapHTML()}`;
-  const i = $(keepOwn ? "#fqOwn" : "#fqIn", box); if(i && !i.disabled){ i.focus(); const v = i.value; i.value = ""; i.value = v; }
+  const i = $(keepOwn ? "#fqOwn" : "#fqIn", box); if(focusInput && i && !i.disabled){ i.focus(); const v = i.value; i.value = ""; i.value = v; }
 }
 const typedList = () => (FQ.typed.match(/\d+/g) || []);
 function count(ok){ if(FQ.counted) return; FQ.counted = true; FQ.n++; if(ok && !FQ.hint) FQ.score++; }
@@ -99,5 +99,5 @@ export function mountFsmQuiz(el){
     if(e.target.id === "fqOwn"){ FQ.own = e.target.value; clearTimeout(t); t = setTimeout(() => { cur = null; render(true); }, 350); }
     else if(e.target.id === "fqIn") FQ.typed = e.target.value;
   });
-  return {render};
+  return {render:() => render(false, false)};
 }

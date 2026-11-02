@@ -30,7 +30,11 @@ const GLOSS = {
   "PronType=Ind":"belgisiz", "PronType=Dem":"işaret", "PronType=Prs":"kişi", "PronType=Int":"soru", "PronType=Neg":"olumsuz", "NumType=Card":"asıl sayı", "NumType=Ord":"sıra sayı"
 };
 const glossOf = tag => [UPOS_TR[uposOf(tag)] || uposOf(tag), ...(featsOf(tag) === "_" ? [] : featsOf(tag).split("|").map(f => GLOSS[f]).filter(Boolean))].join(" · ");
-const tagHTML = t => `<span class="dm-tag"><b>${esc(uposOf(t))}</b>${featsOf(t) !== "_" ? `<small>${esc(featsOf(t).split("|").join(" · "))}</small>` : ""}</span>`;
+const tagHTML = t => {
+  const feats = featsOf(t);
+  const items = feats === "_" ? [] : feats.split("|");
+  return `<span class="dm-tag"><b>${esc(uposOf(t))}</b>${items.length ? `<details class="dm-tag-feats"><summary>${items.length} özellik</summary><small>${esc(items.join(" · "))}</small></details>` : ""}</span>`;
+};
 const pct = (a, n) => n ? (100 * a / n).toFixed(1) : "–";
 const meter = v => `<div class="meter"><i><b style="width:${Math.min(1, v) * 100}%"></b></i></div>`;
 const FL = {w:"sözcük", pw:"önceki sözcük", nw:"sonraki sözcük", ps3:"önceki sözcüğün son 3 harfi", ns3:"sonraki sözcüğün son 3 harfi", ps2:"önceki sözcüğün son 2 harfi", ns2:"sonraki sözcüğün son 2 harfi",
@@ -74,13 +78,13 @@ function statsHTML(){
 function accHTML(){
   const U = DM.gran === "upos" ? "U" : "";
   const rows = [["all", "Tüm sözcükler"], ["amb", "Belirsiz (bilinen, 2 ve üstü aday)"], ["one", "Tek adaylı (bilinen)"], ["unk", "Bilinmeyen sözcük (eğitimde yok)"]];
-  return `<div class="ng-scroll"><table class="ng-tbl ng-cmp"><caption>Sınama kümesi doğruluğu (%), ${DM.gran === "upos" ? "yalnızca sözcük türü (UPOS)" : "tam çözümleme (UPOS + FEATS)"}. Noktalama sayılmaz.</caption>
+  return `<div class="ng-scroll" role="region" tabindex="0" aria-label="Sınama kümesi doğruluk tablosu, yatay kaydırılabilir"><table class="ng-tbl ng-cmp"><caption>Sınama kümesi doğruluğu (%), ${DM.gran === "upos" ? "yalnızca sözcük türü (UPOS)" : "tam çözümleme (UPOS + FEATS)"}. Noktalama sayılmaz.</caption>
     <thead><tr><th>Küme</th><th>Sözcük</th><th title="Doğru çözümlemenin aday kümesinde bulunma oranı: hiçbir yöntem bunu aşamaz">Tavan</th>${METHODS.map(m => `<th>${NAME[m]}</th>`).join("")}</tr></thead>
     <tbody>${rows.map(([k, label]) => {
       const r = R[k], v = METHODS.map(m => 100 * r[m + U] / r.n), mx = Math.max(...v), mn = Math.min(...v);
       return `<tr><td>${label}</td><td>${num(r.n)}</td><td>${pct(r["ceil" + U], r.n)}</td>${v.map(x => `<td class="${r.n && x === mx && mx > mn ? "best" : ""}">${r.n ? x.toFixed(1) : "–"}</td>`).join("")}</tr>`;
     }).join("")}</tbody></table></div>
-    <p class="ng-formula" style="margin:6px 0 0">Aday kümesi eğitim sözlüğünden gelir, gerçek bir çözümleyiciden değil: görülen sözcüğün eğitimdeki çözümlemeleri; görülmeyen sözcük için son harfleri aynı olan sözcüklerin çözümlemeleri. Tavan, doğru çözümlemenin bu kümede olduğu sözcüklerin oranıdır.</p>`;
+    <p class="ng-formula stu" style="margin:6px 0 0">Aday kümesi eğitim sözlüğünden gelir, gerçek bir çözümleyiciden değil: görülen sözcüğün eğitimdeki çözümlemeleri; görülmeyen sözcük için son harfleri aynı olan sözcüklerin çözümlemeleri. Tavan, doğru çözümlemenin bu kümede olduğu sözcüklerin oranıdır.</p>`;
 }
 
 const cur = () => {
@@ -118,10 +122,10 @@ function zemHTML(){
   const rows = [["zem", "Zemberek: cümle bağlamında seçim"], ["zemAny", "Zemberek: aday kümesinde var (tavan)"], ["base", NAME.base], ["dl", NAME.dl], ["ap", NAME.ap]];
   const pc = (a, n) => (100 * a / n).toFixed(1);
   const best = k => Math.max(...["zem", "base", "dl", "ap"].map(r => T.rows[r][k]));
-  return `<div class="ng-ctl">${btn}</div><div class="ng-scroll"><table class="ng-tbl ng-cmp"><caption>Zemberek karşılaştırması (%): ${num(T.n)} sözcük, ${T.sents} cümle${T.skipped ? `; ${T.skipped} cümle tokenlaştırma farkı yüzünden atlandı` : ""}. Noktalama sayılmaz.</caption>
+  return `<div class="ng-ctl">${btn}</div><div class="ng-scroll" role="region" tabindex="0" aria-label="Zemberek karşılaştırma tablosu, yatay kaydırılabilir"><table class="ng-tbl ng-cmp"><caption>Zemberek karşılaştırması (%): ${num(T.n)} sözcük, ${T.sents} cümle${T.skipped ? `; ${T.skipped} cümle tokenlaştırma farkı yüzünden atlandı` : ""}. Noktalama sayılmaz.</caption>
     <thead><tr><th>Yöntem</th><th title="Seçilen çözümlemenin kökü BOUN lemmasıyla aynı">Kök</th><th title="Eşlenen sözcük türü BOUN UPOS'uyla aynı">Sözcük türü (UPOS)</th><th>İkisi birden</th></tr></thead>
     <tbody>${rows.map(([r, label]) => `<tr><td>${esc(label)}</td>${["l", "u", "b"].map(k => `<td class="${r !== "zemAny" && T.rows[r][k] === best(k) ? "best" : ""}">${pc(T.rows[r][k], T.n)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
-    <p class="ng-formula" style="margin:6px 0 0">Zemberek BOUN'la eğitilmedi ve etiket kümesi UD değil: UPOS eşlemesi <code>zmap.js</code>'te ve bana ait (örn. da/de için Zemberek bağlaç, BOUN parçacık; ad / özel ad ayrımı). Bizim yöntemlerin kökü yalnızca eğitimde görülen sözcüklerde bulunur; Zemberek gerçek çözümleyici olduğu için aday kümesi eğitim verisine bağlı değildir.</p>`;
+    <p class="ng-formula stu" style="margin:6px 0 0">Zemberek BOUN'la eğitilmedi ve etiket kümesi UD değil: UPOS eşlemesi <code>zmap.js</code>'te ve bana ait (örn. da/de için Zemberek bağlaç, BOUN parçacık; ad / özel ad ayrımı). Bizim yöntemlerin kökü yalnızca eğitimde görülen sözcüklerde bulunur; Zemberek gerçek çözümleyici olduğu için aday kümesi eğitim verisine bağlı değildir.</p>`;
 }
 async function runZem(){
   if(ZE.busy || !(await zemAvail())) return;
@@ -148,7 +152,7 @@ function candHTML(t, k, gold){
     else why.push(`<p><b>Karar listesi:</b> uyan kural yok, en sık çözümlemeye düştü.</p>`);
     if(t.ap.why.length) why.push(`<p><b>Perceptron:</b> seçilen çözümlemeyi ikinci adaya göre öne çıkaran özellikler (ağırlık farkı): ${t.ap.why.map(([f, x]) => `${featText(f)} <b>${x > 0 ? "+" : "−"}${Math.abs(x).toFixed(2)}</b>`).join("; ")}.</p>`);
   }
-  return `<tr class="dm-det"><td colspan="${k}"><div class="dm-cand">${rows}${more}</div>${t.known ? "" : `<p class="muted" style="margin:6px 0 0">Bu sözcük eğitimde yok: adaylar, son harfleri aynı olan sözcüklerin çözümlemelerinden çıkarıldı.</p>`}<div class="stu dm-why">${why.join("")}</div></td></tr>`;
+  return `<tr class="dm-det"><td colspan="${k}"><div class="dm-cand">${rows}${more}</div>${t.known ? "" : `<p class="muted stu" style="margin:6px 0 0">Bu sözcük eğitimde yok: adaylar, son harfleri aynı olan sözcüklerin çözümlemelerinden çıkarıldı.</p>`}<div class="stu dm-why">${why.join("")}</div></td></tr>`;
 }
 function sentHTML(){
   const S = cur();
@@ -158,7 +162,7 @@ function sentHTML(){
   const score = {base:0, dl:0, ap:0, z:0}; let n = 0;
   const cell = (t, tag, ref, i) => {
     const mk = S.gold && S.upos[i] !== "PUNCT" ? (tag === S.gold[i] ? " ok" : " no") : "";
-    return `<td class="dm-pick${mk}"><div class="dm-cin">${mk ? `<span class="dm-mk">${mk === " ok" ? "✓" : "✗"}</span>` : ""}${ref !== undefined && tag === ref ? `<span class="muted">aynı</span>` : tagHTML(tag)}</div></td>`;
+    return `<td class="dm-pick${mk}"><div class="dm-cin">${mk ? `<span class="dm-mk">${mk === " ok" ? "✓" : "✗"}</span>` : ""}${ref !== undefined && tag === ref ? `<span class="dm-same">tabanla aynı</span>` : tagHTML(tag)}</div></td>`;
   };
   const zcell = (w, i) => {                                   // Zemberek'in seçimi: UPOS (eşlenmiş) ve Oflazer biçimi; işaret yalnızca UPOS'a bakar
     const m = S.gold && S.upos[i] !== "PUNCT" ? matchZ(w, S.lemmas[i], S.upos[i]) : null;
@@ -167,12 +171,12 @@ function sentHTML(){
   const body = res.map((t, i) => {
     if(S.gold && S.upos[i] !== "PUNCT"){ n++; for(const m of METHODS) if((m === "base" ? t.base : t[m].tag) === S.gold[i]) score[m]++; if(zok && matchZ(zw[i].best, S.lemmas[i], S.upos[i]).upos) score.z++; }
     const open = DM.open.includes(i);
-    return `<tr class="dm-row${open ? " sel" : ""}" data-row="${i}"><td class="muted">${i + 1}</td><td><b>${esc(t.w)}</b></td><td>${t.cands.length > 1 ? `<b>${t.cands.length}</b>` : t.cands.length}${t.known ? "" : ` <small class="muted">yeni</small>`}</td>
+    return `<tr class="dm-row${open ? " sel" : ""}" data-row="${i}"><td class="muted"><button class="dm-row-toggle" data-row="${i}" aria-expanded="${open}" aria-label="${open ? "Adayları gizle" : "Adayları göster"}: ${esc(t.w)}">${i + 1}</button></td><td><b>${esc(t.w)}</b></td><td>${t.cands.length > 1 ? `<b>${t.cands.length}</b>` : t.cands.length}${t.known ? "" : ` <small class="muted">yeni</small>`}</td>
       ${cell(t, t.base, undefined, i)}${cell(t, t.dl.tag, t.base, i)}${cell(t, t.ap.tag, t.base, i)}${zok ? zcell(zw[i].best, i) : ""}${S.gold ? `<td>${tagHTML(S.gold[i])}</td>` : ""}</tr>${open ? candHTML(t, cols, S.gold?.[i]) : ""}`;
   }).join("");
   const head = `<p class="dm-score">${S.gold ? `Taban çizgisi <b>${score.base}/${n}</b> · Karar listesi <b>${score.dl}/${n}</b> · Perceptron <b>${score.ap}/${n}</b>${zok ? ` · Zemberek (yalnızca UPOS) <b>${score.z}/${n}</b>` : ""}` : `${res.filter(t => t.cands.length > 1).length} sözcük belirsiz`}</p>`;
-  return `${head}<div class="ng-scroll"><table class="ng-tbl dm-tbl"><thead><tr><th>#</th><th>Sözcük</th><th>Aday</th><th>${NAME.base}</th><th>${NAME.dl}</th><th>${NAME.ap}</th>${zok ? "<th title=\"Zemberek'in cümle bağlamındaki seçimi; UPOS eşlemesi zmap.js'te\">Zemberek</th>" : ""}${S.gold ? "<th>Doğru</th>" : ""}</tr></thead><tbody>${body}</tbody></table></div>
-    <p class="ng-formula" style="margin:6px 0 0">Satıra tıklayınca adaylar ve sayıları açılır.${S.gold ? " “aynı” = taban çizgisiyle aynı seçim; ✓ / ✗ doğru çözümlemeyle karşılaştırır." : " Eğitimde görülmemiş sözcükte aday kümesi güvenilir değildir."}</p>`;
+  return `${head}<div class="ng-scroll" role="region" tabindex="0" aria-label="Cümle çözümlemeleri, yatay kaydırılabilir tablo"><table class="ng-tbl dm-tbl"><thead><tr><th>#</th><th>Sözcük</th><th>Aday</th><th>${NAME.base}</th><th>${NAME.dl}</th><th>${NAME.ap}</th>${zok ? "<th title=\"Zemberek'in cümle bağlamındaki seçimi; UPOS eşlemesi zmap.js'te\">Zemberek</th>" : ""}${S.gold ? "<th>Doğru</th>" : ""}</tr></thead><tbody>${body}</tbody></table></div>
+    <p class="ng-formula" style="margin:6px 0 0">Adayları ve sayıları görmek için sözcük satırını seç.${S.gold ? `<span class="stu"> “Tabanla aynı” aynı seçimi, ✓ / ✗ doğru çözümlemeyle eşleşmeyi gösterir.</span>` : `<span class="stu"> Eğitimde görülmemiş sözcükte aday kümesi güvenilir değildir.</span>`}</p>`;
 }
 function sentCtlHTML(){
   const n = SP.test.length;
@@ -186,13 +190,13 @@ function wordHTML(){
   if(!w) return "";
   if(!m) return `<p class="muted">“${esc(w)}” BOUN'da yok.</p>`;
   const list = [...m].sort((a, b) => b[1].n - a[1].n), tot = list.reduce((a, [, e]) => a + e.n, 0);
-  return `<div class="ng-scroll"><table class="ng-tbl"><caption><b>${esc(w)}</b>: BOUN'da ${tot} kez, ${list.length} farklı çözümleme</caption><thead><tr><th>Çözümleme</th><th>Kök</th><th>Sayı</th><th></th></tr></thead><tbody>
+  return `  <div class="ng-scroll" role="region" tabindex="0" aria-label="${esc(w)} sözcüğünün çözümlemeleri"><table class="ng-tbl"><caption><b>${esc(w)}</b>: BOUN'da ${tot} kez, ${list.length} farklı çözümleme</caption><thead><tr><th>Çözümleme</th><th>Kök</th><th>Sayı</th><th></th></tr></thead><tbody>
     ${list.map(([t, e]) => `<tr><td>${tagHTML(t)}<small class="stu muted" style="display:block">${esc(glossOf(t))}</small></td><td>${esc(lemOf(e))}</td><td>${e.n}</td><td class="ng-bar">${meter(e.n / tot)}</td></tr>`).join("")}</tbody></table></div>`;
 }
 function rulesHTML(){
   const seen = new Set(), rules = topRules(M.dl, 120).filter(r => { const k = `${r.t}|${r.p}|${r.n}`; return seen.has(k) ? false : (seen.add(k), true); }).slice(0, 14);   // aynı kanıta dayanan kopya kuralları ele
   return `<p class="muted" style="margin:0 0 8px">Her kural “özellik → çözümleme” biçimindedir; kurallar güvenilirliğe (log olabilirlik oranı) göre sıralanır, sözcüğe uyan ilk kural karar verir. Bu liste eğitimden çıkan en güvenilir ${rules.length} kuraldır (aynı kanıta dayanan kopyalar çıkarıldı).</p>
-    <div class="ng-scroll"><table class="ng-tbl"><thead><tr><th>#</th><th>Özellik</th><th>Çözümleme</th><th>Güven</th><th>Doğru / yanlış</th></tr></thead><tbody>
+    <div class="ng-scroll" role="region" tabindex="0" aria-label="Karar listesi kuralları tablosu"><table class="ng-tbl"><thead><tr><th>#</th><th>Özellik</th><th>Çözümleme</th><th>Güven</th><th>Doğru / yanlış</th></tr></thead><tbody>
     ${rules.map((r, i) => `<tr><td class="muted">${i + 1}</td><td>${featText(r.f)}</td><td>${tagHTML(r.t)}</td><td>${r.score.toFixed(2)}</td><td>${r.p} / ${r.n}</td></tr>`).join("")}</tbody></table></div>`;
 }
 const METH = `<p><b>Sorun.</b> Bir yüzey biçimin birden çok çözümlemesi olabilir (slayt 31: “Of course, we need to solve it”). Çözümleyici hepsini listeler; bağlama bakıp doğru olanı seçmek <b>morfolojik belirsizlik gidermedir</b>.</p>
@@ -291,7 +295,7 @@ function mount(){
     if(D.gran){ DM.gran = D.gran; renderAll(); }
     else if(D.src){ DM.src = D.src; DM.open = []; renderAll(); }
     else if(D.nav){ const n = SP.test.length; DM.i = D.nav === "rand" ? Math.floor(Math.random() * n) : (DM.i + +D.nav + n) % n; DM.open = []; $("#dmCtl", root).innerHTML = sentCtlHTML(); renderSent(); }
-    else if(D.row !== undefined){ const i = +D.row, k = DM.open.indexOf(i); if(k < 0) DM.open.push(i); else DM.open.splice(k, 1); renderSent(); }
+    else if(D.row !== undefined){ const i = +D.row, restore = d.matches(".dm-row-toggle"), k = DM.open.indexOf(i); if(k < 0) DM.open.push(i); else DM.open.splice(k, 1); renderSent(); if(restore) $(`.dm-row-toggle[data-row="${i}"]`, root)?.focus(); }
     else if(D.bad){ DM.word = D.bad; $("#dmWord", root).value = D.bad; renderAll(); }
     else if(D.qa !== undefined && QZ.cur && QZ.cur.ans == null){ const k = +D.qa; QZ.cur.ans = k; QZ.n++; if(QZ.cur.opts[k] === QZ.cur.g) QZ.score++; $("#dmQuiz", root).innerHTML = quizHTML(); }
     else if(D.q === "next"){ quizNew(); $("#dmQuiz", root).innerHTML = quizHTML(); }

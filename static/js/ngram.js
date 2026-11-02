@@ -84,15 +84,15 @@ function distTable(key){
   const head = M.n > 1 ? `${T(key.split(SEP).join(" "))} bağlamından sonra gelenler · C = ${num(total)}` : `Sözcük olasılıkları · N = ${num(total)}`;
   const how = howMode();
   const md = [`| ${M.n > 1 ? "Sonraki" : "Sözcük"} | Sayım | ${how ? "Kaynak" : "Kesir"} | Olasılık |`, "| --- | --- | --- | --- |", ...rows.slice(0, 40).map(r => `| ${r.w} | ${r.c} | ${how ? r.how : fr(r)} | ${dec(r.p)} |`)].join("\n");
-  return `<table class="ng-tbl"><caption>${head}${cf.smooth === "laplace" ? ` · V = ${num(M.V)}` : ""}</caption>
+  return `<div class="ng-scroll" role="region" tabindex="0" aria-label="Sözcük dağılımı, yatay kaydırılabilir"><table class="ng-tbl"><caption>${head}${cf.smooth === "laplace" ? ` · V = ${num(M.V)}` : ""}</caption>
     <tr><th>${M.n > 1 ? "Sonraki" : "Sözcük"}</th><th>Sayım</th><th>${how ? "Kaynak" : "Kesir"}</th><th>Olasılık</th><th class="ng-bar"></th></tr>
     ${shown.map(r => `<tr><td>${T(r.w)}</td><td>${r.c}</td><td>${how ? `<small class="muted">${esc(r.how)}</small>` : fr(r)}</td><td><b>${dec(r.p)}</b></td><td class="ng-bar">${meter(r.p)}</td></tr>`).join("")}
     ${rest > 0 ? `<tr><td colspan="5" class="muted">… ve ${num(rest)} sözcük daha</td></tr>` : ""}
-    <tr class="sum"><td>Toplam${complete ? "" : " (gösterilen)"}</td><td>${rows.reduce((a, r) => a + r.c, 0)}</td><td></td><td><b>${dec(sum)}</b></td><td class="ng-bar">${complete ? (Math.abs(sum - 1) < 1e-9 ? '<span class="ng-ok stu">Σ = 1 ✓</span>' : '<span class="ng-bad stu">Σ ≠ 1</span>') : '<small class="muted stu">tablo yalnızca bağlamda görülenleri içerir</small>'}</td></tr></table><button class="btn sm ghost" data-copy="${esc(md)}" style="margin-top:6px">Tabloyu Markdown olarak kopyala</button>`;
+    <tr class="sum"><td>Toplam${complete ? "" : " (gösterilen)"}</td><td>${rows.reduce((a, r) => a + r.c, 0)}</td><td></td><td><b>${dec(sum)}</b></td><td class="ng-bar">${complete ? (Math.abs(sum - 1) < 1e-9 ? '<span class="ng-ok stu">Σ = 1 ✓</span>' : '<span class="ng-bad stu">Σ ≠ 1</span>') : '<small class="muted stu">tablo yalnızca bağlamda görülenleri içerir</small>'}</td></tr></table></div><button class="btn sm ghost" data-copy="${esc(md)}" style="margin-top:6px">Tabloyu Markdown olarak kopyala</button>`;
 }
 function matrix(){
   const cf = cfg(), rows = [BOS, ...M.words].filter(h => M.orders[2].has(h)), how = howMode();
-  return `<div class="ng-scroll"><table class="ng-mx"><caption>Bigram tablosu · satır: önceki sözcük, sütun: sonraki sözcük${cf.smooth !== "none" ? " · " + SM[cf.smooth] : ""}</caption>
+  return `<div class="ng-scroll" role="region" tabindex="0" aria-label="Bigram olasılık matrisi, yatay kaydırılabilir"><table class="ng-mx"><caption>Bigram tablosu · satır: önceki sözcük, sütun: sonraki sözcük${cf.smooth !== "none" ? " · " + SM[cf.smooth] : ""}</caption>
     <tr><th></th>${M.cols.map(c => `<th>${T(c)}</th>`).join("")}<th>Σ</th></tr>
     ${rows.map(h => { let sum = 0; const cells = M.cols.map(c => { const r = prob(M, [h], c, cf); sum += r.p; return `<td class="${r.p ? "" : "z"}"><b>${how ? dec(r.p) : fr(r)}</b>${how ? "" : `<small>${dec(r.p)}</small>`}</td>`; }).join("");
       return `<tr class="${h === NG.hist ? "sel" : ""}" data-hist="${esc(h)}"><th>${T(h)}</th>${cells}<td class="sum">${dec(sum)}</td></tr>`; }).join("")}</table></div>`;
@@ -124,8 +124,8 @@ function predHTML(){
   const why = how ? `Neden: ${esc(top.how)}.` : (M.n > 1 ? `Neden: C(${T(hist.concat(top.w).join(" "))}) = ${top.c}, C(${T(hist.join(" "))}) = ${top.h}.` : `Neden: C(${T(top.w)}) = ${top.c}, N = ${top.h}.`);
   const verdict = (ties.length > 1 ? `Beraberlik: ${ties.map(r => T(r.w)).join(", ")} aynı olasılıkta (<b>${val}</b>).` : `En olası sonraki sözcük ${T(top.w)} (<b>${val}</b>).`) + ` <span class="stu">${why}</span>`;
   return `${line}<p class="verdict">${verdict}</p>
-    <table class="ng-tbl"><tr><th>Aday</th><th>Sayım</th><th>${how ? "Kaynak" : "Kesir"}</th><th>Olasılık</th><th class="ng-bar"></th></tr>
-    ${rows.map(r => `<tr><td>${T(r.w)}</td><td>${r.c}</td><td>${how ? `<small class="muted">${esc(r.how)}</small>` : fr(r)}</td><td><b>${dec(r.p)}</b></td><td class="ng-bar">${meter(r.p)}</td></tr>`).join("")}</table>`;
+    <div class="ng-scroll" role="region" tabindex="0" aria-label="Sonraki sözcük olasılıkları tablosu"><table class="ng-tbl"><tr><th>Aday</th><th>Sayım</th><th>${how ? "Kaynak" : "Kesir"}</th><th>Olasılık</th><th class="ng-bar"></th></tr>
+    ${rows.map(r => `<tr><td>${T(r.w)}</td><td>${r.c}</td><td>${how ? `<small class="muted">${esc(r.how)}</small>` : fr(r)}</td><td><b>${dec(r.p)}</b></td><td class="ng-bar">${meter(r.p)}</td></tr>`).join("")}</table></div>`;
 }
 
 // ───────────────────────── cümle olasılığı
@@ -141,7 +141,7 @@ function sentHTML(){
   const fracs = r.steps.map(s => s.p > 0 && !how ? `${s.num}/${s.den}` : dec(s.p)).join(" × ");
   return `<p class="verdict">P = ${r.steps.map(s => dec(s.p)).join(" × ")} = <b>${dec(r.prod)}</b></p>
     <p class="ng-formula stu">${M.n > 1 ? `${T(BOS)} (×${M.n - 1}) ve ${T(EOS)} otomatik eklenir` : "Unigram'da yalnızca sözcükler çarpılır"} · ${r.N} çarpan</p>${warn}
-    <div class="ng-scroll"><table class="ng-tbl"><tr><th>#</th><th>Çarpan</th><th>${how ? "Kaynak" : "Kesir"}</th><th>Değer</th><th>log₂</th><th>Birikmiş çarpım</th></tr>
+    <div class="ng-scroll" role="region" tabindex="0" aria-label="Cümle olasılığı çarpanları tablosu, yatay kaydırılabilir"><table class="ng-tbl"><tr><th>#</th><th>Çarpan</th><th>${how ? "Kaynak" : "Kesir"}</th><th>Değer</th><th>log₂</th><th>Birikmiş çarpım</th></tr>
     ${r.steps.map((s, i) => `<tr class="${s.p === 0 ? "bad" : ""}"><td>${i + 1}</td><td>${lab(s)}</td><td>${how ? `<small class="muted">${esc(s.how)}</small>` : s.und ? "0/0" : fr(s)}</td><td><b>${dec(s.p)}</b></td><td>${lgs(lg(s.p))}</td><td>${dec(s.prod)}</td></tr>`).join("")}
     <tr class="sum"><td></td><td>Toplam</td><td></td><td><b>${dec(r.prod)}</b></td><td><b>${lgs(r.ls)}</b></td><td></td></tr></table></div>
     <p class="ng-formula stu">${esc(fracs)}</p>
@@ -172,7 +172,7 @@ function cmpHTML(){
   });
   const fin = rows.flatMap(r => r.v).filter(isFinite), best = fin.length ? Math.min(...fin) : null;
   return `<p class="ck-meta">Cümlelerin %80'i eğitim, %20'si test (her 5. cümle). Test perplexity: düşük = model görmediği metni daha iyi tahmin ediyor. UNK eşiği: <b>${NG.unk ? "≤ " + NG.unk : "kapalı"}</b>.</p>
-    <div class="ng-scroll"><table class="ng-tbl ng-cmp"><tr><th>Model</th>${Object.values(SM).map(x => `<th lang="en">${x}</th>`).join("")}</tr>
+    <div class="ng-scroll" role="region" tabindex="0" aria-label="Test perplexity karşılaştırma tablosu"><table class="ng-tbl ng-cmp"><tr><th>Model</th>${Object.values(SM).map(x => `<th lang="en">${x}</th>`).join("")}</tr>
     ${rows.map(r => `<tr><td><b>${["Unigram", "Bigram", "Trigram"][r.n - 1]}</b></td>${r.v.map(v => `<td class="${v === best ? "best" : ""}">${ppl(v)}${v === best ? " ★" : ""}</td>`).join("")}</tr>`).join("")}</table></div>
     <p class="ck-meta stu">∞ görürsen test cümlesinde modelin hiç görmediği bir n-gram (ya da sözcük) var: olasılık 0. Yumuşatma n-gram'ı kurtarır; bilinmeyen <em>sözcük</em> için UNK gerekir. Backoff puanları normalize olmadığından perplexity'si yaklaşıktır (stupid backoff). Perplexity eğitim kümesinde değil test kümesinde ölçülür; yoksa ezber ödüllendirilir.</p>`;
 }
@@ -188,7 +188,7 @@ function pmiHTML(){
     <label class="muted" style="font-size:.88rem">en az <input id="pmM" class="dp-num" type="number" min="1" value="${NG.pmin}"> kez birlikte</label>
     <label class="field sm" style="flex:1 1 200px"><input id="pmW" type="text" placeholder="Sözcük sorgula (örn. ${NG.src === "boun" ? "okul" : "president"})" autocomplete="off" spellcheck="false" value="${esc(NG.pw)}"></label></div>
     <p class="ng-formula stu">PMI(x, y) = log₂ P(x, y) / (P(x) · P(y)); burada P(x, y), x ve y'nin ±${NG.pk} sözcüklük pencerede birlikte görülme olasılığı. Varsayım: anlamca benzer sözcükler benzer bağlamlarda geçer (slayt 34).</p>`;
-  h += `<div class="cp-two"><div><h3 class="ng-h3">En yüksek PMI'lı çiftler</h3>${top.length ? `<table class="ng-tbl"><tr><th>x</th><th>y</th><th>Birlikte</th><th>PMI</th></tr>${top.map(p => `<tr><td><b>${esc(p.a)}</b></td><td><b>${esc(p.b)}</b></td><td>${p.c}</td><td>${p.pmi.toFixed(2)}</td></tr>`).join("")}</table>` : '<p class="ck-meta">Bu eşikte çift yok: “en az” değerini düşür.</p>'}
+  h += `<div class="cp-two"><div><h3 class="ng-h3">En yüksek PMI'lı çiftler</h3>${top.length ? `<div class="ng-scroll" role="region" tabindex="0" aria-label="En yüksek PMI değerli sözcük çiftleri"><table class="ng-tbl"><tr><th>x</th><th>y</th><th>Birlikte</th><th>PMI</th></tr>${top.map(p => `<tr><td><b>${esc(p.a)}</b></td><td><b>${esc(p.b)}</b></td><td>${p.c}</td><td>${p.pmi.toFixed(2)}</td></tr>`).join("")}</table></div>` : '<p class="ck-meta">Bu eşikte çift yok: “en az” değerini düşür.</p>'}
     <p class="ck-meta stu">PMI nadir çiftleri şişirir (iki sözcük de çok seyrek ve bir kez yan yana gelmişse PMI çok yüksek çıkar); bu yüzden “en az kez birlikte” süzgeci kullanılır.</p></div>`;
   if(q){
     const col = collocates(pm, q, NG.pmin, 12), sim = similar(pm, q, 8, 10);
@@ -242,7 +242,7 @@ function nqHTML(){
   const rows = q.rows.map((x, i) => `<tr><td>${T(x.w)}</td><td><input class="nq-cell ${NQ.done ? (closeTo(parseVal(NQ.vals?.[i] ?? ""), x.r.p) ? "ok" : "bad") : ""}" data-i="${i}" type="text" autocomplete="off" spellcheck="false" value="${esc(NQ.vals?.[i] ?? "")}" ${NQ.done ? "disabled" : ""}></td>${NQ.done ? `<td class="muted">${x.r.num}/${x.r.den} = ${dec(x.r.p)}</td>` : ""}</tr>`).join("");
   const sumRow = NQ.done ? `<p class="verdict" style="margin-top:10px">${NQ.right ? "Hepsi doğru ✓" : "Bazıları yanlış ✗"} · toplam ${dec(q.rows.reduce((a, x) => a + x.r.p, 0))}${q.all ? " (tüm sözlük: 1 olmalı)" : " (yalnızca gösterilen sözcükler)"}</p>` : "";
   return head + `<p class="mp-q">${M.n > 1 ? `${T(hl)} bağlamından sonra gelen her sözcük için P(· | ${T(hl)}) yaz:` : "Her sözcük için P(w) yaz:"}</p>
-    <table class="ng-tbl nq-tbl"><tr><th>Sonraki</th><th>Olasılık</th>${NQ.done ? "<th>Doğru</th>" : ""}</tr>${rows}</table>
+    <div class="ng-scroll" role="region" tabindex="0" aria-label="Olasılık alıştırması tablosu"><table class="ng-tbl nq-tbl"><tr><th>Sonraki</th><th>Olasılık</th>${NQ.done ? "<th>Doğru</th>" : ""}</tr>${rows}</table></div>
     ${NQ.done ? "" : '<button class="btn pri sm" data-nq="check" style="margin-top:10px">Kontrol et</button>'}${note}${sumRow}`;
 }
 function renderNQ(){ const el = $("#ngQuiz", root); if(el) el.innerHTML = nqHTML(); }
@@ -305,9 +305,10 @@ function ex(kind){
 async function refresh(){
   const my = ++token;
   if(NG.src !== "text") $("#ngState", root).textContent = "yükleniyor…";
-  try{ S = await getSents(); }catch(_){ S = []; }
+  let failure = false;
+  try{ S = await getSents(); }catch(_){ S = []; failure = true; }
   if(my !== token) return;
-  $("#ngState", root).textContent = "";
+  $("#ngState", root).textContent = failure ? "Korpus yüklenemedi; sunucuyu kontrol edip yeniden deneyin." : "";
   M = memo(`m|${srcKey()}|${NG.n}|${NG.unk}`, () => buildModel(S, NG.n, {unk:NG.unk}));
   renderAll();
 }
@@ -323,7 +324,11 @@ function mount(){
   root.innerHTML = `<div class="page wide">
     <h1 class="page-title">N-gram dil modeli</h1>
     <p class="lesson-intro" style="margin:0">Bir korpustan sözcük dizilerinin olasılığını hesapla: sayımlar, koşullu olasılık, yumuşatma (Laplace, backoff, interpolation), bilinmeyen sözcük (UNK), cümle olasılığı, perplexity, rastgele cümle üretimi ve PMI.<span class="stu"> Slayt 17–39, InClass 5.</span></p>
-    <h2 class="ng-h">1 · Korpus <small id="ngState"></small></h2>
+    <details class="section-index"><summary>Bu görünümde</summary><nav aria-label="N-gram bölümleri">
+      <a href="#ngSecCorpus">Korpus</a><a href="#ngSecCounts">Sayımlar</a><a href="#ngSecNext">Sonraki sözcük</a>
+      <a href="#ngSecSentence">Cümle olasılığı</a><a href="#ngSecGenerate">Üretim</a><a href="#ngSecCompare">Karşılaştırma</a><a href="#ngSecPmi">PMI</a><a class="stu" href="#ngSecQuiz">Alıştırma</a>
+    </nav></details>
+    <h2 class="ng-h" id="ngSecCorpus" tabindex="-1">1 · Korpus <small id="ngState" role="status" aria-live="polite"></small></h2>
     <div class="ng-ctl" style="margin-top:0"><div class="seg" role="group" aria-label="Korpus kaynağı"><button data-src="text">Kendi metnim</button><button data-src="boun">${esc(CORPORA.boun.label)}</button><button data-src="brown">${esc(CORPORA.brown.label)}</button></div>
       <label id="ngBrown" class="muted hidden" style="font-size:.88rem">Cümle sayısı <select id="ngSize" class="btn sm"><option value="1000">1.000</option><option value="5000">5.000</option><option value="20000">20.000</option><option value="0">tümü</option></select></label>
       <a class="muted" href="#" data-go="corpus" style="font-size:.86rem">Korpus gezgininde incele →</a></div>
@@ -331,31 +336,33 @@ function mount(){
     <p class="ng-formula" style="margin:6px 0 0">Her satır bir cümle (nokta, soru ve ünlem de cümleyi böler). <span class="ng-t">&lt;s&gt;</span> ve <span class="ng-t">&lt;/s&gt;</span> otomatik eklenir; noktalama atılır.</p>
     <div class="chips" style="margin-top:10px">${Object.entries(PRESETS).map(([k, p]) => `<button class="chip${p.stu ? " stu" : ""}" data-preset="${k}">${esc(p.label)}</button>`).join("")}</div></div>
     <div class="ng-ctl">
-      <div class="seg" role="group" aria-label="N"><button data-n="1">Unigram</button><button data-n="2">Bigram</button><button data-n="3">Trigram</button></div>
+      <div class="seg" role="group" aria-label="N-gram uzunluğu"><button data-n="1">Unigram</button><button data-n="2">Bigram</button><button data-n="3">Trigram</button></div>
       <div class="seg" role="group" aria-label="Yumuşatma">${Object.entries(SM).map(([k, v]) => `<button data-sm="${k}">${esc(v)}</button>`).join("")}</div>
-      <label class="muted" style="font-size:.88rem">UNK eşiği <select id="ngUnk" class="btn sm"><option value="0">kapalı</option><option value="1">sayım ≤ 1</option><option value="2">sayım ≤ 2</option><option value="5">sayım ≤ 5</option></select></label>
-      <label class="chk"><input type="checkbox" id="ngLower"> küçük harf</label>
-      <label id="ngAlpha" class="muted hidden" style="font-size:.88rem">α <input id="ngAlphaIn" class="dp-num" type="number" step="0.05" min="0" max="1" value="0.4"></label>
-      <span id="ngLam" class="hidden" style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"></span></div>
+      <details class="ng-advanced"><summary>Diğer seçenekler <small>UNK · harf biçimi · α · λ</small></summary><div class="ng-ctl">
+        <label class="muted">UNK eşiği <select id="ngUnk" class="btn sm"><option value="0">kapalı</option><option value="1">sayım ≤ 1</option><option value="2">sayım ≤ 2</option><option value="5">sayım ≤ 5</option></select></label>
+        <label class="chk"><input type="checkbox" id="ngLower"> küçük harf</label>
+        <label id="ngAlpha" class="muted hidden">α <input id="ngAlphaIn" class="dp-num" type="number" step="0.05" min="0" max="1" value="0.4"></label>
+        <span id="ngLam" class="hidden" style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"></span>
+      </div></details></div>
     <div class="ng-expl stu" id="ngExplain"></div>
     <div id="ngStats"></div>
-    <h2 class="ng-h">2 · Sayımlar ve olasılıklar</h2>
+    <h2 class="ng-h" id="ngSecCounts" tabindex="-1">2 · Sayımlar ve olasılıklar</h2>
     <div id="ngTables" aria-live="polite"></div>
-    <h2 class="ng-h">3 · Sonraki sözcük <small>“the cat X” tipi soru</small></h2>
+    <h2 class="ng-h" id="ngSecNext" tabindex="-1">3 · Sonraki sözcük <small>“the cat X” tipi soru</small></h2>
     <label class="field sm">Geçmiş<input id="ngPred" type="text" autocomplete="off" spellcheck="false" placeholder="örn. the cat"></label>
     <div class="chips" id="ngPredEx" style="margin-top:10px"></div>
     <div id="ngPredOut" aria-live="polite"></div>
-    <h2 class="ng-h">4 · Cümle olasılığı ve perplexity</h2>
+    <h2 class="ng-h" id="ngSecSentence" tabindex="-1">4 · Cümle olasılığı ve perplexity</h2>
     <label class="field sm">Cümle<input id="ngSent" type="text" autocomplete="off" spellcheck="false" placeholder="örn. I am Sam"></label>
     <div class="chips" id="ngSentEx" style="margin-top:10px"></div>
     <div id="ngSentOut" aria-live="polite"></div>
-    <h2 class="ng-h">5 · Rastgele cümle üretimi <small><button class="btn sm" id="ngRegen">Yeniden üret</button></small></h2>
+    <h2 class="ng-h" id="ngSecGenerate" tabindex="-1">5 · Rastgele cümle üretimi <small><button class="btn sm" id="ngRegen">Yeniden üret</button></small></h2>
     <div id="ngGen"></div>
-    <h2 class="ng-h">6 · Yumuşatma karşılaştırması <small>test perplexity</small></h2>
+    <h2 class="ng-h" id="ngSecCompare" tabindex="-1">6 · Yumuşatma karşılaştırması <small>test perplexity</small></h2>
     <div id="ngCmp"></div>
-    <h2 class="ng-h">7 · PMI <small>birlikte geçiş</small></h2>
+    <h2 class="ng-h" id="ngSecPmi" tabindex="-1">7 · PMI <small>birlikte geçiş</small></h2>
     <div id="ngPmi"></div>
-    <div class="stu"><h2 class="ng-h">8 · Kendin hesapla <small>önce sen, sonra kontrol</small></h2><div id="ngQuiz"></div></div>
+    <div class="stu"><h2 class="ng-h" id="ngSecQuiz" tabindex="-1">8 · Kendin hesapla <small>önce sen, sonra kontrol</small></h2><div id="ngQuiz"></div></div>
     <div style="height:56px"></div></div>`;
   const text = $("#ngText", root);
   let t;
