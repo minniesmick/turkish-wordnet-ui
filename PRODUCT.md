@@ -7,32 +7,37 @@
 web
 
 ## Users
-Alper, MEF Üniversitesi Veri Bilimi öğrencisi; COMP 451 (Doğal Dil İşlemeye Giriş, Dr. Seniz Demir, Güz 2026) dersini çalışırken ve in-class ödevlerini yaparken kullanıyor. Aynı arayüz derste hocaya ve sınıf arkadaşlarına gösteriliyor. İkincil kitle: aynı dersi alan öğrenciler (paylaşım istenirse). Arayüz dili Türkçe; veri Türkçe ve İngilizce.
+Alper, MEF Üniversitesi Veri Bilimi öğrencisi; COMP 451 (Doğal Dil İşlemeye Giriş, Dr. Seniz Demir, Güz 2026) dersini çalışırken ve sınıf içi ödevlerini yaparken kullanıyor. Aynı arayüz derste hocaya ve sınıf arkadaşlarına gösteriliyor. İkincil kitle, uygulama paylaşılırsa aynı dersi alan öğrenciler. Arayüz dili Türkçe; veriler Türkçe ve İngilizce.
 
 ## Product Purpose
-Türkçe (KeNet) ve İngilizce (Princeton WordNet 3.1) sözcüksel anlam kaynaklarını, PropBank / TRopBank, VerbNet ve FrameNet ile birlikte tek yerde aratıp gezdirmek ve Lecture 4 (Semantics) slaytlarındaki kavramları canlı örneklerle çalıştırmak. Başarı: bir sözcükten anlamlarına, kavram hiyerarşisine, rollere ve çerçevelere en az dağılmayla geçebilmek; ders sırasında bir kavramı hocaya canlı gösterebilmek.
+Türkçe ve İngilizce sözcüksel kaynakları ile doğal dil işleme laboratuvarlarını tek yerde çalıştırmak; COMP 451 Lecture 1–5 kavramlarını canlı örnekler ve alıştırmalarla incelemek. Başarı: bir kavramdan ilgili anlamlara ve kaynaklara dağılmadan geçebilmek, NLP yöntemlerini gözle görülür çıktılarla deneyebilmek ve ders sırasında bunları sınıfa gösterebilmek.
 
 ## Positioning
-Normalde ayrı sitelerde duran kaynaklar (Türkçe WordNet, İngilizce WordNet, PropBank, VerbNet, FrameNet) burada Türkçe ↔ İngilizce bağlantılarıyla ve aynı kavram üzerinden birbirine bağlı. Slayt numaralarına eşlenmiş ders sekmesi, Lesk / Naive Bayes ile anlam seçimi, yol ve bilgi içeriği tabanlı benzerlik ve kural tabanlı Türkçe rol etiketleme aynı veride çalışıyor.
+Türkçe ve İngilizce WordNet, PropBank / TRopBank, VerbNet ve FrameNet aynı kavram çevresinde bağlanır. Aynı yerel çalışma alanı; sözcüksel anlamı, morfolojik belirsizliği, CKY ve bağımlılık çözümlemesini, korpus istatistiklerini ve n-gram modellerini ders sırasına uygun laboratuvarlarla birleştirir.
 
 ## Operating Context
-Yerel çalışıyor: Python standart kütüphaneli sunucu (`server.py`, port 8770), tek sayfalık statik arayüz (`static/index.html`). Veri `data/` altında (~117 MB): Starlang `TurkishWordNet`, `TurkishPropBank`, `TurkishFrameNet`; PropBank 3.4, FrameNet 1.7, VerbNet 3.3, SemCor, SENSEVAL-2 (NLTK veri deposu ve resmî depolar). Ders sırasında projeksiyonda ve laptopta, açık ve koyu temada kullanılıyor. Arama durumu URL'de tutulur; derste bağlantı ile aynı ekrana dönülebilmeli.
+Yerel çalışır: Python standart kütüphane sunucusu (`server.py`, 8770) ve derleme adımı olmayan tek sayfalık HTML / vanilla ES modül arayüzü. Sunucu yalnızca yerel arabirimlerde dinler. Veriler `data/` altındadır (~117 MB): Starlang TurkishWordNet, TurkishPropBank ve TurkishFrameNet; PropBank 3.4, FrameNet 1.7, VerbNet 3.3, SemCor, SENSEVAL-2 ve UD Turkish-BOUN. Laptopta günlük çalışma ve derste projeksiyon kullanımı hedeflenir; açık / koyu tema ile masaüstü ve mobil ekranlar desteklenir. Görünüm, arama ve kip durumu paylaşılabilir URL'lerle korunur.
 
 ## Capabilities and Constraints
-- Sekmeler: Ara (KeNet / PWN 3.1 / 1998), Benzerlik (path, Wu-Palmer, Resnik, Lin, Jiang-Conrath), Anlam seçimi (Lesk, Naive Bayes), Roller (PropBank, TRopBank, VerbNet, cümle etiketleme, rol sınavı), Çerçeveler (FrameNet İngilizce / Türkçe), Ders (slayt eşlemeli anlatım ve quiz).
-- Terimler: synset, lemma, sense, hypernym / hyponym, meronym / holonym, LU, FE, roleset, ARG0–ARG4, durum eki (acc, dat, abl, loc, ins, gen).
-- Kısıt: sunucu tarafı hesap yok; kullanıcıya özel kayıtlar (favoriler, geçmiş, notlar) tarayıcıda tutulur. Türkçe arayüz metni korunur. Mevcut API uç noktaları ve URL parametreleri çalışmaya devam etmeli.
-- Kapsam dışı (veri yok): FOL, CCG, söylem semantiği (slayt 37–45).
-- Kural tabanlı Türkçe rol etiketleme öneridir; durum eki tahmini elle düzeltilebilir. Lesk doğruluğu sınırlıdır ve arayüzde böyle sunulur.
+- 13 görünüm: Ara, Harita, Benzerlik, Anlam seçimi, Roller, Çerçeveler, Morfoloji, Belirsizlik, Ayrıştırma, Bağımlılık, Korpus, N-gram ve Ders.
+- Sözcüksel çalışmalar: KeNet, Princeton WordNet 3.1 ve 1998 sözlüğünde arama; kavram haritası; yol / bilgi içeriği tabanlı benzerlik; Lesk ve Naive Bayes ile anlam seçimi; PropBank, TRopBank, VerbNet ve FrameNet gezgini; Türkçe rol etiketleme ve alıştırması.
+- NLP laboratuvarları: Zemberek veya sınırlı çevrimdışı kural motoruyla Türkçe morfoloji; BOUN üzerinde morfolojik belirsizlik giderme; CFG / PCFG, CKY, adım adım ayrıştırma ve MLE; UD Turkish-BOUN cümlelerinden bağımlılık ağacı; BOUN / Brown verileriyle korpus ve n-gram çalışmaları.
+- Ders görünümü, Lecture 1–5 içeriklerini ilgili araçlara hazır örneklerle bağlar. Araç kipi yalnızca sonuçları; Öğrenci kipi açıklama, formül, kural izi, alıştırma, sınav ve Ders görünümünü sunar. Öğretici içerik `.stu` ile işaretlenir; `learn` yalnızca Öğrenci kipinde bulunur.
+- Terimler: synset, lemma, sense, hypernym / hyponym, meronym / holonym, LU, FE, roleset, ARG0–ARG4, UPOS, FEATS, CFG, CKY, perplexity ve durum ekleri.
+- Kullanıcıya özel kayıtlar (favoriler, iz, notlar ve tercihler) tarayıcıda tutulur; hesap veya sunucu taraflı kullanıcı profili yoktur. Var olan API, `?v=`, `?mode=student`, `?theme=` ve `wn:*` yerel depolama anahtarları geriye dönük çalışmalıdır.
+- Bağımlılık eklenmez; arayüz mevcut HTML, tek CSS dosyası ve vanilla ES modülleriyle kalır. Arayüz işi sunucunun yerel dinleme adreslerini değiştirmez.
+- Zemberek (`lib/zemberek-full.jar` ve JDK) isteğe bağlıdır. Olmadığında morfoloji ve belirsizlik görünümleri küçük yerel motora düşer; bu motor gerçek bir çözümleyici değildir ve kapsamı sınırlıdır.
+- Veri / yöntem sınırları görünür tutulur: Lesk ve kural tabanlı etiketleme yaklaşık sonuç verir; BOUN alt kümeleri, sabit eğitim / sınama ayrımları, UD etiket eşlemeleri ve n-gram yaklaşıkları doğruluk iddiası gibi sunulmaz. FOL, CCG ve söylem semantiği uygulamada yoktur.
 
 ## Evidence on Hand
-Gerçek veri: KeNet 78.327 synset, PWN 3.1 117.791 synset, TRopBank 17.526 fiil çerçevesi, PropBank 3.4 11.198 roleset, FrameNet 1.7 1.221 çerçeve, VerbNet 594 sınıf, SemCor 224.149 anlam etiketi, SENSEVAL-2 interest 2.368 örnek. Lecture4.pdf slaytları ders eşlemesinin kaynağı. Müşteri, kullanıcı sayısı ya da başarı oranı iddiası uydurulmaz.
+Gerçek kaynaklar: KeNet 78.327 synset, PWN 3.1 117.791 synset, TRopBank 17.526 fiil çerçevesi, PropBank 3.4 11.198 roleset, FrameNet 1.7 1.221 çerçeve, VerbNet 594 sınıf, SemCor 224.149 anlam etiketi ve SENSEVAL-2 interest 2.368 örnek. NLP laboratuvarlarında BOUN eğitim / sınama verileri ve SemCor cümlelerinden oluşturulan Brown örnekleri kullanılır. Ders slaytları ve InClass PDF'leri ders eşlemesinin kaynağıdır. Müşteri, kullanıcı sayısı ya da ölçülmemiş başarı oranı iddiası uydurulmaz.
 
 ## Product Principles
-1. Kavram merkezde: her ekran bir kavramdan başlar ve ona bağlı her şeye (anlam, hiyerarşi, rol, çerçeve, çeviri) bir tık uzaklıktadır.
-2. Gösterirken ikna eden, çalışırken sessiz: ders anında etkileyici, günlük kullanımda sakin ve hızlı.
-3. Veri dürüstlüğü: yöntemlerin sınırları (Lesk, kural tabanlı etiketleme) saklanmaz, doğruluk sayıları gerçek hesaplardan gelir.
-4. Bağlam kaybolmaz: bir tıklama sonraki adımı açar ama nereden gelindiği, geri dönüş ve URL durumu korunur.
+1. Bağlantılı kavram: sözcük, anlam, hiyerarşi, rol, çerçeve ve çeviri arasında bağlam kaybetmeden geçilir.
+2. İki kullanım amacı: Araç kipi hızlı ve sade sonuç verir; Öğrenci kipi yöntemleri ve ders alıştırmalarını görünür kılar.
+3. Veri dürüstlüğü: yöntem sınırları saklanmaz; doğruluk ve istatistikler ölçümden gelir.
+4. Ders ve bireysel çalışma: aynı araçlar gündelik keşfi ve projeksiyonda anlaşılır canlı anlatımı destekler.
+5. Bağlam korunur: görünüm ve paylaşılabilir bağlantı sonraki adıma geçerken durumu taşır.
 
 ## Accessibility & Inclusion
-Türkçe karakterler (İ/ı, ç ğ ö ş ü) doğru işlenir (Türkçe yerelli büyük/küçük harf). Açık ve koyu tema, klavyeyle tam gezinme, yeterli kontrast; projeksiyonda okunabilir yazı boyutu.
+Türkçe karakterler (İ/ı, ç ğ ö ş ü) ve Türkçe yerel büyük / küçük harf işlemleri doğru olmalıdır. Arayüz Türkçe; iki tema, klavye ile kullanım, görünür odak ve yeterli kontrast sağlamalıdır. İçerik hem mobil ekranda hem projeksiyonda okunabilir kalmalıdır.
