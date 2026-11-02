@@ -1,6 +1,6 @@
 // Kabuk: gezinti rayı, üst çubuk, kenar kâğıdı (bağlam), komut paleti, kısayollar + ortak çizim yardımcıları.
 import {$, $$, esc, tr, lower, hl, sub, w1, other, debounce, POS, DSNAME, REL, REL_ORDER, relLabel, REL_FAMILY, FAMILY, FUNC, CASEL, icon,
-  VIEWS, STUDENT_VIEWS, MODE, setMode, VIEW_LABEL, VIEW_ICON, VIEW_KEY, DS_VIEWS, state, G, store, itemOf, on, api, toast, copyText, views, setView, urlSync, act, setShellSync, buildURL} from "./core.js";
+  VIEWS, VIEW_GROUPS, STUDENT_VIEWS, MODE, setMode, VIEW_LABEL, VIEW_ICON, VIEW_KEY, DS_VIEWS, state, G, store, itemOf, on, api, toast, copyText, views, setView, urlSync, act, setShellSync, buildURL} from "./core.js";
 
 // ───────────────────────── ortak çizim yardımcıları
 export const relBtn = (b, ds, extra = "") => `<button class="rel" data-open="${esc(b.id)}" data-ods="${ds}" title="${esc(b.d || "")}">${b.lits.map(l => esc(l.w) + sub(l.s)).join(", ")}${b.more ? ` <sub>+${b.more}</sub>` : ""}</button>${extra}`;
@@ -62,13 +62,16 @@ export function togglePresent(force){
   document.body.classList.toggle("present", on);
   $("#presentBtn").setAttribute("aria-pressed", on);
   $(".present-hint")?.remove();
-  if(on) document.body.insertAdjacentHTML("beforeend", '<div class="present-hint">Sunum modu · çıkmak için P veya Esc</div>');
+  if(on) document.body.insertAdjacentHTML("beforeend", '<button class="present-hint" type="button" aria-label="Sunum modundan çık">Sunumdan çık · Esc</button>');
   views[state.v]?.resize?.();
 }
 
 // ───────────────────────── kabuk
 export function mountShell(){
-  $("#tabs").innerHTML = VIEWS.map(v => `<button class="tab${STUDENT_VIEWS.has(v) ? " stu" : ""}" data-view="${v}">${icon(VIEW_ICON[v])}<span>${VIEW_LABEL[v]}</span><span class="kb">g ${VIEW_KEY[v]}</span></button>`).join("");
+  $("#tabs").innerHTML = VIEW_GROUPS.map((group, i) => {
+    const onlyStudent = group.views.every(v => STUDENT_VIEWS.has(v));
+    return `<div class="tab-group${onlyStudent ? " stu" : ""}" role="group" aria-labelledby="tabGroup${i}"><h2 class="tab-group-title" id="tabGroup${i}">${group.label}</h2>${group.views.map(v => `<button class="tab${STUDENT_VIEWS.has(v) ? " stu" : ""}" data-view="${v}">${icon(VIEW_ICON[v])}<span>${VIEW_LABEL[v]}</span><span class="kb">g ${VIEW_KEY[v]}</span></button>`).join("")}</div>`;
+  }).join("");
   $("#menuBtn").innerHTML = icon("menu");
   $("#omni").insertAdjacentHTML("afterbegin", icon("search"));
   $("#linkBtn").innerHTML = icon("link");
@@ -87,7 +90,17 @@ export function mountShell(){
     setMode(st);
     if(!st && STUDENT_VIEWS.has(state.v)) setView("search"); else { syncShell(); views[state.v]?.enter?.(); }
   });
-  $("#menuBtn").addEventListener("click", () => $("#app").classList.toggle("rail-open"));
+  $("#menuBtn").addEventListener("click", () => {
+    const open = $("#app").classList.toggle("rail-open");
+    $("#menuBtn").setAttribute("aria-expanded", open);
+  });
+  document.addEventListener("click", e => {
+    if(e.target.closest(".present-hint")) togglePresent(false);
+    if(!e.target.closest("#rail, #menuBtn") && $("#app").classList.contains("rail-open")){
+      $("#app").classList.remove("rail-open");
+      $("#menuBtn").setAttribute("aria-expanded", "false");
+    }
+  });
   $("#omni").addEventListener("click", openPalette);
   $("#themeBtn").addEventListener("click", toggleTheme);
   $("#railTheme").addEventListener("click", toggleTheme);
@@ -108,10 +121,14 @@ export function syncShell(){
   $$("#tabs .tab").forEach(b => { if(b.dataset.view === state.v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
   for(const v of VIEWS) $("#v-" + v).classList.toggle("hidden", v !== state.v);
   const dsOn = DS_VIEWS.includes(state.v);
+  $("#trailSection").classList.toggle("hidden", !dsOn);
+  $("#favSection").classList.toggle("hidden", !dsOn);
+  $("#menuBtn").setAttribute("aria-expanded", $("#app").classList.contains("rail-open"));
   $("#dsSeg").classList.toggle("hidden", !dsOn);
   $("#ds1998").classList.toggle("hidden", state.v !== "search");
   $$("#dsSeg [data-ds]").forEach(b => b.setAttribute("aria-pressed", b.dataset.ds === state.ds));
   $$("#modeSeg [data-mode]").forEach(b => b.setAttribute("aria-pressed", (b.dataset.mode === "student") === MODE.student));
+  $("#modeCaption").textContent = MODE.student ? "Ders + alıştırmalar" : "Yalnızca sonuçlar";
   const dark = isDark();
   $("#themeBtn").innerHTML = icon(dark ? "sun" : "moon");
   $("#railTheme").innerHTML = icon(dark ? "sun" : "moon");
@@ -250,7 +267,7 @@ export function openPalette(prefill = ""){
 }
 export const closePalette = () => $("#palette").close();
 const cmds = () => [
-  ...VIEWS.filter(v => MODE.student || !STUDENT_VIEWS.has(v)).map(v => ({k:"cmd", label:`${VIEW_LABEL[v]} bölümüne git`, key:"g " + VIEW_KEY[v], run:() => setView(v), icon:VIEW_ICON[v]})),
+  ...VIEW_GROUPS.flatMap(group => group.views.filter(v => MODE.student || !STUDENT_VIEWS.has(v)).map(v => ({k:"cmd", grp:group.label, label:`${VIEW_LABEL[v]} bölümüne git`, key:"g " + VIEW_KEY[v], run:() => setView(v), icon:VIEW_ICON[v]}))),
   {k:"cmd", label:"Rastgele bir kavram aç", run:async () => { const j = await api("/api/random", {ds:state.ds === "1998" ? "kenet" : state.ds, n:1}); if(j.results[0]) openConcept(j.results[0].id, state.ds === "1998" ? "kenet" : state.ds); }, icon:"dice"},
   {k:"cmd", label:"Çalışma listemi aç", key:"F", run:openFavs, icon:"star"},
   {k:"cmd", label:"Temayı değiştir", key:"T", run:toggleTheme, icon:isDark() ? "sun" : "moon"},
@@ -264,15 +281,15 @@ function buildPalette(q){
   if(!qq){
     store.hist().slice(0, 5).forEach(x => add("Son bakılanlar", {label:x.w, sub:(POS[x.pos] || x.pos || "").toLocaleLowerCase("tr"), lg:x.ds === "en" ? "EN" : "TR", run:() => openConcept(x.id, x.ds), icon:"clock"}));
     store.favs().slice(0, 4).forEach(x => add("Favoriler", {label:x.w, sub:x.def.slice(0, 46), lg:x.ds === "en" ? "EN" : "TR", run:() => openConcept(x.id, x.ds), icon:"star"}));
-    cmds().forEach(c => add("Komutlar", c));
+    cmds().forEach(c => add(c.grp || "Komutlar", c));
     return renderPalette();
   }
   const ql = lower(qq);
-  cmds().filter(c => lower(c.label).includes(ql)).slice(0, 3).forEach(c => add("Komutlar", c));
+  cmds().filter(c => lower(c.label).includes(ql)).slice(0, 3).forEach(c => add(c.grp || "Komutlar", c));
   renderPalette();
   if(pal.ctl) pal.ctl.abort(); pal.ctl = new AbortController();
   api("/api/suggest", {q:qq}, pal.ctl.signal).then(j => {
-    const keep = pal.items.filter(i => i.grp === "Komutlar");
+    const keep = pal.items.filter(i => i.k === "cmd");
     pal.items = [];
     j.words.forEach(w => pal.items.push({grp:"Sözcükler", label:w.w, sub:`${w.n} anlam · ${w.pos.map(p => (POS[p] || p).toLocaleLowerCase("tr")).join(", ")}`, lg:w.ds === "en" ? "EN" : "TR", run:() => setView("search", {ds:w.ds, q:w.w, field:"word", mode:"exact", reset:true}), icon:"search", alt:() => setView("search", {ds:w.ds, q:w.w, field:"word", mode:"exact", reset:true, map:true})}));
     j.frames.forEach(n => pal.items.push({grp:"FrameNet çerçeveleri", label:n, lg:"FN", run:() => act({act:"fn", name:n}), icon:"frame"}));
@@ -306,7 +323,11 @@ export function initPalette(){
 }
 
 // ───────────────────────── kısayollar
-const KEYS = [["⌘ K  /  /", "Komut paletini aç"], ["g  s h b w r f m z c k o n d", "Bölümlere git (Ara, Harita, Benzerlik, Anlam seçimi, Roller, Çerçeveler, Morfoloji, Belirsizlik, Ayrıştırma, Bağımlılık, Korpus, N-gram, Ders)"], ["j  k", "Sonuçlar arasında aşağı / yukarı (odak)"], ["Enter", "Odaktaki anlamın kâğıdını aç"], ["m", "Odaktaki kavramı haritada aç"], ["f", "Odaktaki kavramı favorilere ekle / çıkar"], ["Esc", "Odağı ve kâğıdı kapat"], ["←  →", "Haritada komşu kavramlar arasında gez"], ["↵ / Çift tık", "Haritada seçili kavramı merkeze al"], ["Backspace", "Haritada bir önceki merkeze dön"], ["p", "Sunum modu"], ["t", "Açık / koyu tema"], ["?", "Bu pencere"]];
+const KEYS = [
+  ["⌘ K  /  /", "Komut paletini aç"],
+  ...VIEW_GROUPS.map(group => [`g  ${group.views.map(v => VIEW_KEY[v]).join("  ")}`, `${group.label}: ${group.views.map(v => VIEW_LABEL[v]).join(", ")}`]),
+  ["j  k", "Sonuçlar arasında aşağı / yukarı (odak)"], ["Enter", "Odaktaki anlamın kâğıdını aç"], ["m", "Odaktaki kavramı haritada aç"], ["f", "Odaktaki kavramı favorilere ekle / çıkar"], ["Esc", "Odağı ve kâğıdı kapat"], ["←  →", "Haritada komşu kavramlar arasında gez"], ["↵ / Çift tık", "Haritada seçili kavramı merkeze al"], ["Backspace", "Haritada bir önceki merkeze dön"], ["p", "Sunum modu"], ["t", "Açık / koyu tema"], ["?", "Bu pencere"]
+];
 export function openShortcuts(){
   $("#kbGrid").innerHTML = KEYS.map(([k, d]) => `<span>${k.split("  ").map(x => `<span class="kbd">${esc(x)}</span>`).join(" ")}</span><span>${esc(d)}</span>`).join("");
   $("#shortcuts").showModal();

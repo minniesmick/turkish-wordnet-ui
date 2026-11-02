@@ -14,6 +14,8 @@
   --font-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
   --ease:cubic-bezier(.16,1,.3,1);
   --r:6px; --r-sm:3px;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-6:24px; --space-8:32px; --space-10:40px; --space-12:48px;
   --rail-w:216px; --sheet-w:432px; --top-h:56px;
   --float:0 1px 2px rgba(13,18,32,.06),0 8px 16px -6px rgba(13,18,32,.18);
   --scale:1;
@@ -50,6 +52,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 a{color:var(--spot);text-underline-offset:3px;text-decoration-thickness:1px}
 input,textarea{caret-color:var(--spot)}
+input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 .hidden{display:none!important}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 *{scrollbar-width:thin;scrollbar-color:var(--rule-2) transparent}
@@ -68,7 +71,10 @@ sub{font-size:.62em;line-height:0;margin-left:.08em;color:var(--ink-3);font-weig
 .brand{display:flex;align-items:baseline;gap:8px;padding:0 20px 18px;text-decoration:none;color:var(--ink)}
 .brand b{font:800 1.18rem/1 var(--font-ui);letter-spacing:-.03em}
 .brand span{font:italic 400 .9rem var(--font-text);color:var(--ink-3)}
-.tabs{display:flex;flex-direction:column;gap:2px;padding:0 0 0 10px}
+.tabs{display:flex;flex:1;min-height:0;flex-direction:column;gap:2px;padding:0 0 0 10px;overflow-y:auto}
+.tab-group{display:flex;flex-direction:column;gap:2px}
+.tab-group+.tab-group{margin-top:8px;padding-top:8px;border-top:1px solid var(--rule)}
+.tab-group-title{margin:0 18px 4px 12px;color:var(--ink-3);font:600 .75rem/1.35 var(--font-ui);letter-spacing:.025em;text-wrap:balance}
 .tab{position:relative;display:flex;align-items:center;gap:11px;width:100%;padding:9px 18px 9px 12px;border:0;background:none;border-radius:var(--r) 0 0 var(--r);text-align:left;color:var(--ink-2);font-weight:500;font-size:.95rem;transition:color .15s,background .15s}
 .tab:hover{color:var(--ink);background:var(--sunk)}
 .tab[aria-current=page]{color:var(--ink);font-weight:650;background:var(--page);box-shadow:inset 0 0 0 1px var(--rule);border-right-color:var(--page)}
@@ -431,7 +437,7 @@ svg.edges path.spot{stroke:var(--spot)}
 /* ───────── Sunum modu ───────── */
 body.present .rail,body.present .topbar{opacity:.0;pointer-events:none;transition:opacity .2s}
 body.present .rail:hover,body.present .topbar:hover{opacity:1;pointer-events:auto}
-.present-hint{position:fixed;right:18px;bottom:18px;z-index:80;padding:6px 12px;border-radius:var(--r);background:var(--ink);color:var(--paper);font-size:.8rem;font-weight:550;opacity:.85}
+.present-hint{position:fixed;right:18px;bottom:18px;z-index:80;min-height:40px;padding:6px 12px;border:1px solid var(--rule-2);border-radius:var(--r);background:var(--page);color:var(--ink);font-size:.86rem;font-weight:600;box-shadow:var(--float)}
 
 /* ───────── Dar ekran ───────── */
 @media (max-width:1180px){
@@ -457,7 +463,12 @@ body.present .rail:hover,body.present .topbar:hover{opacity:1;pointer-events:aut
   .gside{display:none}
   .guide-list li{grid-template-columns:1fr;gap:4px}
 }
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important}
+  .gcanvas.arrive .gn,.gcanvas.arrive svg.edges path{animation:none!important}
+  .app,.rail,.sheet{transition:none!important}
+  .tab,.btn,.iconbtn,.omni,.seg button{transition-duration:.01ms!important}
+}
 
 /* ───────── eklemeler ───────── */
 @media (max-width:860px){.hide-sm{display:none}}
@@ -483,11 +494,21 @@ body.present .rail:hover,body.present .topbar:hover{opacity:1;pointer-events:aut
   .runhead{font-size:.72rem}
   .page-title{font-size:1.9rem}
   .verdict,.verdict b{font-size:1.25rem}
+  .tab{min-height:40px}
+  .iconbtn,.btn.sm{min-height:40px}
+  .seg button{min-height:40px}
 }
 @media (max-width:520px){
-  .topbar{gap:6px}
-  .omni #omniTxt{display:none}.omni{flex:none;width:40px;padding:0;justify-content:center}.omni .kbd{display:none}
-  #dsSeg{margin-left:auto}
+  .topbar{height:auto;min-height:var(--top-h);display:grid;grid-template-columns:40px minmax(0,1fr) max-content max-content 40px;grid-template-areas:"menu search search search actions" "dict dict mode mode actions";gap:4px;padding:6px 10px}
+  .menu-btn{grid-area:menu}
+  .omni{grid-area:search;min-width:0;width:100%;height:40px;padding:0 10px}
+  .omni #omniTxt{display:none}.omni .kbd{display:none}
+  #dsSeg{grid-area:dict;margin:0;justify-self:start}
+  .mode-control{grid-area:mode;align-items:flex-start;flex-direction:column;gap:2px;justify-self:start}
+  .top-actions{grid-area:actions;align-self:center;margin:0}
+  #modeSeg button,#dsSeg button{padding:4px 6px;font-size:.74rem;white-space:nowrap}
+  .mode-caption{font-size:.75rem}
+  .topbar .iconbtn{min-width:40px}
 }
 
 .up .i,.chip .i,.toggler .i{width:1em;height:1em;vertical-align:-.14em;margin-right:4px}
@@ -621,7 +642,8 @@ svg.dp .dp-node.on rect{stroke:var(--spot);fill:var(--wash);stroke-width:2}
 body:not(.student) .stu{display:none!important}
 #modeSeg button{padding:4px 10px;font-size:.8rem}
 #modeSeg{margin-left:auto}
-#modeSeg + .top-actions{margin-left:6px}
+.mode-control{display:flex;align-items:center;gap:6px;min-width:0}
+.mode-caption{color:var(--ink-3);font-size:.74rem;white-space:nowrap}
 @media(max-width:700px){#modeSeg button{padding:4px 7px}}
 
 /* Morfoloji */

@@ -92,7 +92,14 @@ const P = {
 export const icon = (n, cls = "") => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n] || ""}</svg>`;
 
 // ───────────────────────── durum
-export const VIEWS = ["search","graph","relate","wsd","roles","frames","morph","disamb","parse","deps","corpus","ngram","learn"];
+export const VIEW_GROUPS = [
+  {label:"Sözcük anlamı", views:["search","graph","relate","wsd","roles","frames"]},
+  {label:"Lecture 2", views:["morph","disamb"]},
+  {label:"Lecture 3", views:["parse","deps"]},
+  {label:"Lecture 5", views:["corpus","ngram"]},
+  {label:"Ders", views:["learn"]}
+];
+export const VIEWS = VIEW_GROUPS.flatMap(group => group.views);
 export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", morph:"Morfoloji", disamb:"Belirsizlik", parse:"Ayrıştırma", deps:"Bağımlılık", corpus:"Korpus", ngram:"N-gram", learn:"Ders"};
 export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"target", roles:"tag", frames:"frame", morph:"morph", disamb:"fork", parse:"tree", deps:"deps", corpus:"corpus", ngram:"list", learn:"book"};
 export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", morph:"m", disamb:"z", parse:"c", deps:"k", corpus:"o", ngram:"n", learn:"d"};
