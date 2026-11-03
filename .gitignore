@@ -7,3 +7,7 @@ __pycache__/
 .impeccable/brief-body.md
 .impeccable/questions/
 lib/
+
+# arayüz inceleme ekran görüntüleri (yerel, repoya girmez)
+docs/ui-review/before/
+docs/ui-review/after/
