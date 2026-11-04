@@ -97,12 +97,13 @@ export const VIEW_GROUPS = [
   {label:"Lecture 2", views:["morph","disamb"]},
   {label:"Lecture 3", views:["parse","deps"]},
   {label:"Lecture 5", views:["corpus","ngram"]},
+  {label:"Lecture 6 · Derin öğrenme", views:["tok"]},
   {label:"Ders", views:["learn"]}
 ];
 export const VIEWS = VIEW_GROUPS.flatMap(group => group.views);
-export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", morph:"Morfoloji", disamb:"Belirsizlik", parse:"Ayrıştırma", deps:"Bağımlılık", corpus:"Korpus", ngram:"N-gram", learn:"Ders"};
-export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"target", roles:"tag", frames:"frame", morph:"morph", disamb:"fork", parse:"tree", deps:"deps", corpus:"corpus", ngram:"list", learn:"book"};
-export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", morph:"m", disamb:"z", parse:"c", deps:"k", corpus:"o", ngram:"n", learn:"d"};
+export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", morph:"Morfoloji", disamb:"Belirsizlik", parse:"Ayrıştırma", deps:"Bağımlılık", corpus:"Korpus", ngram:"N-gram", tok:"Metin temsili", learn:"Ders"};
+export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"target", roles:"tag", frames:"frame", morph:"morph", disamb:"fork", parse:"tree", deps:"deps", corpus:"corpus", ngram:"list", tok:"list", learn:"book"};
+export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", morph:"m", disamb:"z", parse:"c", deps:"k", corpus:"o", ngram:"n", tok:"x", learn:"d"};
 export const DS_VIEWS = ["search","graph","relate","wsd"];
 
 // Kullanım kipi: "Araç" (client) yalnızca sonuçları verir; "Öğrenci" ders bağlantılarını, formülleri, adım adım açıklamayı, alıştırma ve sınavı da açar.

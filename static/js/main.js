@@ -14,6 +14,7 @@ import "./parse.js";
 import "./deps.js";
 import "./corpus.js";
 import "./ngram.js";
+import "./textrep.js";
 import "./exportfig.js";
 import "./learn.js";
 

@@ -173,15 +173,15 @@ export const LECTURES = {
       {gut:"DL-4 · slayt 4–11", h:"Ön işleme hattı", p:[
         "Slayttaki metin temsili hattı <b>standardize et → tokenize et → indeksle → kodla</b> adımlarını izler. Örnek standardizasyon işlemleri büyük/küçük harf, noktalama ve aksanları ele alma; bazı durumlarda stop word çıkarma ve stemming'dir.",
         "İndeksleme her farklı token'a bir tamsayı verir; kodlama bu indeksi vektöre çevirir. One-hot kodlama, token'ın sözlükteki indeksine karşılık gelen tek konumu 1 yapar."
-      ]},
+      ], chips:[["Ön işlemeyi dene", {v:"tok", text:"İstanbul'da NLP çalışmak güzel! İstanbul'da."}]]},
       {gut:"DL-4 · slayt 13–16, 23–26", h:"Tokenization ve sözlük dışı sözcükler", p:[
         "<b>Tokenization</b>, metni daha küçük birimlere ayırır. Slaytlar sözcük, karakter ve alt-sözcük düzeylerini karşılaştırır; yöntem seçimi token sayısı, sözlük boyutu ve bilinmeyen sözcük sorununu etkiler.",
         "Sözcük düzeyinde daha önce görülmemiş bir sözcüğe indeks verilemeyebilir; eğitimde seyrek sözcükleri <b>&lt;UNK&gt;</b> ile değiştirmek bir çözümdür. Karakter düzeyi sözlüğü küçültür ve bilinmeyen sözcük sorununu azaltır, fakat dizileri uzatır."
-      ]},
+      ], chips:[["Sözcük / karakter karşılaştır", {v:"tok", text:"Öğrencilerimizin kitaplarını bugün sınıfta yeniden okuyacağız."}]]},
       {gut:"DL-4 · slayt 17–22", h:"Alt-sözcük: BPE ve WordPiece", p:[
         "<b>Byte Pair Encoding (BPE)</b> örneğinde önce eğitim verisindeki karakterlerden başlangıç sözlüğü kurulur. Ardışık sembol çiftleri sayılır; en sık çift birleştirilip yeni sembol eklenir ve veri yeni sözlükle tekrar temsil edilir.",
         "Bu birleştirme seçilen sayıda adım boyunca yinelenir. <b>WordPiece</b> de alt-sözcük birleştirir, ancak slaytta BPE'den farklı olarak dil modeli olasılığını artıran birleştirmeyi seçtiği belirtilir."
-      ]},
+      ], chips:[["Slayt örneğinde BPE'yi çalıştır", {v:"tok", preset:"bpe"}]]},
       {gut:"DL-4 · slayt 28–32", h:"Statik ve bağlamsal embedding", p:[
         "<b>Statik embedding</b> her sözcüğe tek, sabit bir vektör verir; aynı sözcüğün farklı cümlelerdeki gösterimi değişmez. Slayt, bunun hesaplama açısından daha hafif olmasına karşın bir sözcüğün farklı anlamlarını sınırlı yakaladığını belirtir.",
         "<b>Bağlamsal embedding</b> gösterimi cümlenin bağlamına göre üretir; aynı biçimli sözcük farklı cümlelerde farklı vektör alabilir. BERT örneğinde cümle önce alt-sözcük token'larına ayrılır, sonra Transformer bağlamı işler."

@@ -824,3 +824,66 @@ mark.dm-w{padding:0 4px;border-radius:var(--r-sm);background:var(--wash-2);color
 .fq-msg.hint{font-style:italic;color:var(--ink-2)}
 .fq-map{margin-top:20px}
 .fq-map summary{cursor:pointer;font:600 .9rem var(--font-ui)}
+
+/* ───────── Metin temsili · Lecture 6 ───────── */
+.tr-page{max-width:1240px}
+.tr-section{margin-top:30px;padding-top:18px;border-top:1px solid var(--rule)}
+.tr-section>.ng-h{margin-top:0}
+.tr-section>.ng-label{display:block;margin:10px 0 5px}
+.tr-presets{margin:8px 0 14px}
+.tr-options{display:flex;flex-wrap:wrap;gap:8px 16px;margin:12px 0;padding:10px 12px;border:1px solid var(--rule);border-radius:var(--r)}
+.tr-options legend{padding:0 6px;font-size:.84rem;font-weight:600;color:var(--ink-2)}
+.tr-output-label{margin:12px 0 4px;color:var(--ink-3);font-size:.78rem;font-weight:650;letter-spacing:.04em;text-transform:uppercase}
+.tr-output{min-height:44px;margin:0;padding:10px 12px;border-left:2px solid var(--ink);background:var(--page);overflow-wrap:anywhere}
+.tr-step-list{margin-top:10px}
+.tr-step{border-bottom:1px solid var(--rule)}
+.tr-step summary{min-height:40px;padding:8px 4px;cursor:pointer;font-size:.9rem;font-weight:600}
+.tr-diff-row{display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;padding:5px 8px;font:500 .84rem/1.6 var(--font-mono);overflow-wrap:anywhere}
+.tr-diff-row>b{color:var(--ink-3);font:600 .72rem/1.8 var(--font-ui);text-transform:uppercase}
+.tr-diff-row del{text-decoration-thickness:2px;text-decoration-style:wavy}
+.tr-diff-row ins{text-decoration-thickness:2px;text-decoration-style:double;text-underline-offset:3px}
+.tr-methods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.tr-method{min-width:0;padding-top:12px;border-top:1px solid var(--rule)}
+.tr-method h3,.tr-vocab-title{margin:0 0 8px;font:700 1rem/1.3 var(--font-ui)}
+.tr-token-output{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 7px;min-height:56px;padding:9px 0}
+.tr-word-group{display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:2px;padding:2px 3px;border-bottom:1px solid var(--rule-2);font:500 .82rem/1.6 var(--font-mono);overflow-wrap:anywhere}
+.tr-token{padding:1px 3px;background:var(--sunk);overflow-wrap:anywhere}
+.tr-join,.tr-space{color:var(--ink-3);font:500 .72rem var(--font-mono)}
+.tr-space{padding:0 1px}
+.tr-method .ng-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;margin-top:8px;background:var(--rule);border:1px solid var(--rule)}
+.tr-method .ng-stats>div{display:flex;flex-direction:column;min-width:0;padding:7px;background:var(--page)}
+.tr-method .ng-stats b{font:650 .96rem var(--font-mono);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.tr-method .ng-stats span{color:var(--ink-3);font-size:.73rem}
+.tr-controls{display:flex;align-items:end;flex-wrap:wrap;gap:10px;margin:12px 0}
+.tr-controls .fie{min-width:140px}
+.tr-controls .in,.tr-controls .sel{display:block;width:100%;min-height:40px;margin-top:4px}
+.tr-step-control{display:grid;grid-template-columns:auto minmax(90px,1fr) auto auto;align-items:center;gap:10px;margin:16px 0 10px}
+.tr-step-control>label,.tr-step-control>output{font-size:.82rem;color:var(--ink-2)}
+.tr-step-control input[type=range]{width:100%;min-height:40px;accent-color:var(--spot)}
+.tr-pair-summary{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px 12px;margin:12px 0;padding:10px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.tr-pair-summary span{color:var(--ink-3);font-size:.8rem}
+.tr-scroll{max-height:300px;overflow:auto}
+.tr-vocab-title{margin-top:18px}
+.tr-vocab{display:flex;flex-wrap:wrap;gap:5px;max-height:150px;overflow:auto;padding:8px;border:1px solid var(--rule);background:var(--page)}
+.tr-vocab code{font:500 .78rem var(--font-mono)}
+.tr-explain,.tr-source-note,.tr-practice{margin-top:14px;padding:10px 12px;border-left:2px dashed var(--rule-2);color:var(--ink-2)}
+.tr-explain p,.tr-source-note,.tr-practice p{font:400 .94rem/1.55 var(--font-text)}
+.tr-practice h3{margin:0;font:700 1rem var(--font-ui)}
+.tr-practice .row{align-items:center}
+.tr-practice .in{flex:1;min-width:0}
+.tr-encode-input{width:min(100%,600px);min-height:40px;margin:8px 0}
+@media(max-width:900px){
+  .tr-methods{grid-template-columns:minmax(0,1fr)}
+  .tr-step-control{grid-template-columns:auto minmax(80px,1fr)}
+  .tr-step-control>output{grid-column:1}
+  .tr-step-control>button{grid-column:2;justify-self:start}
+}
+@media(max-width:520px){
+  .tr-options{gap:4px 10px;padding:8px}
+  .tr-options .chk{flex:1 1 100%;min-height:40px}
+  .tr-controls{align-items:stretch}
+  .tr-controls .fie,.tr-controls .btn{flex:1 1 100%}
+  .tr-step-control{grid-template-columns:1fr}
+  .tr-step-control>output,.tr-step-control>button{grid-column:auto}
+  .tr-diff-row{grid-template-columns:44px minmax(0,1fr);font-size:.76rem}
+}
