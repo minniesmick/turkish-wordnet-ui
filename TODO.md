@@ -25,7 +25,7 @@ Rakamlar 2026-10-23'te 500 gerçek BOUN sözcüğü ve 400 rastgele üretimle ö
 
 **Genel**
 - İndirilen SVG / PNG sitenin yazı tiplerini taşımaz, açıldığı bilgisayarın yazı tipiyle çizilir.
-- Ders sayfaları ve soruları ders slaytlarının metninden yazıldı; slayt görselleri (şekiller, tablolar) tek tek taranmadı.
+- Ders sayfaları ve soruları ders slaytlarının metninden yazıldı. Lecture 6 için DL-1…DL-7'deki 218 slaydın tamamı görsel olarak incelendi; önceki derslerin slayt görselleri bu adımda yeniden incelenmedi.
 - Testler: `scripts/test_*.mjs` (turkish 43 + 54 yeni ek, fsm 4 yol + alıştırma ve yeni yollar, lm 41, mle 19, parsers 13, md 34, zmap 36); arayüz otomatik test edilmiyor, preview'da elle denendi.
 
 ## N-gram dil modeli laboratuvarı (InClass 5, Güz 2026)
@@ -63,7 +63,7 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [x] Belirsizlik: Zemberek'in kendi seçimiyle karşılaştırma (kök ve eşlenen UPOS; "Zemberek ile karşılaştır" düğmesi, cümle tablosunda Zemberek sütunu).
 - [ ] Belirsizlik: aday kümesini Zemberek çözümlemelerinden al (tam UD etiket eşlemesi gerekir); BOUN train/dev kümesiyle eğit; lemma de seçilsin; sinir ağı yöntemi (slayt 32'deki üçüncü yöntem).
 - [x] "Kendin doldur, kontrol et": CKY tablosu (Ayrıştırma, hücre hücre kontrol, ipucu) ve n-gram (tek olasılık, tablo satırı).
-- [x] Ders sekmesi Lecture 1, 2, 3 ve 5 için genişletildi (`static/js/lessons.js`: bölümler + 38 çoktan seçmeli soru; düğmeler `act: go` ile araçları hazır örnekle açar).
+- [x] Ders sekmesi Lecture 1, 2, 3, 5 ve 6 için genişletildi (`static/js/lessons.js`: Lecture 1, 2, 3 ve 5 için mevcut açıklamalı sorular; Lecture 6 için 28 bölüm ve 42 kaynaklı çoktan seçmeli soru; düğmeler `act: go` ile araçları hazır örnekle açar).
 - [x] "FSM yolunu kendin yaz" (`static/js/fsmquiz.js`, Morfoloji sekmesi bölüm 7, yalnızca Öğrenci kipi): 22 hazır çözümleme ya da kendi çözümlemen, durum dizisini yaz, kontrol et, ipucu, cevap (Sample.pdf biçimi), şekil yerine durum haritası. Cevap anahtarı elle kodlanan kenarlardan çıkar; PDF'le birebir doğrulananlar 3 yol.
 - [ ] Kendin-doldur'u bağımlılık ağacına (kenar ekleme) taşı; Ders sorularını slayt görsellerinden ek sorularla zenginleştir.
 
@@ -82,3 +82,12 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [ ] Kenar kâğıdı bağlam sekmelerini görselle doğrula.
 - [x] Telefonda harita kontrollerini diyagramdan ayır; dar ekranda araç çubuğu artık kendi satırında ve grafik alanı altında başlıyor.
 - [ ] Fiziksel telefonda dokunma hareketlerini; ekran okuyucu/klavye akışını ve 200% yakınlaştırmayı doğrula.
+
+## Derin öğrenme (Lecture 6)
+
+- [x] DL-1…DL-7 slaytlarını Ders sekmesine ekle: 28 bölüm ve 42 açıklamalı soru (her PDF'den 6 soru).
+- [ ] Metin temsili laboratuvarı: ön işleme ve tokenization; BPE adım adım (DL-4).
+- [ ] Word embedding laboratuvarı: BOUN üzerinde embedding ve en yakın komşular (DL-3/4).
+- [ ] Self-attention laboratuvarı: Q·Kᵀ, softmax, ısı haritası ve maskeleme (DL-6/7).
+- [ ] RNN açılımı laboratuvarı (DL-5).
+- [ ] Küçük sinir ağı eğitimi: ileri / geri yayılım, kayıp ve karar sınırı (DL-1/2).

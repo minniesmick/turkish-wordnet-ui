@@ -1,4 +1,4 @@
-// Ders sekmesi içeriği: Lecture 1, 2, 3 ve 5 (Lecture 4'ün canlı örnekli dersi learn.js içinde).
+// Ders sekmesi içeriği: Lecture 1, 2, 3, 5 ve 6 (Lecture 4'ün canlı örnekli dersi learn.js içinde).
 // Kaynak: dersin slaytları (Dr. Seniz Demir, COMP 451). Düğmeler [etiket, {v: sekme, ...}] biçimindedir ve ilgili aracı hazır örnekle açar.
 // Sorular: [soru, [seçenekler], doğru indeks, açıklama]
 
@@ -112,6 +112,181 @@ export const LECTURES = {
       ["UNK simgesi ne işe yarar?", ["Cümle sonunu işaretler", "Bilinmeyen/nadir sözcüklere de olasılık verebilmeyi sağlar (açık sözlük)", "Noktalamayı siler", "Sözlüğü büyütür"], 1, "Eşiğin altındaki sözcükler UNK olur; bilinmeyen sözcük de UNK sayılır."],
       ["PMI neyi ölçer?", ["Bir sözcüğün sıklığını", "İki sözcüğün birlikte geçmesinin, bağımsız olsalardı beklenenden ne kadar farklı olduğunu", "Cümle uzunluğunu", "Sözcüğün uzunluğunu"], 1, "PMI(x,y) = log P(x,y) / (P(x) P(y))."],
       ["n-gram'da n büyüdükçe genel olarak ne olur?", ["Model daha doğru ama kestirimler zayıf ve tablolar seyrek olur", "Tablo küçülür", "Model daha az doğru olur", "Sayımlar artar"], 0, "Slayt: büyük n daha doğru model, ama zayıf/seyrek sayımlar."]
+    ]
+  },
+
+  6: {
+    title:"Lecture 6 · Derin öğrenme",
+    intro:"Bu ders, sinir ağlarının katmanlı yapısından başlayıp eğitimde kayıp, gradyan ve geri yayılımı ele alır; ardından sözcükleri vektörlerle temsil etmeyi ve sıralı veriler için RNN'leri inceler. Son bölümde self-attention ve Transformer mimarisi, BERT, GPT ve T5 gibi encoder, decoder ve encoder-decoder modellerine bağlanır. Sıra, metni modele hazırlamaktan bağlamı temsil edip görev çıktısı üretmeye doğrudur.",
+    sections:[
+      {gut:"DL-1 · slayt 4–13", h:"Sinir ağı: girdiden dönüşümlere", p:[
+        "<b>Sinir ağları</b>, veride doğrusal olmayan örüntüleri bulmak için birbirine bağlı düğümlerden oluşan model aileleridir. Girdi, ara dönüşümlerden geçirilir; böylece model yalnızca ham girdiye uygulanan lojistik regresyonla sınırlı kalmaz.",
+        "Slaytta lojistik regresyon, gizli katmanı olmayan özel bir sinir ağı olarak gösterilir. <b>Nöron</b>, <b>katman</b> ve <b>aktivasyon işlevi</b> terimleri bu katmanlı hesaplamanın parçalarını adlandırır."
+      ]},
+      {gut:"DL-1 · slayt 14–20", h:"İleri yayılım ve ağ tasarımı", p:[
+        "<b>İleri yayılım</b> girdiyi katman katman taşır. Bir katmandaki etkinleşme, önceki katmanın çıktısının ağırlıklarla birleştirilip bias eklenmesi ve aktivasyon işlevinden geçirilmesiyle elde edilir: a = g(W·x + b).",
+        "Ağ tasarımında seçilenler arasında gizli katmanların sayısı, katman başına nöron sayısı ve aktivasyon işlevleri vardır. Slayttaki GPA ve deneyim örneği, bu ağırlık ve bias'larla lojistik regresyon çıktısı üretir."
+      ]},
+      {gut:"DL-1 · slayt 21", h:"Sınıflandırma çıktısı", p:[
+        "<b>İkili sınıflandırmada</b> tek çıktı birimi iki sınıf sonucunu temsil eder. <b>Çok sınıflı sınıflandırmada</b> her sınıf için bir çıktı birimi kullanılır; slaytta çıktı vektörünün boyutu sınıf sayısına eşit gösterilir.",
+        "Bu ayrım, ağın hangi çıktıyı üretmesi gerektiğini belirler: tek bir 0/1 sonucu ya da sınıflar üzerinde bir çıktı vektörü."
+      ]},
+      {gut:"DL-1 · slayt 22–29", h:"Aktivasyon işlevleri", p:[
+        "<b>Sigmoid</b> girdiyi 0 ile 1 arasına taşır; slaytta ikili karar ve çıktı katmanı örneklerinde kullanılır. <b>tanh</b> −1 ile 1 arasında değer verir; <b>ReLU</b> negatif girdiyi 0 yapıp pozitif girdiyi olduğu gibi geçirir.",
+        "<b>Softmax</b> bir değer vektörünü toplamı 1 olan olasılıklara dönüştürür. Slaytlar bu işlevleri grafik ve örneklerle ayırır; kullanım örnekleri arasında ikili ve çok sınıflı çıktılar bulunur."
+      ]},
+
+      {gut:"DL-2 · slayt 4–6", h:"Kayıp ve maliyet işlevi", p:[
+        "Eğitim, ağırlık ve bias değerlerini tahmin hatasını küçültecek biçimde bulmayı hedefler. <b>Kayıp işlevi</b> tek bir tahminin hatasını niceler; <b>maliyet işlevi</b> eğitim örnekleri üzerindeki hatayı toplulaştırır.",
+        "Slayt, lojistik regresyon için karesel hatanın ideal olmadığını ve model kendinden emin biçimde yanlış olduğunda <b>çapraz entropinin</b> daha büyük ceza verdiğini vurgular."
+      ]},
+      {gut:"DL-2 · slayt 7–10", h:"Gradyanla maliyeti azaltma", p:[
+        "Bir işlevin türevi, parametrede küçük bir değişikliğin işlev değerini hangi yönde değiştirdiğini gösterir. Birden çok parametrede <b>gradyan</b>, her parametreye göre türevleri birlikte taşır.",
+        "Maliyeti küçültmek için parametreler gradyanın gösterdiği yöne göre güncellenir; slayttaki çizimler güncellemelerin minimuma yaklaşmasını ve çok değişkenli durumu gösterir."
+      ]},
+      {gut:"DL-2 · slayt 11–27", h:"Ağırlık, bias ve geri yayılım", p:[
+        "<b>Ağırlıklar</b> bağlantıların etkisini, <b>bias</b> ise nöronun toplama adımındaki ek terimi belirler. <b>Geri yayılım</b>, zincir kuralını kullanarak kaybın ağdaki ağırlık ve bias'lara göre gradyanını hesaplar.",
+        "Hesap, çıktıdaki hatadan başlayıp önceki katmanlara doğru ilerler; ardından bu gradyanlar parametreleri güncellemek için kullanılır. Slaytlarda ağırlık ve bias türevleri ayrı izlenir; tüm eğitim örneklerinin katkısı maliyet gradyanında ortalanır."
+      ]},
+      {gut:"DL-2 · slayt 28–34", h:"Örnek güncelleme ve optimizer'lar", p:[
+        "Slayttaki iki girdili örnekte önce gizli ve çıktı katmanlarının değerleri hesaplanır; sonra çıktı hatası ve gizli birimlerin hataları bulunarak ağırlıklar öğrenme oranıyla güncellenir.",
+        "<b>Optimizer</b>, geri yayılımda hesaplanan gradyanların ağırlık ve bias güncellemelerine nasıl dönüştürüleceğini belirler. Slayt SGD, Momentum, RMSProp, Adam ve AdamW adlarını karşılaştırır; Adam için hareketli gradyan ortalaması, RMSProp için kareli gradyanların üstel ortalaması gösterilir."
+      ]},
+
+      {gut:"DL-3 · slayt 4–8", h:"Metin girdisini vektörleştirme", p:[
+        "Sinir ağına sözcük vermek için metinsel simgeler sayısal gösterime çevrilir. <b>Sözlük</b>, farklı sözcükleri kapsar; <b>one-hot</b> gösterimde her sözcük için sözlük boyutunda, tek bir konumu 1 olan bir vektör kullanılır.",
+        "Bu gösterimde farklı sözcük vektörleri ortogonaldir; slaytta, sözcüklerin anlam benzerliğini one-hot uzaklığından çıkaramayacağımız gösterilir. Sözlük büyüdükçe vektör boyutu da büyür."
+      ]},
+      {gut:"DL-3 · slayt 9–17", h:"Yoğun sözcük vektörleri ve bağlam", p:[
+        "<b>Word embedding</b>, her sözcüğü daha küçük boyutlu yoğun bir vektörle temsil eder. Slayttaki amaç, benzer bağlamlarda görülen sözcüklerin vektörlerini de birbirine yakın öğrenmektir.",
+        "<b>Dağılımsal anlambilim</b> fikri “sözcük, birlikte göründüğü sözcüklerden anlaşılır” biçiminde verilir. Bağlam, merkez sözcüğün çevresindeki sabit boyutlu pencereyle alınabilir; yakınlık için kosinüs benzerliği gösterilir."
+      ], chips:[["BOUN korpusu", {v:"corpus", name:"boun"}], ["N-gram: PMI", {v:"ngram", src:"boun", smooth:"none"}]]},
+      {gut:"DL-3 · slayt 18–24", h:"Word2Vec: CBOW ve Skip-Gram", p:[
+        "<b>Word2Vec</b>, büyük bir metin korpusundan sözcük vektörleri öğrenme çerçevesi olarak tanıtılır. <b>CBOW</b>, çevre sözcüklerin vektörlerinden merkez sözcüğü tahmin eder; slayttaki örnek pencere merkezdeki “banking” sözcüğünü çevresinden tahmin eder.",
+        "<b>Skip-Gram</b> yönü tersine çevirir: merkez sözcükten çevresindeki sözcükleri tahmin eder. Slaytta bu tahminin skorları softmax ile olasılığa dönüştürülür ve gerçek bağlam sözcüğünün olasılığını artıran bir amaçla öğrenme anlatılır."
+      ]},
+      {gut:"DL-3 · slayt 25–27", h:"Vektör benzerliği ve ağ girdisi", p:[
+        "Vektörlerin kosinüs benzerliği ve sözcük analojileri, öğrenilmiş uzaydaki yakınlıkları incelemek için gösterilir. Slayttaki benzetme örneği `man : woman :: king : ?` biçimindedir.",
+        "Sözcük embedding'leri sinir ağına one-hot girdiden sonra bir temsil katmanı olarak bağlanabilir. Bu bölüm, vektör temsillerini sonraki dizisel ve Transformer modellerine girdi olacak biçimde konumlandırır."
+      ]},
+
+      {gut:"DL-4 · slayt 4–11", h:"Ön işleme hattı", p:[
+        "Slayttaki metin temsili hattı <b>standardize et → tokenize et → indeksle → kodla</b> adımlarını izler. Örnek standardizasyon işlemleri büyük/küçük harf, noktalama ve aksanları ele alma; bazı durumlarda stop word çıkarma ve stemming'dir.",
+        "İndeksleme her farklı token'a bir tamsayı verir; kodlama bu indeksi vektöre çevirir. One-hot kodlama, token'ın sözlükteki indeksine karşılık gelen tek konumu 1 yapar."
+      ]},
+      {gut:"DL-4 · slayt 13–16, 23–26", h:"Tokenization ve sözlük dışı sözcükler", p:[
+        "<b>Tokenization</b>, metni daha küçük birimlere ayırır. Slaytlar sözcük, karakter ve alt-sözcük düzeylerini karşılaştırır; yöntem seçimi token sayısı, sözlük boyutu ve bilinmeyen sözcük sorununu etkiler.",
+        "Sözcük düzeyinde daha önce görülmemiş bir sözcüğe indeks verilemeyebilir; eğitimde seyrek sözcükleri <b>&lt;UNK&gt;</b> ile değiştirmek bir çözümdür. Karakter düzeyi sözlüğü küçültür ve bilinmeyen sözcük sorununu azaltır, fakat dizileri uzatır."
+      ]},
+      {gut:"DL-4 · slayt 17–22", h:"Alt-sözcük: BPE ve WordPiece", p:[
+        "<b>Byte Pair Encoding (BPE)</b> örneğinde önce eğitim verisindeki karakterlerden başlangıç sözlüğü kurulur. Ardışık sembol çiftleri sayılır; en sık çift birleştirilip yeni sembol eklenir ve veri yeni sözlükle tekrar temsil edilir.",
+        "Bu birleştirme seçilen sayıda adım boyunca yinelenir. <b>WordPiece</b> de alt-sözcük birleştirir, ancak slaytta BPE'den farklı olarak dil modeli olasılığını artıran birleştirmeyi seçtiği belirtilir."
+      ]},
+      {gut:"DL-4 · slayt 28–32", h:"Statik ve bağlamsal embedding", p:[
+        "<b>Statik embedding</b> her sözcüğe tek, sabit bir vektör verir; aynı sözcüğün farklı cümlelerdeki gösterimi değişmez. Slayt, bunun hesaplama açısından daha hafif olmasına karşın bir sözcüğün farklı anlamlarını sınırlı yakaladığını belirtir.",
+        "<b>Bağlamsal embedding</b> gösterimi cümlenin bağlamına göre üretir; aynı biçimli sözcük farklı cümlelerde farklı vektör alabilir. BERT örneğinde cümle önce alt-sözcük token'larına ayrılır, sonra Transformer bağlamı işler."
+      ]},
+
+      {gut:"DL-5 · slayt 4–8", h:"Sıralı veri ve RNN fikri", p:[
+        "Konuşma tanıma, makine çevirisi, dil modelleme, adlandırılmış varlık tanıma ve duygu sınıflandırma slaytta <b>dizi verisi</b> örnekleri olarak yer alır. Girdi ve çıktı dizilerinin uzunluğu görevler arasında farklı olabilir.",
+        "<b>RNN</b> aynı işlemi dizinin her adımında uygular; her çıktı, o adıma kadarki önceki hesaplamalardan etkilenir. Bu nedenle önceki bilgiyi bir “bellek” gibi taşıyabilir; sabit boylu ileri beslemeli ağ ise adımları bağımsız işler."
+      ]},
+      {gut:"DL-5 · slayt 10–15", h:"RNN mimarisi ve hücresi", p:[
+        "RNN açılımında her zaman adımında bir girdi <b>x<sub>t</sub></b>, gizli durum <b>h<sub>t</sub></b> ve görev çıktısı <b>y<sub>t</sub></b> bulunabilir. Hücre önceki gizli durumu yeni girdiyle birleştirerek günceller: h<sub>t</sub> = tanh(W·[x<sub>t</sub>, h<sub>t−1</sub>]).",
+        "Slaytlar tek-girdiden tek-çıktıya, tekten çoğa, çoktan teke ve çoktan çoğa eşlemeleri ayırır. Dizi uzunluğu sabit değilse örnekleri hizalamak için PAD sözcükleri eklenebilir."
+      ]},
+      {gut:"DL-5 · slayt 16–27", h:"LSTM, GRU ve RNN türleri", p:[
+        "<b>LSTM</b>, uzun ve kısa süreli bağımlılıkları ele almak üzere hücre durumu ve kapılar kullanır. Unutma kapısı eski bellekten neyin çıkarılacağını, giriş kapısı yeni bilgiden neyin ekleneceğini, çıkış kapısı ise neyin dışarı verileceğini denetler.",
+        "<b>GRU</b> güncelleme ve sıfırlama kapılarıyla gizli durumu birleştirir. Slayt ayrıca katmanları üst üste koyan derin/stacked RNN'yi ve diziyi iki yönde işleyen BiRNN'yi gösterir; Vanilla RNN, LSTM ve GRU yaygın türler olarak sıralanır."
+      ]},
+      {gut:"DL-5 · slayt 28–30", "h":"RNN ile sequence-to-sequence", p:[
+        "Slayttaki RNN örneği her girdi sözcüğünü sırayla işler ve her adımda bir çıktı dağılımı üretir. <b>Sequence-to-sequence (Seq2Seq)</b> düzeninde encoder girdi dizisini işler, decoder ise temsil üzerinden çıktı dizisini adım adım üretir.",
+        "Örnek diyagramda farklı uzunluktaki giriş ve çeviri dizileri eşlenir. Bu mimari, giriş ve çıktı uzunluklarının birbirine eşit olmasını gerektirmeyen görevleri gösterir."
+      ]},
+
+      {gut:"DL-6 · slayt 4–11", h:"Transformer: sıralı hesaplamadan dikkat katmanlarına", p:[
+        "Slaytlar Transformer'ı uzun dizilerde girdinin farklı bölümlerine dikkat verebilen bir mimari olarak RNN ile karşılaştırır. RNN adımları sırayla hesaplarken Transformer'da bir katmanın girdileri üzerindeki attention hesapları paralel yapılabilir; bellek gereksinimi dizi uzunluğuyla birlikte büyür.",
+        "Encoder tarafında <b>self-attention</b> ve feed-forward katmanları; decoder tarafında bunlara ek olarak <b>encoder-decoder attention</b> bulunur. Encoder çıktıları decoder'a bağlanır."
+      ]},
+      {gut:"DL-6 · slayt 13–16", h:"Self-attention: Query, Key ve Value", p:[
+        "<b>Self-attention</b>, dizideki her öğenin diğer öğelere bakarak temsilini güncellemesini sağlar. Her girdi temsili <b>Query (Q)</b>, <b>Key (K)</b> ve <b>Value (V)</b> vektörleriyle kullanılır: sorgu ne arandığını, anahtar ne bulunduğunu, değer ise alınacak bilgiyi temsil eder.",
+        "Q·K benzerlik skorları anahtar boyutunun kareköküne bölünür, <b>softmax</b> ile ağırlıklara çevrilir ve Value vektörleri bu ağırlıklarla birleştirilir. Slayttaki iki sözcüklü örnekte 112 ve 96 skorları 8'e bölünür; 0.88 ve 0.12 ağırlıkları elde edilir."
+      ]},
+      {gut:"DL-6 · slayt 17–21", h:"Matris hesabı ve multi-head attention", p:[
+        "Self-attention hesabı matrislerle topluca yapılabilir: girdi temsilleri Q, K ve V matrislerine dönüştürülür; ölçeklenmiş QK<sup>T</sup> skorlarına softmax uygulanıp V ile çarpılır.",
+        "<b>Multi-head attention</b>, hesabı farklı öğrenilmiş dönüşümlerle birden çok attention head'de yürütür. Slayttaki akış head çıktılarını birleştirir ve öğrenilen bir ağırlık matrisiyle projekte eder."
+      ]},
+      {gut:"DL-6 · slayt 22–30", h:"Konumsal bilgi, residual ve decoder", p:[
+        "Self-attention tek başına girdilerin sırasını bilmez. <b>Positional encoding</b>, sözcük embedding'lerine konum sinyali ekleyerek sıra bilgisini katmana taşır.",
+        "Encoder bloğunda self-attention ve feed-forward alt katmanlarının çevresinde <b>residual bağlantılar</b> ile Add &amp; Normalize adımları gösterilir. Decoder, önceki çıktılardan sıradaki token'ı üretir; doğrusal katman ve softmax sözlük üzerindeki dağılımı verir."
+      ]},
+
+      {gut:"DL-7 · slayt 4–13", h:"Encoder modelleri ve BERT ön eğitimi", p:[
+        "Slaytlar Transformer katman türlerini encoder (BERT), decoder (GPT) ve encoder-decoder (T5) olarak ayırır. <b>ELMo</b>, iki ayrı yönde eğitilen dil modellerinden elde edilen önceden eğitilmiş gösterimleri örnekler; <b>BERT</b> çift yönlü bağlamdan gösterim öğrenir.",
+        "BERT ön eğitimi iki hedefle anlatılır: <b>Masked Language Modeling (MLM)</b> seçilen token'ları tahmin eder; <b>Next Sentence Prediction (NSP)</b> iki segmentin ardışık olup olmadığını sınıflandırır. Slaytta token'ların %15'inin seçildiği, seçilenlerin %80'inin [MASK], %10'unun rastgele sözcük ve %10'unun değişmeden bırakıldığı belirtilir."
+      ]},
+      {gut:"DL-7 · slayt 14–21", h:"BERT'i görevler için uyarlama", p:[
+        "BERT bir kez ön eğitilip farklı görevler için ince ayar görebilir. Cümle çifti görevlerinde [CLS] gösteriminin üzerine sınıflandırıcı eklenir; iki cümle [SEP] ile ayrılır.",
+        "Tek cümle sınıflandırması, soru-cevapta başlangıç/bitiş konumlarını bulma ve token düzeyinde etiketleme slaytta farklı çıktı başlıklarıyla gösterilir. Adlandırılmış varlık tanıma, token düzeyindeki görevlere örnektir."
+      ]},
+      {gut:"DL-7 · slayt 23–32", h:"Decoder modeli: GPT ve üretim", p:[
+        "<b>GPT</b>, bir dizinin sonraki token'ını tahmin ederek otoregresif olasılık modeli kurar: P(t<sub>1</sub>,…,t<sub>n</sub>) = P(t<sub>1</sub>) ∏ P(t<sub>i</sub> | t<sub>1</sub>,…,t<sub>i−1</sub>). Üretilen token öneke eklenir ve aynı işlem yinelenir.",
+        "<b>Greedy decoding</b> her adımda en olası token'ı seçer; <b>beam search</b> en iyi k diziyi tutar; <b>top-k sampling</b> en olası k token arasından örnekler ve sıcaklık dağılımı ayarlar. Slayt, tam en olası diziyi bulmanın üstel arama uzayında zor olduğunu ve bu yöntemlerin yaklaşık arama kullandığını belirtir."
+      ]},
+      {gut:"DL-7 · slayt 34–36", h:"Encoder-decoder: T5 ve metinden metne", p:[
+        "<b>T5</b>, encoder-decoder mimarisini metin girdisinden metin çıktısı üretmek için kullanır. Slayttaki örnekler çeviri, özetleme ve sınıflandırma gibi görevleri göreve özgü bir önekle metin biçiminde ifade eder.",
+        "Model, denetimsiz ve denetimli görevlerin karışımı üzerinde ön eğitilip sonraki görevlere ince ayarlanır; slayt bunu <b>transfer learning</b> olarak vurgular. Son slayt modellerin evrimini bir ağaçta gösterir; ağaçtaki ayrıntılar bu derste daha fazla açıklanmıyor."
+      ]}
+    ],
+    quiz:[
+      ["Slaytta sinir ağları hangi tür örüntüleri bulmak üzere tasarlanmış model aileleri olarak tanımlanır?", ["Yalnızca doğrusal örüntüler", "Doğrusal olmayan örüntüler", "Yalnızca sözcük sıklıkları", "Sadece sıralama hataları"], 1, "Sinir ağları veride doğrusal olmayan örüntüleri bulmayı hedefleyen mimariler olarak tanıtılır (DL-1, slayt 4)."],
+      ["Lojistik regresyon, sinir ağı olarak nasıl gösterilir?", ["Gizli katmanı olmayan özel bir sinir ağı", "Yalnızca üç gizli katmanı olan ağ", "Geri yayılımsız RNN", "Bir embedding sözlüğü"], 0, "Slayt 13, lojistik regresyonu gizli katmanı olmayan özel bir sinir ağı olarak gösterir (DL-1, slayt 13)."],
+      ["Bir katmanda ağırlıklı girdi ve bias'tan sonra hangi işlem gösterilir?", ["Sadece tokenization", "Aktivasyon işlevi", "Korpus indeksleme", "Beam search"], 1, "İleri yayılımda katman hesabı aktivasyon işlevinden geçirilir (DL-1, slayt 14)."],
+      ["İkili sınıflandırma için slaytta hangi çıktı düzeni verilir?", ["Sınıf başına bir gizil katman", "Tek çıktı birimi", "Her token için iki decoder", "Sözlük boyutunda bir girdi"], 1, "İkili sınıflandırma bir çıktı birimiyle; çok sınıflı durum K çıktı birimiyle gösterilir (DL-1, slayt 21)."],
+      ["Softmax'ın slaytta anlatılan işlevi nedir?", ["Bir vektörü toplamı 1 olan olasılıklara çevirmek", "Negatif girdileri sıfırlamak", "Diziyi ters çevirmek", "Ağırlıkları sabitlemek"], 0, "Softmax, girdi vektörünü toplamı 1 olan olasılıklara dönüştürür (DL-1, slayt 25)."],
+      ["Slayttaki ReLU tanımı hangisidir?", ["Çıktıyı her zaman 0 ile 1 arasına sıkıştırır", "Negatif girdiyi 0 yapar, pozitif girdiyi değiştirmez", "Girdileri olasılığa böler", "Her girdinin işaretini ters çevirir"], 1, "ReLU negatif girdiyi 0'a eşler, pozitif girdiyi olduğu gibi bırakır (DL-1, slayt 24)."],
+
+      ["Eğitimde ağırlık ve bias'lar için hedef nedir?", ["Maliyet işlevini küçülten değerleri bulmak", "Sözlük boyutunu büyütmek", "Token sırasını değiştirmek", "Her girdiyi aynı yapmak"], 0, "Eğitim, maliyet işlevini küçülten ağırlık ve bias değerlerini arar (DL-2, slayt 4)."],
+      ["Slayta göre lojistik regresyonda karesel hata için hangi ifade kullanılır?", ["Her durumda en iyi kayıp", "İdeal olmayan bir kayıp", "Bir optimizer", "Bir tokenization türü"], 1, "Slayt, karesel hatanın lojistik regresyon için ideal olmadığını ve çapraz entropinin kendinden emin yanlış tahminleri cezalandırdığını söyler (DL-2, slayt 5–6)."],
+      ["Bir işlevin türevi, slayttaki açıklamaya göre neyi anlatır?", ["Parametre sayısını", "Küçük bir parametre değişiminde işlevin nasıl değiştiğini", "Sözlükteki OOV oranını", "Ağın katman türünü"], 1, "Türev, parametrede küçük bir artışın işlev değerinde oluşturduğu değişimi gösterir (DL-2, slayt 7)."],
+      ["Backpropagation gradyanları hangi ilkeyle hesaplar?", ["Zincir kuralı", "En uzun önek", "Kosinüs uzaklığı", "Sözlük sıralaması"], 0, "Geri yayılım, kaybın ağırlıklara göre gradyanını zincir kuralıyla hesaplar (DL-2, slayt 17)."],
+      ["Geri yayılım ağırlık güncellemesinde slaytta hangi üç terim çarpılır?", ["Öğrenme oranı, birim hata terimi ve girdinin/önceki çıktının değeri", "Sözlük boyutu, katman sayısı ve token uzunluğu", "Q, K ve softmax", "Korpus boyutu, pencere ve PMI"], 0, "Örnek güncelleme Δwᵢⱼ = η·δⱼ·Oᵢ biçimindedir (DL-2, slayt 28–31)."],
+      ["Slaytta optimizer'ın görevi nasıl açıklanır?", ["Kayıp gradyanlarına göre ağırlık ve bias'ların güncellenmesini belirlemek", "Token'ları cümleye çevirmek", "Girdi sözlüğünü sıralamak", "Hangi etiketin doğru olduğunu seçmek"], 0, "Optimizer, hesaplanan gradyanlarla ağırlık ve bias'ların nasıl güncelleneceğini belirler (DL-2, slayt 32)."],
+
+      ["One-hot gösterimde sözcük vektörünün boyutu neye eşittir?", ["Cümle sayısına", "Sözlükteki sözcük sayısına", "Gizli katmandaki bias sayısına", "Bağlam penceresinin yönüne"], 1, "Slaytta one-hot vektör boyutunun sözlük boyutuna eşit olduğu belirtilir (DL-3, slayt 5–6)."],
+      ["Slaytta iki farklı one-hot vektör için hangi sorun vurgulanır?", ["Aralarındaki uzaklık anlam benzerliğini yansıtmaz", "Her zaman aynı sözcüğü gösterirler", "Sözlükte indeks taşımazlar", "RNN tarafından kullanılamazlar"], 0, "Farklı one-hot vektörleri ortogonaldir; uzaklıkları sözcüklerin anlamına bağlı değildir (DL-3, slayt 8)."],
+      ["Yoğun word embedding'ler için slayttaki hedef hangisidir?", ["Sık benzer bağlamlarda görülen sözcükleri vektör uzayında yakınlaştırmak", "Her sözcüğü tek bir karaktere çevirmek", "Sözcük sırasını kaldırmak", "Kayıp işlevini optimizer'a dönüştürmek"], 0, "Slayt 9, benzer bağlamlarda görülen sözcüklerin vektörlerinin yakın olmasını hedefler (DL-3, slayt 9)."],
+      ["CBOW modeli hangi tahmini yapar?", ["Merkez sözcükten bağlamı", "Bağlam sözcüklerinden merkez sözcüğü", "Cümle etiketinden sözlüğü", "Bir sonraki cümleden önceki token'ı"], 1, "CBOW, çevre sözcüklerden merkez sözcüğü tahmin eder (DL-3, slayt 18–23)."],
+      ["Skip-Gram'ın CBOW'a göre yönü nasıldır?", ["Merkez sözcükten çevre sözcükleri tahmin eder", "Karakterlerden sözlük indeksini çıkarır", "Çevreden tek bir cümle etiketi üretir", "Sadece cümle çiftlerini sınıflandırır"], 0, "Skip-Gram, merkez sözcükten çevre sözcükleri tahmin eder (DL-3, slayt 24)."],
+      ["Kosinüs benzerliği vektörler arasında neyi karşılaştırır?", ["Yalnızca bileşen sayısını", "Vektörlerin yönünü", "Sözlük indekslerinin sırasını", "Korpus cümlelerinin uzunluğunu"], 1, "Slayt, sözcük gösterimleri için kosinüs benzerliğini kullanır (DL-3, slayt 7)."],
+
+      ["Slayttaki metin ön işleme hattının sırası hangisidir?", ["İndeksle → standardize et → kodla → tokenize et", "Standardize et → tokenize et → indeksle → kodla", "Kodla → tahmin et → tokenize et → standardize et", "Tokenize et → decoder → embedding → indeksle"], 1, "Hattın adımları standardize etme, tokenization, indeksleme ve kodlamadır (DL-4, slayt 4–11)."],
+      ["Tokenization ne yapar?", ["Metni daha küçük token birimlerine ayırır", "Ağırlıkları gradyanla günceller", "Her sözcüğü bağlamdan bağımsız yorumlar", "Encoder çıktısını sınıflandırır"], 0, "Tokenization, metni sözcük veya alt-sözcük gibi daha küçük sembol birimlerine böler (DL-4, slayt 13)."],
+      ["Sözlükte olmayan bir sözcük için slaytta verilen sözcük-düzeyi çözüm nedir?", ["Onu önceden özel bir bilinmeyen token'a eşlemek", "Sözcüğü her cümlede silmek", "Bir yeni attention head eklemek", "Onu tüm karakterlere çevirmek"], 0, "Slayt, eğitimde seyrek sözcükleri özel <UNK> token'ıyla değiştirip testte de kullanmayı önerir (DL-4, slayt 13)."],
+      ["Slayttaki BPE adımında hangi sembol çifti birleştirilir?", ["En seyrek çift", "En sık görülen ardışık çift", "Sözlüğün ilk ve son token'ı", "Rastgele seçilen tek karakter"], 1, "BPE örneğinde en sık görülen karakter/alt-sözcük çifti birleştirilir ve süreç yinelenir (DL-4, slayt 17–21)."],
+      ["WordPiece, BPE'den hangi seçim ölçütüyle ayrılır?", ["En uzun cümleyi seçer", "Dil modeli olasılığını en çok artıran birleşimi seçer", "Yalnızca tek harfleri kullanır", "Yalnızca noktalama işaretlerini birleştirir"], 1, "Slayt, WordPiece'in olasılık artışına göre birleştirme seçtiğini belirtir (DL-4, slayt 22)."],
+      ["Bağlamsal embedding'lerde aynı sözcük için hangi durum mümkündür?", ["Her zaman aynı vektör kullanılır", "Farklı cümle bağlamlarında farklı vektör üretilir", "Sözcük indeksi bulunmaz", "Sadece karakter sayısı değişir"], 1, "Slaytta dinamik/bağlamsal gösterimin aynı sözcük için cümle bağlamına göre değişebildiği anlatılır (DL-4, slayt 28–30)."],
+
+      ["RNN'in sıralı veriye yönelik temel fikri nedir?", ["Her adımda aynı işi yapıp önceki hesaplamaların bilgisini kullanmak", "Tüm girdileri birbirinden bağımsız işlemek", "Sadece son token'ı one-hot yapmak", "Her cümleyi aynı uzunluğa indirmek"], 0, "RNN her dizi öğesinde aynı görevi yineler; çıktı önceki hesaplamalara bağlıdır (DL-5, slayt 7)."],
+      ["RNN adımındaki girdi genellikle hangi simgeyle gösterilir?", ["xₜ", "Wᴼ", "V", "CLS"], 0, "Slayt, her zaman adımındaki girdiyi xₜ ile gösterir (DL-5, slayt 8)."],
+      ["Vanilla RNN hücresinin gizli durumu neye dayanır?", ["Yalnızca gelecekteki çıktı etiketine", "Mevcut girdiye ve önceki gizli duruma", "Sadece sözlük boyutuna", "Yalnızca bias'a"], 1, "Hücre hₜ'yi xₜ ve hₜ₋₁ kullanarak hesaplar (DL-5, slayt 15)."],
+      ["LSTM unutma kapısının rolü nedir?", ["Bellekten hangi bilginin atılacağını denetlemek", "Sözlüğe yeni bir indeks eklemek", "Çıktı dizisini tokenize etmek", "Decoder'ı tamamen kaldırmak"], 0, "Unutma kapısı bellekteki hangi bilginin atılacağını kontrol eder (DL-5, slayt 18)."],
+      ["BiRNN nasıl bilgi işler?", ["Diziyi yalnızca soldan sağa", "Diziyi ileri ve geri yönlerde", "Sadece tek bir merkez token'ı", "Decoder çıktısını rastgele sırada"], 1, "BiRNN diyagramları diziyi ileri ve geri yönlerde işleyen iki akışı gösterir (DL-5, slayt 25–26)."],
+      ["Seq2Seq mimarisinde encoder ve decoder'ın iş bölümü nedir?", ["Encoder girdi dizisini işler, decoder çıktı dizisini üretir", "Encoder token seçer, decoder sözlüğü oluşturur", "İkisi de sadece maliyet hesaplar", "Encoder çıktı olasılığı, decoder girdi padding'i üretir"], 0, "Slayt, encoder'ın girdiyi işlediği ve decoder'ın çıktı dizisini ürettiği düzeni gösterir (DL-5, slayt 29–30)."],
+
+      ["Slaytta Transformer'ın RNN'e göre belirtilen bir avantajı nedir?", ["Dizideki sonraki durumları yalnızca önceki adım bitince hesaplaması", "Attention hesaplarını girdiler üzerinde paralel yapabilmesi", "Daha az bellek kullanması her durumda", "Sıra bilgisini kendiliğinden taşıması"], 1, "Transformer attention hesaplarının paralelleştirilebildiği belirtilir; slayt ayrıca bellek maliyetinin büyüdüğünü de not eder (DL-6, slayt 5)."],
+      ["Self-attention'da Query, Key ve Value hangi karşılıklarla açıklanır?", ["Ne arıyoruz, neye sahibiz, ne elde ediyoruz", "Girdi, kayıp, optimizer", "Sözlük, indeks, karakter", "Encoder, decoder, sınıf etiketi"], 0, "Slayt Q/K/V'yi aranan, elde olan ve elde edilen bilgi olarak açıklar (DL-6, slayt 14)."],
+      ["Self-attention skorları softmax öncesinde slayttaki örnekte neye bölünür?", ["Dizi uzunluğuna", "Anahtar boyutunun kareköküne", "Sözlük boyutuna", "Head sayısının karesine"], 1, "Scaled dot-product attention, QKᵀ skorlarını √dₖ ile ölçekler (DL-6, slayt 15)."],
+      ["Birden çok attention head'in çıktıları sonrasında ne yapılır?", ["Birleştirilip öğrenilmiş bir ağırlık matrisiyle dönüştürülür", "Tamamen atılır", "Sözlükte alfabetik sıralanır", "Sadece bir tanesi korunur"], 0, "Multi-head akışında head çıktıları birleştirilip Wᴼ ile projekte edilir (DL-6, slayt 19–21)."],
+      ["Transformer'da positional encoding neden eklenir?", ["Self-attention katmanı girdi sırasını tek başına bilmediği için", "Softmax'ın toplamını 1 yapmak için", "RNN hücresini eğitmek için", "Bilinmeyen token'ı kaldırmak için"], 0, "Slayt, attention'ın sırayı kendiliğinden dikkate almadığını ve konumsal sinyal eklendiğini gösterir (DL-6, slayt 13, 22–23)."],
+      ["Decoder'ın çıktı katmanında sıradaki token dağılımı nasıl üretilir?", ["Doğrusal katman ve softmax ile", "Sadece BPE birleştirmesiyle", "PMI ve kosinüsle", "Unutma kapısıyla"], 0, "Decoder çıktısı doğrusal katman ve softmax üzerinden sözlük olasılıklarına çevrilir (DL-6, slayt 27–29)."],
+
+      ["Slaytlarda BERT hangi bağlam türünden gösterim öğrenir?", ["Yalnızca soldan sağa", "Çift yönlü bağlam", "Sadece sonraki cümle", "Karakter başına sabit sözlük"], 1, "BERT bölümü, hem sol hem sağ bağlamın sözcük anlamını anlamada önemli olduğunu vurgular (DL-7, slayt 6)."],
+      ["BERT'in MLM hedefi neyi yapar?", ["Maskelenmiş token'ı tahmin eder", "Bir sonraki cümlenin uzunluğunu seçer", "Sadece decoder beam'ini sıralar", "Ağırlıkların normunu hesaplar"], 0, "Masked Language Modeling, maskelenen sözcükleri girdinin kalanından tahmin eder (DL-7, slayt 7–9)."],
+      ["Slaytta seçilen maskeli token'ların yüzde kaçı [MASK] ile değiştirilir?", ["%10", "%15", "%80", "%100"], 2, "Seçilen token'ların %80'i [MASK], %10'u rastgele sözcük, %10'u değişmeden bırakılır (DL-7, slayt 9)."],
+      ["BERT'in cümle çifti sınıflandırma düzeninde iki segmenti hangi özel token ayırır?", ["[CLS]", "[MASK]", "[SEP]", "[PAD]"], 2, "Cümle çiftinde segmentleri ayırmak için [SEP] kullanılır (DL-7, slayt 18)."],
+      ["GPT slaytında otoregresif üretim nasıl ilerler?", ["Her adımda öneke koşullu sonraki token tahmin edilir ve öneke eklenir", "Önce tüm çıktılar paralel üretilir", "Yalnızca cümlenin sınıfı seçilir", "Girdi önce ters çevrilip atılır"], 0, "GPT her adımda önceki token'lara koşullu sonraki token'ı seçip diziyi uzatır (DL-7, slayt 25–28)."],
+      ["T5'in slaytlarda öne çıkan görev yaklaşımı nedir?", ["Görevleri metinden metne biçiminde ifade etmek", "Yalnızca sabit boyutlu sınıf kimliği üretmek", "Girdi token'larını tamamen kaldırmak", "Yalnızca tek yönlü embedding kullanmak"], 0, "T5 görev önekleriyle çeviri, özetleme ve sınıflandırma gibi görevleri metin biçiminde ele alır (DL-7, slayt 34–35)."]
     ]
   }
 };

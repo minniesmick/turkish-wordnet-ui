@@ -154,7 +154,7 @@ function mount(){
   root = $("#v-learn");
   root.innerHTML = `<div class="page">
     <h1 class="page-title">Slaytlardaki her kavram, bir tık uzakta</h1>
-    <div class="seg" id="lecSeg" role="group" aria-label="Ders" style="margin:6px 0 14px">${[1, 2, 3, 4, 5].map(n => `<button data-lec="${n}">Lecture ${n}</button>`).join("")}</div>
+    <div class="seg" id="lecSeg" role="group" aria-label="Ders" style="margin:6px 0 14px">${[1, 2, 3, 4, 5, 6].map(n => `<button data-lec="${n}">Lecture ${n}</button>`).join("")}</div>
     <div id="lecBody"></div>
   </div>`;
   root.addEventListener("click", e => {
