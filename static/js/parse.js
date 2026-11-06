@@ -27,6 +27,25 @@ D -> the | a | some
 ADJ -> good | quick | open
 ADV -> fast | quick
 AUX -> may | can`},
+  inclass5: {stu:true, label:"InClass · PCFG (kid ate beef)", sent:"the kid ate beef with the knife", ex:["the kid ate beef"], grammar:
+`S -> NP VP [0.9]
+NP -> Det N [0.2]
+NP -> N [0.3]
+NP -> NP PP [0.4]
+VP -> V NP PP [0.1]
+VP -> V NP [0.5]
+PP -> P NP [0.8]
+Det -> the [0.1]
+N -> kid [0.2]
+N -> knife [0.4]
+N -> beef [0.3]
+V -> ate [0.7]
+P -> with [0.6]`},
+  inclass6: {stu:true, label:"InClass · CKY (baaab)", sent:"b a a a b", ex:["a b", "b b a"], grammar:
+`S -> A B | B C
+A -> B A | a
+B -> C C | b
+C -> A B | a`},
   pp: {label:"Örnek · PP bağlanması", sent:"kids saw birds with binoculars", ex:["kids saw birds with fish"], grammar:
 `S -> NP VP
 NP -> N | NP PP
