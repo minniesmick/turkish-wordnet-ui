@@ -2,6 +2,7 @@
 import {$, $$, esc, api, registerView, MODE} from "./core.js";
 import {scoreDeps, treeProblems} from "./depscore.js";
 import {oracle} from "./depparse.js";
+import {groups, matchZ} from "./zmap.js";
 
 // Universal Dependencies ilişkileri: kısa Türkçe açıklama
 const REL = {
@@ -17,6 +18,9 @@ const relText = r => REL[r] || REL[r.split(":")[0]] || "";
 const EX0 = () => ({head:{}, rel:{}, chk:false, hints:0, shown:false});
 const DS = {tr:null, ex:EX0(), q:"", min:5, max:12, results:[], total:0, id:"", conllu:"", hide:false, view:"arc", sel:0, paste:false};
 const KEY = "wn:deps";
+// Çekim grupları (IG): Zemberek varsa, cümledeki her sözcüğün çözümlemesi türetme sınırlarından (^DB) gruplara bölünür
+const ZI = {avail:null, words:{}};
+const lcw = s => s.toLocaleLowerCase("tr");
 let root = null, sent = null;
 
 const load = () => { try{ const v = JSON.parse(localStorage.getItem(KEY)) || {}; for(const k of ["q", "min", "max", "id", "conllu", "view"]) if(v[k] != null) DS[k] = v[k]; }catch(_){} };
@@ -134,6 +138,34 @@ function selHTML(toks){
   const h = toks.find(x => x.id === t.head), kids = toks.filter(x => x.head === t.id);
   return `<p class="verdict" style="font-size:1.15rem"><b>${esc(t.form)}</b> ${h ? `→ bağımlısı olduğu baş: <b>${esc(h.form)}</b> · ilişki <span class="ck-s">${esc(t.rel)}</span> <small class="muted stu">${esc(relText(t.rel))}</small>` : `cümlenin <b>kökü</b>`}.${kids.length ? ` Bağımlıları: ${kids.map(k => `<button class="rel" data-tok="${k.id}">${esc(k.form)}<sub>${esc(k.rel)}</sub></button>`).join(" ")}` : " Bağımlısı yok (yaprak)."}</p>`;
 }
+// ───────────────────────── çekim grupları (IG)
+// Birden çok çözümlemesi olan sözcükte altın lemma ve UPOS ile uyuşan çözümleme seçilir; yoksa yalnızca UPOS, o da yoksa ilk çözümleme.
+function pickZ(list, t){
+  if(!list?.length) return null;
+  const m = list.map(a => ({a:{lemma:a.l, stem:"", oflazer:a.o, pos:a.p}, ...matchZ({lemma:a.l, stem:"", oflazer:a.o, pos:a.p}, t.lemma, t.upos)}));
+  return (m.find(x => x.lemma && x.upos) || m.find(x => x.upos) || m[0]).a;
+}
+function igHTML(toks){
+  if(ZI.avail === null) return `<p class="ck-meta">Zemberek denetleniyor…</p>`;
+  if(!ZI.avail) return `<p class="ck-meta">Çekim grupları için Zemberek gerekir (lib/zemberek-full.jar ve bir JDK); bulunamadı.</p>`;
+  const rows = toks.map(t => {
+    const a = pickZ(ZI.words[lcw(t.form)], t);
+    if(!a) return `<tr><td>${t.id}</td><td><b>${esc(t.form)}</b></td><td colspan="2" class="muted">Zemberek çözümü yok</td></tr>`;
+    const gs = groups(a.oflazer);
+    return `<tr><td>${t.id}</td><td><b>${esc(t.form)}</b></td><td>${gs.map((g, i) => `<span class="tag" title="${i === 0 ? "kök grubu" : "türetmeyle gelen grup"}">${i === 0 ? esc(a.oflazer.split("+")[0]) + "+" : ""}${esc([g.pos, ...g.items].join("+"))}</span>`).join(" ← ")}</td><td>${gs.length}</td></tr>`;
+  }).join("");
+  return `<p class="ck-meta">Türkçe'de bir sözcük, türetme sınırlarıyla (^DB) çekim gruplarına (IG) bölünür; her grubun kendi sözcük türü ve çekim ekleri vardır. Aşağıda her sözcüğün altın lemma ve UPOS ile uyuşan Zemberek çözümlemesinin grupları var. Bağımlılık okları klasik Türkçe çözümlemede belirli bir gruba bağlanır; burada okların grup düzeyinde gösterimi yok.</p>
+    <div class="ck-scroll" role="region" tabindex="0" aria-label="Çekim grupları tablosu"><table class="ng-tbl"><tr><th>#</th><th>Sözcük</th><th>Gruplar (türetme sırasıyla)</th><th>IG sayısı</th></tr>${rows}</table></div>`;
+}
+async function loadIG(){
+  if(!sent) return;
+  try{ if(ZI.avail === null) ZI.avail = !!(await api("/api/zemberek", {})).available; }catch(_){ ZI.avail = false; }
+  if(ZI.avail){
+    const need = [...new Set(sent.toks.map(t => lcw(t.form)))].filter(w => !(w in ZI.words));
+    try{ for(let i = 0; i < need.length; i += 100) Object.assign(ZI.words, (await api("/api/zemberek", {ws:need.slice(i, i + 100).join("\t")})).words || {}); }catch(_){ ZI.avail = false; }
+  }
+  const el = $("#dpIg", root); if(el && sent) el.innerHTML = igHTML(sent.toks);
+}
 // ───────────────────────── geçiş tabanlı ayrıştırma (arc-standard), altın ağacı üreten eylem dizisiyle
 function trHTML(toks){
   const r = oracle(toks), total = r.steps.length, k = DS.tr == null ? total : Math.max(1, Math.min(DS.tr, total));
@@ -169,6 +201,7 @@ function render(){
   if(!sent || !sent.toks.length){ out.innerHTML = '<div class="empty" style="padding:30px 0">Bir cümle seç ya da CoNLL-U yapıştır.</div>'; return; }
   const {toks, meta} = sent, c = check(toks);
   out.className = DS.hide && MODE.student ? "dp-hide" : "";
+  queueMicrotask(loadIG);
   out.innerHTML = `<p class="ck-meta" style="margin-bottom:4px">${meta.sent_id ? `<span class="tag">${esc(meta.sent_id)}</span> ` : ""}${toks.length} sözcük</p>
     <p class="dp-text">${esc(meta.text || toks.map(t => t.form).join(" "))}</p>
     <div class="ng-ctl"><div class="seg" role="group" aria-label="Görünüm"><button data-dv="arc" aria-pressed="${DS.view === "arc"}">Oklar</button><button data-dv="tree" aria-pressed="${DS.view === "tree"}">Ağaç</button></div>
@@ -177,6 +210,7 @@ function render(){
     <div id="dpSel" aria-live="polite">${selHTML(toks)}</div>
     <h3 class="ng-h3 stu">Özellikler <small>Lecture 3, bağımlılık ağacı</small></h3>${checksHTML(toks, c)}
     <h3 class="ng-h3 stu">Bu cümledeki ilişkiler</h3>${relsHTML(toks)}
+    <h3 class="ng-h3 stu">Çekim grupları <small>IG, Zemberek</small></h3><div class="stu" id="dpIg">${igHTML(toks)}</div>
     <h3 class="ng-h3 stu">Geçiş tabanlı ayrıştırma <small>arc-standard</small></h3><div class="stu" id="dpTr">${trHTML(toks)}</div>
     <h3 class="ng-h3 stu">Kendin ekle <small>ağacı kendin kur</small></h3><div class="stu" id="dpEx">${exHTML(toks)}</div>
     <h3 class="ng-h3">CoNLL-U tablosu</h3>${sent.mwt.length ? `<p class="ck-meta stu">${sent.mwt.length} çok sözcüklü belirteç var: yazıda bitişik görünen sözcük, ağaçta ayrı düğümlere bölünür (örn. <i>${esc(sent.mwt[0].form)}</i>). Ağaç bu bölünmüş parçalar üzerine kurulur.</p>` : ""}${tableHTML(toks, sent.mwt)}`;
