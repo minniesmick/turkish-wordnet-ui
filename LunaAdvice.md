@@ -181,3 +181,11 @@ V1 animasyon prototipinde yeni paket eklemeyelim. CSS/SVG, IntersectionObserver 
 - İlk prototip adayı: Harita kenar çizgilerinin kısa, reduced-motion uyumlu ilk açılış çizimi.
 - Orta vade: kullanıcıya karşılaştırılabilir V1’i tutarak ayrı dalda React/Vite/TypeScript + Motion dikey dilimi değerlendir.
 - Karşı çıkılanlar: sırf katalog trendi olduğu için görsel sistem değişikliği, arka plan shader ve her şeyi baştan yazma.
+
+### 2026-11-04 — Harita hareketi prototipi
+
+- Tavsiye belgesi `main` üzerinde `9bac003` (`docs: 21st.dev hareket önerilerini kaydet`) commit’iyle kaydedildi. Prototip ayrı `ui/map-motion-prototype` dalında tutuluyor.
+- `graph.js` ve `app.css` içinde kenarlar SVG maskesiyle 240 ms’de çizilerek açılıyor; bu yöntem ilişkilerin kesik/noktalı çizgi desenlerini değiştirmiyor. Düğüm girişi 220 ms, gecikme en çok 50 ms; azaltılmış hareket tercihi içeriği animasyonsuz ve tam görünür bırakıyor.
+- Yerel tarayıcı kontrolü: köpek kavramında 30 ilişki kenarı; normal harekette animasyon tamamlanıyor, `prefers-reduced-motion: reduce` durumunda kenar ve düğüm animasyonu kapalı. 1280 px masaüstü görünümü görsel olarak incelendi; 375 px görünümünde belge genişliği 365 px ölçüldü ve yatay taşma görülmedi (mobil ekran görüntüsü alınmadı). Tarayıcı konsolunda yeni hata görülmedi.
+- Yedi hesap testi ve `graph.js` sözdizimi denetimi geçti. Büyük/yoğun haritalarda kare hızı veya performans profili ölçülmedi; bu prototip henüz üretim genelinde animasyon kalitesi/performans onayı sayılmaz.
+- İnceleme adresi: `http://127.0.0.1:8771/?v=graph&ds=kenet&g=TUR10-0386920&gds=kenet` (prototip sunucusu yerelde çalışıyor).

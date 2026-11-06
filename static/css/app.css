@@ -469,16 +469,17 @@ body.present .rail:hover,body.present .topbar:hover{opacity:1;pointer-events:aut
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto!important}
   .gcanvas.arrive .gn,.gcanvas.arrive svg.edges path{animation:none!important}
+  .gcanvas.arrive svg.edges mask path{stroke-dasharray:none!important;stroke-dashoffset:0!important}
   .app,.rail,.sheet{transition:none!important}
   .tab,.btn,.iconbtn,.omni,.seg button{transition-duration:.01ms!important}
 }
 
 /* ───────── eklemeler ───────── */
 @media (max-width:860px){.hide-sm{display:none}}
-.gcanvas.arrive .gn{animation:arrive .42s var(--ease) both;animation-delay:var(--d,0ms)}
+.gcanvas.arrive .gn{animation:arrive .22s var(--ease) both;animation-delay:var(--d,0ms)}
 @keyframes arrive{from{opacity:0;transform:translate(-50%,-50%) translateY(10px)}}
-.gcanvas.arrive svg.edges path{animation:drawin .55s var(--ease) both}
-@keyframes drawin{from{opacity:0}}
+.gcanvas.arrive svg.edges mask path{animation:drawin .24s var(--ease) both;animation-delay:var(--edge-delay,0ms)}
+@keyframes drawin{from{stroke-dasharray:1;stroke-dashoffset:1}to{stroke-dasharray:1;stroke-dashoffset:0}}
 .seg button[disabled]{cursor:default}
 .up b{color:var(--ink)}
 .prob b{color:var(--ink)}

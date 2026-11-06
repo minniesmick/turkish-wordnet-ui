@@ -275,7 +275,7 @@ Heavy 2px ink rule under the headword; each sense has a boxed numeral, bold syno
 432px white page sliding from the right, history stack of folder-tab buttons with a 2px bottom edge, uppercase section heads, relation groups headed by a 28px sample of their line style, and relation pills (3px radius).
 
 ### Graph
-Nodes are white 6px-radius cards; the centre node is 268px wide with a 2px ink border and wash ring; frames are dashed spot; "more" is dotted. Edges are 1.4px ink-2 strokes in the five line styles; the hot edge and its label turn spot at 2.4px. Non-neighbours drop to 40% opacity while a node has focus. A clickable legend (34px line samples with counts) toggles families. Nodes arrive with a 0.42s staggered rise.
+Nodes are white 6px-radius cards; the centre node is 268px wide with a 2px ink border and wash ring; frames are dashed spot; "more" is dotted. Edges are 1.4px ink-2 strokes in the five line styles; the hot edge and its label turn spot at 2.4px. Non-neighbours drop to 40% opacity while a node has focus. A clickable legend (34px line samples with counts) toggles families. When a new concept loads, edges draw in through an SVG mask (0.24s) and nodes rise with a 0.22s stagger capped at 50ms; filter, mode and expand actions repaint without animation.
 
 ### Command Palette and Dialogs
 10px-radius white panels on a 42% dark backdrop, 56px input row, grouped uppercase heads, selected row in wash with spot text, mono shortcut at the right, a sunk footer.

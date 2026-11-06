@@ -219,7 +219,8 @@ function edgePath(e){
 }
 const famClass = (e) => ({hier:"", part:"dash", deriv:"dot", anti:"", cause:"dd", xl:"spot", frame:"spot dash"})[e.fam] + (e.dotted ? " dot" : "");
 
-function paint(){
+// arrive: yalnızca yeni bir kavram yüklenince kenarlar çizilerek açılır; süzgeç, kip ve genişletme tekrarlı kullanımda animasyonsuz boyanır
+function paint(arrive = false){
   mount();
   const inMap = G.mode === "map";
   $("#gwrap", root).classList.toggle("hidden", !inMap); $("#goutline", root).classList.toggle("hidden", inMap);
@@ -235,10 +236,14 @@ function paint(){
   if(inMap){
     const cv = $("#gcanvas", root);
     const edges = m.edges.filter(e => !hideEdge.has(e.id));
-    const svg = `<svg class="edges" viewBox="-4000 -3000 8000 6000" aria-hidden="true">${edges.filter(e => e.type !== "label").map(e => {
+    const visibleEdges = edges.filter(e => e.type !== "label");
+    const edgePaths = visibleEdges.map(e => {
       const cls = famClass(e), d = edgePath(e);
       return `<path class="${cls}" data-e="${e.id}" d="${d}"/>${e.fam === "anti" ? `<path class="${cls} dbl2" data-e="${e.id}" d="${d}"/>` : ""}`;
-    }).join("")}</svg>`;
+    }).join("");
+    const revealPaths = visibleEdges.map((e, i) => `<path d="${edgePath(e)}" pathLength="1" style="--edge-delay:${Math.min(i * 2, 50)}ms"/>`).join("");
+    // Reveal through a separate mask so relation-specific dash patterns remain unchanged.
+    const svg = `<svg class="edges" viewBox="-4000 -3000 8000 6000" aria-hidden="true"><defs><mask id="edge-reveal" maskUnits="userSpaceOnUse" x="-4000" y="-3000" width="8000" height="6000"><rect x="-4000" y="-3000" width="8000" height="6000" fill="#000"/><g fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round">${revealPaths}</g></mask></defs><g mask="url(#edge-reveal)">${edgePaths}</g></svg>`;
     const labs = edges.filter(e => e.label).map(e => {
       const x = e.type === "label" ? e.x : e.lab ? e.x2 : (e.x1 + e.x2) / 2, y = e.type === "label" ? e.y : e.lab ? e.y2 - 22 : (e.y1 + e.y2) / 2;
       return `<span class="elab" data-e="${e.id}" ${e.ids ? `data-ids="${e.ids.join(",")}"` : ""} style="left:${x}px;top:${y}px">${esc(e.label)}</span>`;
@@ -246,13 +251,13 @@ function paint(){
     const nodes = m.nodes.filter(n => n.el).map((n, i) => {
       const cls = `gn ${n.kind} ${G.sel === n.id ? "sel" : ""}`;
       if(n.kind === "more") return `<button class="${cls}" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px;--w:${n.wd}px"><span class="w" style="font-weight:600;font-size:.88rem">${esc(n.w)}</span></button>`;
-      if(n.kind === "frame") return `<button class="${cls}" data-id="${esc(n.id)}" style="left:${n.x}px;top:${n.y}px;--w:${n.wd}px;--d:${i * 14}ms"><span class="w">${esc(n.w)}</span></button>`;
-      return `<button class="${cls}" data-id="${esc(n.id)}" style="left:${n.x}px;top:${n.y}px;--w:${n.wd}px;--d:${i * 14}ms" title="${esc(n.def)}"><span class="w">${esc(n.w)}${sub(n.s)}</span><span class="p">${esc((POS[n.pos] || n.pos).toLocaleLowerCase("tr"))}${n.kind === "xl" ? `<span class="tag" style="color:var(--spot);border-color:var(--spot)">${n.ds === "en" ? "EN" : "TR"}</span>` : ""}</span>${n.kind === "center" ? `<span class="d">${esc(n.def)}</span>` : ""}</button>`;
+      if(n.kind === "frame") return `<button class="${cls}" data-id="${esc(n.id)}" style="left:${n.x}px;top:${n.y}px;--w:${n.wd}px;--d:${Math.min(i * 2, 50)}ms"><span class="w">${esc(n.w)}</span></button>`;
+      return `<button class="${cls}" data-id="${esc(n.id)}" style="left:${n.x}px;top:${n.y}px;--w:${n.wd}px;--d:${Math.min(i * 2, 50)}ms" title="${esc(n.def)}"><span class="w">${esc(n.w)}${sub(n.s)}</span><span class="p">${esc((POS[n.pos] || n.pos).toLocaleLowerCase("tr"))}${n.kind === "xl" ? `<span class="tag" style="color:var(--spot);border-color:var(--spot)">${n.ds === "en" ? "EN" : "TR"}</span>` : ""}</span>${n.kind === "center" ? `<span class="d">${esc(n.def)}</span>` : ""}</button>`;
     }).join("");
     cv.innerHTML = svg + labs + nodes;
-    cv.classList.add("arrive");
     cv.dataset.edgeCount = edges.length;
-    setTimeout(() => cv.classList.remove("arrive"), 700);
+    if(arrive){ cv.classList.add("arrive"); setTimeout(() => cv.classList.remove("arrive"), 360); }
+    else cv.classList.remove("arrive");
     applyPan(false);
     if(!gs.fitted){ gs.moved = false; fit(false); gs.fitted = true; }
     if(G.sel) highlight(G.sel, true); else highlight("");
@@ -381,7 +386,7 @@ async function load(){
   const t = gs.trail[gs.trail.length - 1];
   if(!t || t.id !== d.self.id) { /* iz yalnızca center() ile büyür */ }
   store.addHist(itemOf(state.ds, d.self));
-  paint();
+  paint(true);
   document.title = `${label(d.self)} · Harita`;
 }
 export async function center(id, ds, {trail = false} = {}){
