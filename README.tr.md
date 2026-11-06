@@ -124,7 +124,16 @@ Türkçe iki XML dosyasını indirmek için:
 - **Korpus**: UD Turkish-BOUN (lemma ve UPOS destekli) ya da Brown cümleleri üzerinde sözcük ve n-gram sıklık listeleri, Zipf grafiği, type/token oranı ve bağlam satırları (KWIC) (Lecture 5).
 - **N-gram**: kendi metnin, BOUN ya da Brown üzerinde unigram / bigram / trigram tabloları, sonraki sözcük tahmini, adım adım cümle olasılığı ve perplexity,
   **Laplace, backoff ve interpolation** yumuşatma, bilinmeyen sözcük için **UNK**, rastgele cümle üretimi, eğitim/test perplexity karşılaştırması ve **PMI** (birlikte geçiş, benzer bağlamlı sözcükler) (Lecture 5).
-- **Metin temsili** (Lecture 6, DL-4): ön işleme adımlarını dene; sözcük, karakter ve BPE tokenization'ı karşılaştır; kendi metninde ya da BOUN'un ilk cümlelerinde BPE eğitip birleştirmeleri izle ve sözcük kodla. Arayüz sınırı 20.000 sözcük / 500 birleştirmedir; `node scripts/test_tok.mjs` (toplam 9 test betiği).
+- **Sinir ağı** (Lecture 6, DL-1/2): 2B oyuncak veri kümeleri (XOR, daireler, iki ay, spiral, doğrusal) üzerinde çok katmanlı algılayıcı (MLP) eğitimi; canlı karar sınırı ve kayıp eğrisi, ReLU/tanh/sigmoid/softmax, SGD/Momentum/Adam, Xavier başlatma ve sayısal gradyan denetimi (
+ode scripts/test_nn.mjs).
+- **Metin temsili** (Lecture 6, DL-4): ön işleme adımlarını dene; sözcük, karakter ve BPE tokenization'ı karşılaştır; kendi metninde ya da BOUN'un ilk cümlelerinde BPE eğitip birleştirmeleri izle ve sözcük kodla. Arayüz sınırı 20.000 sözcük / 500 birleştirmedir (
+ode scripts/test_tok.mjs).
+- **Embedding** (Lecture 6, DL-3): BOUN ya da özel metin üzerinde Word2Vec Skip-gram + negatif örnekleme ile yoğun sözcük vektörleri eğit; kosinüs en yakın komşularını PPMI ile yan yana gör, sözcük analojilerini (a − b + c) sına ve 2B PCA saçılım haritasında incele (
+ode scripts/test_emb.mjs).
+- **RNN** (Lecture 6, DL-5): karakter düzeyinde dil modeli için zamanda açılım (unrolled RNN) SVG çizimi; zamanda geri yayılım (BPTT), gradyan kırpma, kaybolan gradyan norm grafiği, LSTM ve GRU adımları (
+ode scripts/test_rnn.mjs).
+- **Attention** (Lecture 6, DL-6/7): Scaled Dot-Product Attention ara matrisleri (^T \to /\sqrt{d_k} \to \text{mask} \to \text{softmax} \to \cdot V$), etkileşimli dikkat ısı haritası, çift yönlü (encoder / BERT) ve nedensel maskeli (decoder / GPT) karşılaştırması, çok başlıklı dikkat ve konumsal kodlama (
+ode scripts/test_attn.mjs; toplam 13 test betiği).
 - **Kullanım kipi**: üst çubuktaki **Araç / Öğrenci** anahtarı normal kullanımı çalışmadan ayırır. Araç kipi yalnızca sonuç verir; Öğrenci kipi ders bağlantıları,
   formüller, adım adım açıklama, kural izi, alıştırma ve sınavları (ve Ders sekmesini) açar: CKY tablosunu kendin doldurup hücre hücre kontrol ettir, n-gram olasılıklarını ve tablo satırlarını elle hesapla, etiketleri gizleyerek bağımlılık ağacını dene. Öğretici öğeler `.stu` sınıfıyla işaretlidir.
 - **Ders** (yalnızca Öğrenci kipi): Lecture 1–6 çalışma sayfaları; her slayt kavramının yanında ilgili aracı hazır örnekle açan düğmeler, Lecture 1, 2, 3, 5 ve 6 için açıklamalı çoktan seçmeli sorular (Lecture 6 için 42 kaynaklı soru). Lecture 4 için: slayt kavramları (homonymy, polysemy, synonymy, antonymy, hypernym/hyponym, ilişki tabloları, bass yolları,

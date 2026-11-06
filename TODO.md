@@ -23,6 +23,13 @@ Rakamlar 2026-10-23'te 500 gerçek BOUN sözcüğü ve 400 rastgele üretimle ö
 - CKY: tekli kural döngüleri atlanır, düğüm başına en iyi 60 alt ağaç tutulur, çok belirsiz cümlede en fazla 30 ağaç gösterilir. Adım adım yöntemler küçük cümleler için (üstten alta 400, shift-reduce 500 adım sınırı). Earley yok.
 - Bağımlılık verisi yalnızca UD Turkish-BOUN **test** kümesidir (979 cümle); çok sözcüklü belirteçler (1-2) atlanır.
 
+**Derin öğrenme laboratuvarları (Lecture 6: DL-1 … DL-7)**
+- **Sinir ağı (
+n)**: 2B oyuncak veri kümeleri (XOR, daireler, iki ay, spiral, doğrusal) üzerinde çok katmanlı algılayıcı (MLP) eğitimi; gerçek NLP görevi değildir. Karar sınırı ızgara tahminiyle (36×36) çizilir.
+- **Embedding (emb)**: BOUN test derlemi sözcük embedding'leri için küçüktür (~10k token); öğrenilen vektörler büyük modeller kadar kararlı değildir, analojiler küçük korpuslarda gürültülüdür.
+- **RNN (nn)**: Tarayıcıda saf JS karakter seviyesinde dil modeli; küçük model ve kısa eğitim süresi nedeniyle üretilen karakter dizileri dilbilgisel açıdan kusursuz olmayabilir; amaç BPTT ve gradyan kaybolmasını somutlaştırmaktır.
+- **Attention (ttn)**: Ağırlıklar eğitilmediği için (rastgele veya elle girildiği için) dikkat örüntüleri semantik açıdan anlamlı değildir; laboratuvar mekanizmayı ve matris adımlarını (QK^T / √d_k, maske, softmax, ·V) göstermeyi hedefler.
+
 **Genel**
 - İndirilen SVG / PNG sitenin yazı tiplerini taşımaz, açıldığı bilgisayarın yazı tipiyle çizilir.
 - Ders sayfaları ve soruları ders slaytlarının metninden yazıldı. Lecture 6 için DL-1…DL-7'deki 218 slaydın tamamı görsel olarak incelendi; önceki derslerin slayt görselleri bu adımda yeniden incelenmedi.
