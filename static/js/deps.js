@@ -1,7 +1,9 @@
 // Bağımlılık ağacı: Lecture 3 (Dependency Parsing), InClass 4. UD Turkish-BOUN cümlesi seç ya da CoNLL-U yapıştır; ok ve ağaç çizimi, özellik kontrolleri.
 import {$, $$, esc, api, registerView, MODE} from "./core.js";
 import {scoreDeps, treeProblems} from "./depscore.js";
-import {oracle} from "./depparse.js";
+import {oracle, trainParser, parse as parseLP, evalParser} from "./depparse.js";
+import {loadCorpus} from "./corpusdata.js";
+import {split as splitMD} from "./md.js";
 import {groups, matchZ} from "./zmap.js";
 
 // Universal Dependencies ilişkileri: kısa Türkçe açıklama
@@ -20,6 +22,44 @@ const DS = {tr:null, ex:EX0(), q:"", min:5, max:12, results:[], total:0, id:"", 
 const KEY = "wn:deps";
 // Çekim grupları (IG): Zemberek varsa, cümledeki her sözcüğün çözümlemesi türetme sınırlarından (^DB) gruplara bölünür
 const ZI = {avail:null, words:{}};
+// Öğrenen ayrıştırıcı (depparse.js): BOUN'un her 5. cümlesi sınama, kalanı eğitim (Belirsizlik ve N-gram ile aynı ayrım)
+const LP = {model:null, busy:false, msg:"", test:null, train:new Set(), err:""};
+const toksOfCorpus = s => s.f.map((f, i) => ({id:i + 1, form:f, lemma:s.l[i], upos:s.p[i], feats:s.x[i] || "_", head:s.h[i], rel:s.r[i]}));
+async function trainLP(){
+  if(LP.busy) return;
+  LP.busy = true; LP.err = ""; LP.msg = "BOUN yükleniyor…"; renderLP();
+  try{
+    const C = await loadCorpus("boun");
+    if(!C.sents[0].h) throw new Error("sunucu HEAD göndermiyor; server.py'yi yeniden başlat");
+    const {train, test} = splitMD(C.sents);
+    LP.train = new Set(train.map(s => s.id));
+    await new Promise(r => setTimeout(r, 20));
+    LP.model = await trainParser(train.map(toksOfCorpus), {onEpoch:async (e, n) => { LP.msg = `eğitiliyor: tur ${e} / ${n}`; renderLP(); await new Promise(r => setTimeout(r, 20)); }});
+    LP.test = evalParser(LP.model, test.map(toksOfCorpus));
+  }catch(e){ LP.err = String(e.message || e); }
+  LP.busy = false; renderLP();
+}
+function renderLP(){ const el = $("#dpLp", root); if(el && sent) el.innerHTML = lpHTML(sent.toks); }
+function lpHTML(toks){
+  const head = `<p class="ck-meta">Yukarıdaki oracle altın ağacı bildiği için eylemleri hazır alır. Burada eylemleri bir sınıflandırıcı seçer: arc-standard durumundan (yığının ve tamponun üst sözcükleri, sözcük türleri, ekler, çocukların ilişkileri) özellikler çıkarılır, ortalama perceptron SHIFT, LEFT-ARC ya da RIGHT-ARC (ilişkiyle) seçer. Eğitim BOUN'un cümlelerinde oracle'ın eylemleriyle yapılır; açgözlü, geri dönüşsüz çalışır.</p>`;
+  if(LP.err) return head + `<div class="notice warn">${esc(LP.err)}</div><button class="btn sm" data-lp="train">Yeniden dene</button>`;
+  if(LP.busy) return head + `<p class="verdict" style="font-size:1.05rem">${esc(LP.msg)}</p>`;
+  if(!LP.model) return head + `<button class="btn sm" data-lp="train">Ayrıştırıcıyı eğit <small>(BOUN, yaklaşık 10 saniye)</small></button>`;
+  const r = parseLP(LP.model, toks), p = new Map(r.arcs.map(a => [a.d, a]));
+  let n = 0, u = 0, l = 0;
+  const rows = toks.map(t => {
+    const a = p.get(t.id), gh = t.head, hasGold = toks.some(x => x.head);
+    const ok = a && a.h === t.head, okL = ok && a.rel === t.rel, skip = t.upos === "PUNCT";
+    if(hasGold && !skip){ n++; if(ok) u++; if(okL) l++; }
+    const nm = id => id === 0 ? "ROOT" : esc(toks.find(x => x.id === id)?.form ?? id);
+    return `<tr class="dp-ex-${!hasGold || skip ? "" : okL ? "ok" : ok ? "half" : "bad"}"><td>${t.id}</td><td><b>${esc(t.form)}</b></td><td>${hasGold ? `${nm(gh)} <small>${esc(t.rel)}</small>` : "—"}</td><td>${a ? `${nm(a.h)} <small>${esc(a.rel)}</small>` : "—"}</td><td>${!hasGold || skip ? "" : okL ? "✓" : ok ? "baş doğru" : "✗"}</td></tr>`;
+  }).join("");
+  const own = LP.train.has(sent.meta.sent_id), t = LP.test;
+  return head + `<p class="verdict" style="font-size:1.05rem">Sınama kümesi (noktalamasız, ${t.n} sözcük): UAS <b>${(100 * t.uas).toFixed(1)}%</b> · LAS <b>${(100 * t.las).toFixed(1)}%</b></p>
+    <p class="ck-meta">Bu cümle: ${own ? "<b>eğitim kümesinde</b> (sonuçlar iyimser olur)" : sent.meta.sent_id ? "<b>sınama kümesinde</b>, ayrıştırıcı görmedi" : "kendi cümlen"}${n ? ` · UAS <b>${Math.round(100 * u / n)}%</b> · LAS <b>${Math.round(100 * l / n)}%</b>` : ""}.</p>
+    <div class="ck-scroll" role="region" tabindex="0" aria-label="Ayrıştırıcı çıktısı tablosu"><table class="ng-tbl dp-ex-tbl"><tr><th>#</th><th>Sözcük</th><th>Altın (baş · ilişki)</th><th>Ayrıştırıcı</th><th></th></tr>${rows}</table></div>
+    <p class="ck-meta">Kesişen yaylı (projektif olmayan) cümleleri arc-standard kuramaz; BOUN cümlelerinin yaklaşık %3'ü böyledir.</p>`;
+}
 const lcw = s => s.toLocaleLowerCase("tr");
 let root = null, sent = null;
 
@@ -212,6 +252,7 @@ function render(){
     <h3 class="ng-h3 stu">Bu cümledeki ilişkiler</h3>${relsHTML(toks)}
     <h3 class="ng-h3 stu">Çekim grupları <small>IG, Zemberek</small></h3><div class="stu" id="dpIg">${igHTML(toks)}</div>
     <h3 class="ng-h3 stu">Geçiş tabanlı ayrıştırma <small>arc-standard</small></h3><div class="stu" id="dpTr">${trHTML(toks)}</div>
+    <h3 class="ng-h3 stu">Öğrenen ayrıştırıcı <small>perceptron, BOUN</small></h3><div class="stu" id="dpLp">${lpHTML(toks)}</div>
     <h3 class="ng-h3 stu">Kendin ekle <small>ağacı kendin kur</small></h3><div class="stu" id="dpEx">${exHTML(toks)}</div>
     <h3 class="ng-h3">CoNLL-U tablosu</h3>${sent.mwt.length ? `<p class="ck-meta stu">${sent.mwt.length} çok sözcüklü belirteç var: yazıda bitişik görünen sözcük, ağaçta ayrı düğümlere bölünür (örn. <i>${esc(sent.mwt[0].form)}</i>). Ağaç bu bölünmüş parçalar üzerine kurulur.</p>` : ""}${tableHTML(toks, sent.mwt)}`;
 }
@@ -286,6 +327,7 @@ function mount(){
     if(h) DS.ex.head[h] = e.target.value; else if(r) DS.ex.rel[r] = e.target.value;
   });
   root.addEventListener("click", e => {
+    if(e.target.closest("[data-lp]")){ trainLP(); return; }
     const b = e.target.closest("[data-exact]"); if(!b || !sent) return;
     const ex = DS.ex, toks = sent.toks, act = b.dataset.exact;
     if(act === "chk") ex.chk = true;

@@ -33,5 +33,28 @@ for(const blk of txt.split(/\n\n+/)){
 }
 check("BOUN: projektif cümlelerde yaylar altınla aynı, 2n adım", okAll, true);
 check("BOUN: projektif cümle oranı %85 üstü", proj / n > 0.85, true);
+// öğrenen ayrıştırıcı
+{
+  const {trainParser, parse, evalParser} = await import("../static/js/depparse.js");
+  const all = [];
+  for(const blk of txt.split(/\n\n+/)){
+    const tk = [];
+    for(const l of blk.split("\n")){ const c = l.split("\t"); if(c.length >= 8 && /^\d+$/.test(c[0])) tk.push({id:+c[0], form:c[1], lemma:c[2], upos:c[3], feats:c[5], head:+c[6], rel:c[7]}); }
+    if(tk.length) all.push(tk);
+  }
+  const tr = all.filter((_, i) => i % 5 !== 4), te = all.filter((_, i) => i % 5 === 4);
+  const M = await trainParser(tr, {epochs:3});
+  const R = evalParser(M, te);
+  check("ayrıştırıcı: UAS %60 üstü", R.uas > 0.6, true);
+  check("ayrıştırıcı: LAS UAS'ten büyük olamaz", R.las <= R.uas, true);
+  check("ayrıştırıcı: deterministik", (await trainParser(tr.slice(0, 80), {epochs:2})).trainErr === (await trainParser(tr.slice(0, 80), {epochs:2})).trainErr, true);
+  let valid = true;
+  for(const tk of te.slice(0, 60)){
+    const a = parse(M, tk).arcs, heads = new Map(a.map(x => [x.d, x.h]));
+    if(a.length !== tk.length || a.filter(x => x.h === 0).length < 1) valid = false;
+    for(const t of tk){ const seen = new Set(); let c = t.id; while(c && heads.has(c) && !seen.has(c)){ seen.add(c); c = heads.get(c); } if(c) valid = false; }   // her sözcükten köke ulaşılmalı (döngü yok)
+  }
+  check("ayrıştırıcı: her çıktı döngüsüz, her sözcük bir başa bağlı", valid, true);
+}
 console.log("geçiş tabanlı ayrıştırma denetimi:", total - bad, "/", total, `(BOUN: ${proj}/${n} projektif)`);
 if(bad) process.exitCode = 1;

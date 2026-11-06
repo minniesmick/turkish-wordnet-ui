@@ -1365,11 +1365,11 @@ _CORP = {}
 
 
 def corpus_boun():
-    """BOUN: [{id, f: biçimler, l: lemmalar, p: UPOS, x: FEATS}] (çok sözcüklü belirteç ve boş düğümler atlanır)."""
+    """BOUN: [{id, f: biçimler, l: lemmalar, p: UPOS, x: FEATS, h: HEAD, r: DEPREL}] (çok sözcüklü belirteç ve boş düğümler atlanır)."""
     if "boun" not in _CORP:
         out = []
         for s in ud_sents():
-            f, l, p, x = [], [], [], []
+            f, l, p, x, h, r = [], [], [], [], [], []
             for line in s["conllu"].split(NL):
                 if not line or not line[0].isdigit():
                     continue
@@ -1377,7 +1377,8 @@ def corpus_boun():
                 if len(c) < 6 or not c[0].isdigit():
                     continue
                 f.append(c[1]); l.append(c[2]); p.append(c[3]); x.append(c[5])
-            out.append({"id": s["id"], "f": f, "l": l, "p": p, "x": x})
+                h.append(int(c[6]) if len(c) > 7 and c[6].isdigit() else 0); r.append(c[7] if len(c) > 7 else "dep")
+            out.append({"id": s["id"], "f": f, "l": l, "p": p, "x": x, "h": h, "r": r})
         _CORP["boun"] = out
     return _CORP["boun"]
 
