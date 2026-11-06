@@ -66,6 +66,13 @@ function knProb(m, hist, w, D){
   }
   return {c, h, num:c, den:h, p, order:n, how:`Kneser-Ney, D = ${D}`};
 }
+// Kneser-Ney indirimi D'yi held-out cümlelerde perplexity'yi en aza indiren değer olarak seç (0,05 adımlı ızgara). Dönen: {D, ppl: ızgaradaki değerler}
+export function tuneD(m, heldout, grid = Array.from({length:19}, (_, i) => +(0.05 + i * 0.05).toFixed(2))){
+  const rows = grid.map(D => ({D, ppl:perplexity(m, heldout, {smooth:"kn", D}).ppl}));
+  let best = rows[0];
+  for(const r of rows) if(r.ppl < best.ppl) best = r;
+  return {D:best.D, rows};
+}
 // λ'ları held-out cümlelerden öğren (deleted interpolation, EM): her sözcük için karışımın hangi düzeyden geldiği sorumluluk olarak dağıtılır, λ'lar ortalama sorumluluğa yaklaşır
 // m: eğitim modeli; heldout: eğitimde olmayan cümleler. Dönen: {lam, ll: her turdaki log-olabilirlik, N}
 export function learnLam(m, heldout, {iters = 40} = {}){

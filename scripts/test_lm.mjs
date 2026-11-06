@@ -113,5 +113,14 @@ import {katzDiscounts} from "../static/js/lm.js";
   check("Katz görülen > görülmeyen", prob(m2, ["the"], "dog", {smooth:"katz"}).p > prob(m2, ["the"], "sings", {smooth:"katz"}).p ? 1 : 0, 1);
   check("Katz perplexity sonlu", isFinite(perplexity(m2, toks("the dog sings\na cat saw the bird"), {smooth:"katz"}).ppl) ? 1 : 0, 1);
 }
+// D ayarı
+import {tuneD} from "../static/js/lm.js";
+{
+  const corp = toks("the dog barks\nthe cat sleeps\nthe dog sleeps\na cat barks\nthe dog saw the cat\na dog saw a cat\nthe cat saw the dog\nthe bird sings\na bird sings\nthe dog barks");
+  const m = buildModel(corp.filter((_, i) => i % 5 !== 0), 2), dev = corp.filter((_, i) => i % 5 === 0), r = tuneD(m, dev);
+  check("D ızgarada", r.rows.some(x => x.D === r.D) ? 1 : 0, 1);
+  check("seçilen D en düşük perplexity", r.rows.every(x => x.ppl >= r.rows.find(y => y.D === r.D).ppl) ? 1 : 0, 1);
+  check("D aralığı (0,1)", r.D > 0 && r.D < 1 ? 1 : 0, 1);
+}
 console.log("dil modeli denetimi:", total - bad, "/", total);
 if(bad) process.exitCode = 1;

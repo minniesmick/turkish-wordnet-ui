@@ -1,7 +1,7 @@
 // N-gram laboratuvarı (Lecture 5): korpustan sayım, olasılık, Laplace / backoff / interpolation, UNK, cümle olasılığı, perplexity, rastgele üretim, PMI.
 // Hesap lm.js içinde; burada yalnızca arayüz var. Korpus: elle yazılan metin, BOUN (Türkçe) ya da Brown (İngilizce).
 import {$, $$, esc, registerView, setView, tr as num, toast} from "./core.js";
-import {BOS, EOS, SEP, buildModel, mapWord, padHist, prob, support, sample, seqProb, perplexity, defaultLam, learnLam, pmiBuild, topPairs, collocates, similar} from "./lm.js";
+import {BOS, EOS, SEP, buildModel, mapWord, padHist, prob, support, sample, seqProb, perplexity, defaultLam, learnLam, tuneD, pmiBuild, topPairs, collocates, similar} from "./lm.js";
 import {loadCorpus, tokensOf, CORPORA} from "./corpusdata.js";
 
 const PRESETS = {
@@ -9,7 +9,7 @@ const PRESETS = {
   inclass5: {stu:true, label:"InClass 5", text:"the dog barks\nthe cat laughs\nthe cat saw the dog\nthe\ncat the dog the\ncat cat cat", n:2, pred:"the cat", sent:"the cat laughs", extra:["the cat saw the dog", "the cat barks"]},
   tr: {label:"Türkçe örnek", text:"bu çocuk bugün okula gidecek\nbu çocuk yarın okula gidecek\no çocuk bugün eve gidecek\nbu kız bugün okula gitmedi", n:2, pred:"bu çocuk", sent:"bu çocuk bugün okula gidecek", extra:["bu çocuk yarın eve gidecek"]}
 };
-const NG = {src:"text", limit:5000, text:PRESETS.slayt.text, n:2, lower:false, smooth:"none", unk:0, alpha:.4, lam:{}, pred:PRESETS.slayt.pred, sent:PRESETS.slayt.sent, hist:"", preset:"slayt", pk:2, pmin:3, pw:""};
+const NG = {src:"text", limit:5000, text:PRESETS.slayt.text, n:2, lower:false, smooth:"none", unk:0, alpha:.4, lam:{}, D:.75, pred:PRESETS.slayt.pred, sent:PRESETS.slayt.sent, hist:"", preset:"slayt", pk:2, pmin:3, pw:""};
 const KEY = "wn:ngram";
 const SM = {none:"Yok", laplace:"Laplace +1", backoff:"Backoff", interp:"Interpolation", kn:"Kneser-Ney", katz:"Katz"};
 let root = null, S = [], M = null, token = 0;
@@ -25,7 +25,7 @@ const load = () => {
 };
 const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(NG)); }catch(_){} };
 const lamFor = n => (NG.lam?.[n]?.length === n) ? NG.lam[n] : defaultLam(n);
-const cfg = () => ({smooth:NG.smooth, alpha:NG.alpha, lam:lamFor(NG.n)});
+const cfg = () => ({smooth:NG.smooth, alpha:NG.alpha, lam:lamFor(NG.n), D:NG.D});
 
 // ───────────────────────── korpus → cümleler
 const clean = s => s.replace(/<\/?s>/g, " ").replace(/[.,;:!?"“”()]+/g, " ").trim();
@@ -172,7 +172,7 @@ function cmpHTML(){
   const train = S.filter((_, i) => i % 5 !== 0), test = S.filter((_, i) => i % 5 === 0);
   const rows = [1, 2, 3].map(n => {
     const m = memo(`c|${srcKey()}|${n}|${NG.unk}`, () => buildModel(train, n, {unk:NG.unk}));
-    return {n, v:Object.keys(SM).map(sm => memo(`p|${srcKey()}|${n}|${NG.unk}|${sm}|${NG.alpha}`, () => perplexity(m, test, {smooth:sm, alpha:NG.alpha, lam:defaultLam(n)}).ppl))};
+    return {n, v:Object.keys(SM).map(sm => memo(`p|${srcKey()}|${n}|${NG.unk}|${sm}|${NG.alpha}|${NG.D}`, () => perplexity(m, test, {smooth:sm, alpha:NG.alpha, lam:defaultLam(n), D:NG.D}).ppl))};
   });
   const fin = rows.flatMap(r => r.v).filter(isFinite), best = fin.length ? Math.min(...fin) : null;
   return `<p class="ck-meta">Cümlelerin %80'i eğitim, %20'si test (her 5. cümle). Test perplexity: düşük = model görmediği metni daha iyi tahmin ediyor. UNK eşiği: <b>${NG.unk ? "≤ " + NG.unk : "kapalı"}</b>.</p>
@@ -274,6 +274,8 @@ function syncControls(){
   $("#ngTextBox", root).classList.toggle("hidden", NG.src !== "text");
   $("#ngBrown", root).classList.toggle("hidden", NG.src !== "brown");
   $("#ngAlpha", root).classList.toggle("hidden", NG.smooth !== "backoff");
+  $("#ngD", root).classList.toggle("hidden", NG.smooth !== "kn" || NG.n < 2);
+  $("#ngDIn", root).value = NG.D;
   const li = $("#ngLam", root), showLam = NG.smooth === "interp" && NG.n >= 2;
   li.classList.toggle("hidden", !showLam);
   if(showLam) li.innerHTML = `<span class="muted" style="font-size:.88rem">λ (birimden ${NG.n}-gram'a):</span>` + lamFor(NG.n).map((v, i) => `<input class="dp-num" data-lam="${i}" type="number" step="0.05" min="0" max="1" value="${v}" aria-label="λ${i + 1}">`).join("") + `<button class="btn sm ghost" data-learn="lam" title="Cümlelerin %80'iyle say, %20'siyle (her 5. cümle) λ'ları EM ile öğren">λ'yı korpustan öğren</button><small class="muted stu">toplam 1'e normalize edilir${NG.learned?.[NG.n] ? ` · öğrenildi: ${NG.learned[NG.n].n} held-out sözcük, ${NG.learned[NG.n].it} tur EM` : ""}</small>`;
@@ -345,6 +347,7 @@ function mount(){
       <details class="ng-advanced"><summary>Diğer seçenekler <small>UNK · harf biçimi · α · λ</small></summary><div class="ng-ctl">
         <label class="muted">UNK eşiği <select id="ngUnk" class="btn sm"><option value="0">kapalı</option><option value="1">sayım ≤ 1</option><option value="2">sayım ≤ 2</option><option value="5">sayım ≤ 5</option></select></label>
         <label class="chk"><input type="checkbox" id="ngLower"> küçük harf</label>
+        <span id="ngD" class="muted hidden"><label>D <input id="ngDIn" class="dp-num" type="number" step="0.05" min="0.05" max="0.95" value="0.75"></label> <button class="btn sm ghost" data-learn="d" title="Cümlelerin %80'iyle say, %20'siyle (her 5. cümle) D'yi seç">D'yi korpustan seç</button></span>
         <label id="ngAlpha" class="muted hidden">α <input id="ngAlphaIn" class="dp-num" type="number" step="0.05" min="0" max="1" value="0.4"></label>
         <span id="ngLam" class="hidden" style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"></span>
       </div></details></div>
@@ -377,6 +380,7 @@ function mount(){
   $("#ngLower", root).addEventListener("change", e => { NG.lower = e.target.checked; refresh(); });
   $("#ngUnk", root).addEventListener("change", e => { NG.unk = +e.target.value; refresh(); });
   $("#ngSize", root).addEventListener("change", e => { NG.limit = +e.target.value; refresh(); });
+  $("#ngDIn", root).addEventListener("input", e => { NG.D = Math.min(.95, Math.max(.05, +e.target.value || .75)); later(() => { renderAll(); }); });
   $("#ngAlphaIn", root).addEventListener("input", e => { NG.alpha = Math.min(1, Math.max(0, +e.target.value)); later(() => { renderAll(); }); });
   $("#ngRegen", root).addEventListener("click", () => { $("#ngGen", root).innerHTML = genHTML(); });
   root.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.id === "nqIn") root.querySelector('[data-nq="check"]')?.click(); });
@@ -390,6 +394,12 @@ function mount(){
   root.addEventListener("click", e => {
     const go = e.target.closest("[data-go]"); if(go){ e.preventDefault(); setView(go.dataset.go); return; }
     const nq = e.target.closest("[data-nq]"); if(nq){ nqAct(nq.dataset.nq, nq.dataset); return; }
+    if(e.target.closest('[data-learn="d"]')){
+      if(S.length < 10){ toast("D seçmek için en az 10 cümle gerekli"); return; }
+      const train = S.filter((_, i) => i % 5 !== 0), dev = S.filter((_, i) => i % 5 === 0);
+      NG.D = tuneD(buildModel(train, NG.n, {unk:NG.unk}), dev).D;
+      toast(`D = ${NG.D} (held-out perplexity en düşük)`); refresh(); return;
+    }
     if(e.target.closest("[data-learn]")){
       if(S.length < 10){ toast("λ öğrenmek için en az 10 cümle gerekli"); return; }
       const train = S.filter((_, i) => i % 5 !== 0), dev = S.filter((_, i) => i % 5 === 0);

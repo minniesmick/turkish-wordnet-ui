@@ -51,7 +51,8 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [x] Korpus gezgini (`static/js/corpus.js`, `g o`): BOUN ve Brown, sıklık, Zipf, KWIC; `/api/corpus` (gzip).
 - [x] N-gram: interpolated Kneser-Ney (D = 0,75, süreklilik sayımı), λ'ları held-out veriden EM ile öğrenme (deleted interpolation).
 - [x] N-gram: Katz backoff (Good-Turing indirimi, K = 5, normalize).
-- [ ] N-gram: D'yi ayarlama, SemCor dışı İngilizce korpus.
+- [x] N-gram: Kneser-Ney D'sini held-out'tan seçme (`tuneD`; BOUN bigram'da D = 0,95 ile 2303 → 1962).
+- [ ] N-gram: SemCor dışı İngilizce korpus.
 
 ## Dışa aktarma
 
