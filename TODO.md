@@ -31,7 +31,7 @@ n)**: 2B oyuncak veri kümeleri (XOR, daireler, iki ay, spiral, doğrusal) üzer
 - **Attention (ttn)**: Ağırlıklar eğitilmediği için (rastgele veya elle girildiği için) dikkat örüntüleri semantik açıdan anlamlı değildir; laboratuvar mekanizmayı ve matris adımlarını (QK^T / √d_k, maske, softmax, ·V) göstermeyi hedefler.
 
 **Genel**
-- İndirilen SVG / PNG sitenin yazı tiplerini taşımaz, açıldığı bilgisayarın yazı tipiyle çizilir.
+- İndirilen SVG / PNG yazı tiplerini içine gömer; dosya her bilgisayarda aynı görünür (SVG yaklaşık 250 KB olur).
 - Ders sayfaları ve soruları ders slaytlarının metninden yazıldı. Lecture 6 için DL-1…DL-7'deki 218 slaydın tamamı görsel olarak incelendi; önceki derslerin slayt görselleri bu adımda yeniden incelenmedi.
 - Testler: `scripts/test_*.mjs` (turkish 43 + 54 yeni ek, fsm 4 yol + alıştırma ve yeni yollar, lm 41, mle 19, parsers 13, md 34, zmap 36); arayüz otomatik test edilmiyor, preview'da elle denendi.
 
@@ -54,7 +54,7 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 ## Dışa aktarma
 
 - [x] Ağaç, bağımlılık şeması ve Zipf için SVG / PNG indirme (`static/js/exportfig.js`); CKY tablosu ve n-gram tablosu Markdown kopyalama; CoNLL-U kopyalama.
-- [ ] CKY tablosu ve n-gram matrisi için PNG; yazı tiplerini SVG'ye göm (şu an indirilen dosyada sistem yazı tipi kullanılır).
+- [x] CKY tablosu ve n-gram tablosu için SVG / PNG indirme; indirilen dosyalara yazı tipleri gömüldü (`static/js/exportfig.js`).
 
 ## Kullanım kipi ve morfoloji (Lecture 2)
 

@@ -334,7 +334,7 @@ function chartHTML(r){
     rows += `<tr>${tds}</tr>`;
   }
   const words = `<tr class="ck-w">${r.toks.map((t, i) => `<th><small>${i}</small>${esc(t)}<small>${i + 1}</small></th>`).join("")}</tr>`;
-  return `${toolbar(r)}<div class="ck-tool"><button class="btn sm ghost" data-copy="${esc(chartMarkdown(r))}">Tabloyu Markdown olarak kopyala</button></div><div class="ck-scroll" role="region" tabindex="0" aria-label="CKY tablosu, yatay kaydırılabilir"><table class="ck">${rows}${words}</table></div><div class="stu">${detail(r, si, sj)}</div>`;
+  return `${toolbar(r)}<div class="ck-tool"><button class="btn sm ghost" data-copy="${esc(chartMarkdown(r))}">Tabloyu Markdown olarak kopyala</button><button class="btn sm ghost" data-export-tbl="svg" data-target="table.ck" data-name="cky-tablosu">SVG</button><button class="btn sm ghost" data-export-tbl="png" data-target="table.ck" data-name="cky-tablosu">PNG</button></div><div class="ck-scroll" role="region" tabindex="0" aria-label="CKY tablosu, yatay kaydırılabilir"><table class="ck">${rows}${words}</table></div><div class="stu">${detail(r, si, sj)}</div>`;
 }
 function detail(r, i, j){
   const cell = r.chart[i]?.[j]; if(!cell) return "";
