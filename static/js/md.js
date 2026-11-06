@@ -284,19 +284,21 @@ function whyAP(ap, fl, a, b){
 // ───────────────────────── değerlendirme (noktalama sayılmaz)
 export const METHODS = ["base", "dl", "ap", "nn"];
 export function evaluate(model, sents){
-  const mk = () => ({n:0, ceil:0, ...Object.fromEntries(METHODS.map(m => [m, 0])), ...Object.fromEntries(METHODS.map(m => [m + "U", 0])), ceilU:0});
+  const mk = () => ({n:0, ceil:0, ...Object.fromEntries(METHODS.map(m => [m, 0])), ...Object.fromEntries(METHODS.map(m => [m + "U", 0])), ceilU:0, ...Object.fromEntries(METHODS.map(m => [m + "L", 0])), ceilL:0});
   const R = {all:mk(), amb:mk(), one:mk(), unk:mk()};
   for(const s of sents){
     const gold = sentTags(s), res = analyze(model, s.f);
     for(let i = 0; i < gold.length; i++){
       if(s.p[i] === "PUNCT") continue;
       const t = res[i], cat = !t.known ? "unk" : t.cands.length > 1 ? "amb" : "one";
-      const pick = {base:t.base, dl:t.dl.tag, ap:t.ap.tag, nn:t.nn.tag};
+      const pick = {base:t.base, dl:t.dl.tag, ap:t.ap.tag, nn:t.nn.tag}, gl = lc(s.l[i]);
+      const lemOk = tag => { const c = t.cands.find(x => x.tag === tag); return !!c?.lemma && lc(c.lemma) === gl; };
       for(const k of ["all", cat]){
         const r = R[k]; r.n++;
         if(t.cands.some(c => c.tag === gold[i])) r.ceil++;
         if(t.cands.some(c => uposOf(c.tag) === s.p[i])) r.ceilU++;
-        for(const m of METHODS){ if(pick[m] === gold[i]) r[m]++; if(uposOf(pick[m]) === s.p[i]) r[m + "U"]++; }
+        if(t.cands.some(c => c.lemma && lc(c.lemma) === gl)) r.ceilL++;
+        for(const m of METHODS){ if(pick[m] === gold[i]) r[m]++; if(uposOf(pick[m]) === s.p[i]) r[m + "U"]++; if(lemOk(pick[m])) r[m + "L"]++; }
       }
     }
   }

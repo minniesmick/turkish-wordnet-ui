@@ -12,7 +12,7 @@ const NAME = {base:"Taban çizgisi", dl:"Karar listesi", ap:"Perceptron", nn:"Si
 let root = null, C = null, SP = null, M = null, R = null, WF = null, BAD = [], TA = null, POOL = null, failed = "";
 const QZ = {cur:null, score:0, n:0};
 
-const load = () => { try{ const v = JSON.parse(localStorage.getItem(KEY)) || {}; for(const k of ["i", "src", "text", "gran", "word"]) if(v[k] != null) DM[k] = v[k]; }catch(_){} if(!["test", "own"].includes(DM.src)) DM.src = "test"; if(!["tag", "upos"].includes(DM.gran)) DM.gran = "tag"; };
+const load = () => { try{ const v = JSON.parse(localStorage.getItem(KEY)) || {}; for(const k of ["i", "src", "text", "gran", "word"]) if(v[k] != null) DM[k] = v[k]; }catch(_){} if(!["test", "own"].includes(DM.src)) DM.src = "test"; if(!["tag", "upos", "lemma"].includes(DM.gran)) DM.gran = "tag"; };
 const save = () => { try{ localStorage.setItem(KEY, JSON.stringify({i:DM.i, src:DM.src, text:DM.text, gran:DM.gran, word:DM.word})); }catch(_){} };
 let loaded = false;
 const ensure = () => { if(!loaded){ loaded = true; load(); } };   // apply() mount'tan önce çağrılabilir; kayıtlı durum onu ezmesin
@@ -76,9 +76,9 @@ function statsHTML(){
   return `<div class="ng-stats">${cell(num(SP.train.length), "eğitim cümlesi")}${cell(num(M.tokens), "eğitim sözcüğü")}${cell(num(M.lex.glob.size), "farklı çözümleme (UPOS + FEATS)")}${cell(num(SP.test.length), "sınama cümlesi")}${cell(num(a.n), "sınama sözcüğü (noktalamasız)")}${cell("%" + pct(R.unk.n, a.n), "eğitimde hiç görülmemiş")}${cell("%" + pct(R.amb.n, known), "bilinen sözcüklerin belirsiz olanı")}</div>`;
 }
 function accHTML(){
-  const U = DM.gran === "upos" ? "U" : "";
+  const U = DM.gran === "upos" ? "U" : DM.gran === "lemma" ? "L" : "";
   const rows = [["all", "Tüm sözcükler"], ["amb", "Belirsiz (bilinen, 2 ve üstü aday)"], ["one", "Tek adaylı (bilinen)"], ["unk", "Bilinmeyen sözcük (eğitimde yok)"]];
-  return `<div class="ng-scroll" role="region" tabindex="0" aria-label="Sınama kümesi doğruluk tablosu, yatay kaydırılabilir"><table class="ng-tbl ng-cmp"><caption>Sınama kümesi doğruluğu (%), ${DM.gran === "upos" ? "yalnızca sözcük türü (UPOS)" : "tam çözümleme (UPOS + FEATS)"}. Noktalama sayılmaz.</caption>
+  return `<div class="ng-scroll" role="region" tabindex="0" aria-label="Sınama kümesi doğruluk tablosu, yatay kaydırılabilir"><table class="ng-tbl ng-cmp"><caption>Sınama kümesi doğruluğu (%), ${DM.gran === "upos" ? "yalnızca sözcük türü (UPOS)" : DM.gran === "lemma" ? "seçilen çözümlemenin kökü BOUN lemmasıyla aynı mı (eğitim sözlüğünde kökü bilinmeyen sözcükte yalnızca Zemberek adayı kök verebilir)" : "tam çözümleme (UPOS + FEATS)"}. Noktalama sayılmaz.</caption>
     <thead><tr><th>Küme</th><th>Sözcük</th><th title="Doğru çözümlemenin aday kümesinde bulunma oranı: hiçbir yöntem bunu aşamaz">Tavan</th>${METHODS.map(m => `<th>${NAME[m]}</th>`).join("")}</tr></thead>
     <tbody>${rows.map(([k, label]) => {
       const r = R[k], v = METHODS.map(m => 100 * r[m + U] / r.n), mx = Math.max(...v), mn = Math.min(...v);
@@ -290,7 +290,7 @@ function mount(){
     <h2 class="ng-h">1 · Doğruluk <small id="dmState">eğitiliyor…</small></h2>
     <div id="dmBody" class="hidden">
       <div id="dmStats"></div>
-      <div class="ng-ctl"><div class="seg" id="dmGran" role="group" aria-label="Ölçüt"><button data-gran="tag">Tam çözümleme</button><button data-gran="upos">Yalnızca sözcük türü</button></div></div>
+      <div class="ng-ctl"><div class="seg" id="dmGran" role="group" aria-label="Ölçüt"><button data-gran="tag">Tam çözümleme</button><button data-gran="upos">Yalnızca sözcük türü</button><button data-gran="lemma">Kök (lemma)</button></div></div>
       <div id="dmAcc" aria-live="polite"></div>
       <div id="dmZem"></div>
       <h2 class="ng-h">2 · Cümlede belirsizlik giderme</h2>

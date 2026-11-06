@@ -54,6 +54,8 @@ check("tek adaylı sözcükte üç yöntem de aynı", R.one.base === R.one.dl &&
 check("belirsiz sözcükte karar listesi taban çizgisinden iyi", R.amb.dl > R.amb.base, true);
 check("belirsiz sözcükte perceptron taban çizgisinden iyi", R.amb.ap > R.amb.base, true);
 check("tümünde perceptron taban çizgisinden iyi", R.all.ap > R.all.base, true);
+check("kök doğruluğu tavanı aşmaz", ["base", "dl", "ap", "nn"].every(k => R.all[k + "L"] <= R.all.ceilL), true);
+check("Zemberek yokken bilinmeyen sözcüğün kökü bulunamaz", R.unk.ceilL, 0);
 check("tümünde sinir ağı taban çizgisinden iyi", R.all.nn > R.all.base, true);
 check("sinir ağı kaybı her turda düşer", M.nn.loss.every((v, i) => i === 0 || v < M.nn.loss[i - 1]), true);
 check("sinir ağı olasılıkları 1 eder", Math.abs(analyze(M, ["gelir"])[0].nn.probs.reduce((a, b) => a + b[1], 0) - 1) < 1e-9, true);
