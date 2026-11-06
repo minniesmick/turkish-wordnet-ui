@@ -907,3 +907,11 @@ mark.dm-w{padding:0 4px;border-radius:var(--r-sm);background:var(--wash-2);color
   .nn-controls label{justify-content:space-between;width:100%}
   .nn-layer-row{flex-wrap:wrap}
 }
+
+/* bağımlılık alıştırması: yanıt geri bildirimi (yalnızca alıştırma, DESIGN.md Quiz-Only Signal) */
+.dp-ex-tbl select{height:34px;max-width:200px;padding:0 8px;border:1px solid var(--rule-2);border-radius:var(--r);background:var(--page);color:var(--ink);font:inherit}
+.dp-ex-tbl tr.dp-ex-ok td{background:color-mix(in srgb,var(--ok) 10%,var(--page))}
+.dp-ex-tbl tr.dp-ex-bad td{background:color-mix(in srgb,var(--bad) 10%,var(--page))}
+.dp-ex-tbl tr.dp-ex-half td{background:var(--wash)}
+.dp-ex-note{font-size:.88rem;color:var(--ink-2)}
+#dpEx .verdict{max-width:none;display:block}

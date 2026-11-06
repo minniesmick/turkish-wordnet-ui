@@ -1,5 +1,6 @@
 // Bağımlılık ağacı: Lecture 3 (Dependency Parsing), InClass 4. UD Turkish-BOUN cümlesi seç ya da CoNLL-U yapıştır; ok ve ağaç çizimi, özellik kontrolleri.
 import {$, $$, esc, api, registerView, MODE} from "./core.js";
+import {scoreDeps, treeProblems} from "./depscore.js";
 
 // Universal Dependencies ilişkileri: kısa Türkçe açıklama
 const REL = {
@@ -12,7 +13,8 @@ const REL = {
   dep:"belirsiz bağımlılık", fixed:"sabit ifade", parataxis:"yan yana cümle", orphan:"yetim öğe", list:"liste", goeswith:"bölünmüş sözcük"
 };
 const relText = r => REL[r] || REL[r.split(":")[0]] || "";
-const DS = {q:"", min:5, max:12, results:[], total:0, id:"", conllu:"", hide:false, view:"arc", sel:0, paste:false};
+const EX0 = () => ({head:{}, rel:{}, chk:false, hints:0, shown:false});
+const DS = {ex:EX0(), q:"", min:5, max:12, results:[], total:0, id:"", conllu:"", hide:false, view:"arc", sel:0, paste:false};
 const KEY = "wn:deps";
 let root = null, sent = null;
 
@@ -127,6 +129,25 @@ function selHTML(toks){
   const h = toks.find(x => x.id === t.head), kids = toks.filter(x => x.head === t.id);
   return `<p class="verdict" style="font-size:1.15rem"><b>${esc(t.form)}</b> ${h ? `→ bağımlısı olduğu baş: <b>${esc(h.form)}</b> · ilişki <span class="ck-s">${esc(t.rel)}</span> <small class="muted stu">${esc(relText(t.rel))}</small>` : `cümlenin <b>kökü</b>`}.${kids.length ? ` Bağımlıları: ${kids.map(k => `<button class="rel" data-tok="${k.id}">${esc(k.form)}<sub>${esc(k.rel)}</sub></button>`).join(" ")}` : " Bağımlısı yok (yaprak)."}</p>`;
 }
+// ───────────────────────── alıştırma: ağacı kendin kur (öğrenci kipi)
+function exHTML(toks){
+  const ex = DS.ex, gold = toks.map(t => ({id:t.id, head:t.head, rel:t.rel}));
+  const sc = ex.chk ? scoreDeps(gold, ex) : null, prob = ex.chk ? treeProblems(toks, ex.head) : [];
+  const relOpts = ["", ...Object.keys(REL)];
+  const rows = toks.map(t => {
+    const r = sc?.rows[t.id - 1], cls = r ? (r.ok ? "ok" : r.headOk ? "half" : "bad") : "";
+    const hv = ex.head[t.id], rv = ex.rel[t.id];
+    return `<tr class="dp-ex-${cls}"><td>${t.id}</td><td><b>${esc(t.form)}</b> <small class="muted">${esc(t.upos)}</small></td>
+      <td><select data-exh="${t.id}" aria-label="${esc(t.form)} sözcüğünün başı"><option value="">—</option><option value="0" ${hv === "0" ? "selected" : ""}>0 · kök</option>${toks.filter(x => x.id !== t.id).map(x => `<option value="${x.id}" ${hv === String(x.id) ? "selected" : ""}>${x.id} · ${esc(x.form)}</option>`).join("")}</select></td>
+      <td><select data-exr="${t.id}" aria-label="${esc(t.form)} sözcüğünün ilişkisi">${relOpts.map(o => `<option value="${esc(o)}" ${rv === o ? "selected" : ""}>${o ? esc(o) : "—"}</option>`).join("")}</select></td>
+      <td class="dp-ex-note">${r ? (r.ok ? "✓" : r.headOk ? `baş doğru, ilişki <b>${esc(t.rel)}</b> olmalı` : ex.shown ? `<b>${t.head ? esc(toks.find(x => x.id === t.head)?.form || "?") : "kök"}</b> · ${esc(t.rel)}` : "✗") : ""}</td></tr>`;
+  }).join("");
+  const verdict = sc ? `<p class="verdict" style="font-size:1.1rem">${sc.done < sc.n ? `<small class="muted">${sc.n - sc.done} sözcük boş · </small>` : ""}UAS <b>${Math.round(sc.uas * 100)}%</b> (doğru baş) · LAS <b>${Math.round(sc.las * 100)}%</b> (baş ve ilişki)${sc.las === 1 ? ' · <span class="ng-ok">Hepsi doğru ✓</span>' : ""}${ex.hints ? ` · ${ex.hints} ipucu` : ""}</p>${prob.length ? `<p class="ck-meta">Ağaç özelliği: ${prob.join(", ")}.</p>` : ""}` : "";
+  return `<p class="ck-meta">Her sözcük için başını ve ilişkisini seç; sonra kontrol et. Önce yukarıdaki “etiketleri gizle” kutusunu işaretle, yoksa cevap ağaçta görünür. UAS yalnızca başı, LAS hem başı hem ilişkiyi sayar (ayrıştırıcılar böyle puanlanır).</p>
+    <div class="ck-scroll" role="region" tabindex="0" aria-label="Bağımlılık alıştırması tablosu"><table class="ng-tbl dp-ex-tbl"><tr><th>#</th><th>Sözcük</th><th>Baş (HEAD)</th><th>İlişki (DEPREL)</th><th></th></tr>${rows}</table></div>
+    <div class="ck-tool"><button class="btn sm" data-exact="chk">Kontrol et</button><button class="btn sm ghost" data-exact="hint">İpucu: bir başı söyle</button><button class="btn sm ghost" data-exact="show">Cevabı göster</button><button class="btn sm ghost" data-exact="reset">Sıfırla</button></div>
+    <div aria-live="polite">${verdict}</div>`;
+}
 function render(){
   const out = $("#dpOut", root);
   if(!sent || !sent.toks.length){ out.innerHTML = '<div class="empty" style="padding:30px 0">Bir cümle seç ya da CoNLL-U yapıştır.</div>'; return; }
@@ -140,10 +161,11 @@ function render(){
     <div id="dpSel" aria-live="polite">${selHTML(toks)}</div>
     <h3 class="ng-h3 stu">Özellikler <small>Lecture 3, bağımlılık ağacı</small></h3>${checksHTML(toks, c)}
     <h3 class="ng-h3 stu">Bu cümledeki ilişkiler</h3>${relsHTML(toks)}
+    <h3 class="ng-h3 stu">Kendin ekle <small>ağacı kendin kur</small></h3><div class="stu" id="dpEx">${exHTML(toks)}</div>
     <h3 class="ng-h3">CoNLL-U tablosu</h3>${tableHTML(toks)}`;
 }
 function setSent(text, id){
-  sent = parseConllu(text); DS.conllu = text; DS.id = id || sent.meta.sent_id || ""; DS.sel = 0; save(); render(); renderList();
+  sent = parseConllu(text); DS.ex = EX0(); DS.conllu = text; DS.id = id || sent.meta.sent_id || ""; DS.sel = 0; save(); render(); renderList();
 }
 function renderList(){
   $("#dpList", root).innerHTML = DS.results.length
@@ -187,7 +209,7 @@ function mount(){
     const r = all.results[Math.floor(Math.random() * all.results.length)]; if(r) pick(r.id);
   });
   $("#dpPaste", root).addEventListener("click", () => { DS.paste = !DS.paste; $("#dpPasteBox", root).classList.toggle("hidden", !DS.paste); if(DS.paste) $("#dpTa", root).focus(); });
-  $("#dpTa", root).addEventListener("input", e => { const s = parseConllu(e.target.value); if(s.toks.length){ sent = s; DS.conllu = e.target.value; DS.id = ""; DS.sel = 0; save(); render(); } });
+  $("#dpTa", root).addEventListener("input", e => { const s = parseConllu(e.target.value); if(s.toks.length){ sent = s; DS.ex = EX0(); DS.conllu = e.target.value; DS.id = ""; DS.sel = 0; save(); render(); } });
   root.addEventListener("click", e => {
     const el = e.target.closest("[data-id],[data-dv],[data-tok]"); if(!el) return;
     if(el.dataset.id) return pick(el.dataset.id);
@@ -202,7 +224,23 @@ function mount(){
     render();
     root.querySelector(`.dp-word[data-tok="${DS.sel}"],.dp-node[data-tok="${DS.sel}"]`)?.focus();
   });
-  root.addEventListener("change", e => { if(e.target.id === "dpHide"){ DS.hide = e.target.checked; render(); } });
+  root.addEventListener("change", e => {
+    if(e.target.id === "dpHide"){ DS.hide = e.target.checked; render(); return; }
+    const h = e.target.dataset.exh, r = e.target.dataset.exr;
+    if(h) DS.ex.head[h] = e.target.value; else if(r) DS.ex.rel[r] = e.target.value;
+  });
+  root.addEventListener("click", e => {
+    const b = e.target.closest("[data-exact]"); if(!b || !sent) return;
+    const ex = DS.ex, toks = sent.toks, act = b.dataset.exact;
+    if(act === "chk") ex.chk = true;
+    else if(act === "reset") DS.ex = EX0();
+    else if(act === "hint"){
+      const t = toks.find(x => String(ex.head[x.id]) !== String(x.head)); if(t){ ex.head[t.id] = String(t.head); ex.hints++; }
+      ex.chk = true;
+    }else if(act === "show"){ for(const t of toks){ ex.head[t.id] = String(t.head); ex.rel[t.id] = t.rel; } ex.chk = true; ex.shown = true; }
+    $("#dpEx", root).innerHTML = exHTML(toks);
+    $("#dpEx", root).querySelector(`[data-exact="${act}"]`)?.focus();
+  });
 }
 
 export const view = {

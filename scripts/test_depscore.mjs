@@ -1,0 +1,21 @@
+// Bağımlılık alıştırması puanı denetimi: node scripts/test_depscore.mjs
+import {scoreDeps, treeProblems} from "../static/js/depscore.js";
+let bad = 0, total = 0;
+const check = (name, got, want) => { total++; if(JSON.stringify(got) !== JSON.stringify(want)){ bad++; console.log("FAIL", name, "beklenen", want, "bulunan", got); } };
+const gold = [{id:1, head:2, rel:"nsubj"}, {id:2, head:0, rel:"root"}, {id:3, head:2, rel:"obj"}, {id:4, head:2, rel:"punct"}];
+const all = scoreDeps(gold, {head:{1:2, 2:0, 3:2, 4:2}, rel:{1:"nsubj", 2:"root", 3:"obj", 4:"punct"}});
+check("hepsi doğru UAS", all.uas, 1); check("hepsi doğru LAS", all.las, 1); check("tamamlanan", all.done, 4);
+const half = scoreDeps(gold, {head:{1:2, 2:0, 3:1, 4:2}, rel:{1:"nsubj", 2:"root", 3:"obj", 4:"dep"}});
+check("baş yanlış: UAS", half.uas, 0.75); check("baş+etiket: LAS", half.las, 0.5);
+check("etiket yanlış, baş doğru", [half.rows[3].headOk, half.rows[3].relOk], [true, false]);
+const empty = scoreDeps(gold, {head:{}, rel:{}});
+check("boş cevap", [empty.uas, empty.las, empty.done], [0, 0, 0]);
+check("yalnızca baş girilmiş: cevaplanmamış", scoreDeps(gold, {head:{1:2}, rel:{}}).rows[0].answered, false);
+check("baş 0 (kök) kabul edilir", scoreDeps(gold, {head:{2:"0"}, rel:{2:"root"}}).rows[1].ok, true);
+check("ayrıntı ilişki tam eşleşme ister", scoreDeps([{id:1, head:0, rel:"nsubj:pass"}], {head:{1:0}, rel:{1:"nsubj"}}).las, 0);
+const toks = gold.map(g => ({id:g.id}));
+check("geçerli ağaç sorunsuz", treeProblems(toks, {1:2, 2:0, 3:2, 4:2}), []);
+check("iki kök", treeProblems(toks, {1:0, 2:0, 3:2, 4:2}), ["birden fazla kök"]);
+check("döngü", treeProblems(toks, {1:2, 2:1, 3:2, 4:2}), ["döngü var"]);
+console.log("bağımlılık alıştırması denetimi:", total - bad, "/", total);
+if(bad) process.exitCode = 1;
