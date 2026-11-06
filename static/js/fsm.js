@@ -65,7 +65,7 @@ edge(120, 1200, "", "0", "s");
 for(const [id, tag] of PERS_NOM) edge(1200, 125, id, tag);
 edge(1200, 125, "", "0", "s");
 edge(125, 130, "Cop", "+DHr"); edge(125, 130, "", "0", "se");
-for(const [id, tag] of [["A1sg", "+yHm"], ["A2sg", "+sHn"], ["A3sg", "0"], ["A1pl", "+yHz"], ["A2pl", "+sHnHz"], ["A3pl", "+lAr"]]) edge(121, 126, id, tag);
+for(const [id, tag] of [["A1sg", "+yHm"], ["A2sg", "+sHn"], ["A3sg", "0"], ["A1pl", "+lHm"], ["A2pl", "+sHnHz"], ["A3pl", "+lAr"]]) edge(121, 126, id, tag);
 edge(121, 126, "", "0", "s"); edge(126, 1260, "", "0", "se");
 for(const [id, tag] of [["A2sg", "0"], ["A2pl", "+yHnHz"], ["A3sg", "+sHn"], ["A3pl", "+sHnlAr"]]) edge(122, 127, id, tag);
 edge(122, 127, "", "0", "s"); edge(127, 1270, "", "0", "se");
