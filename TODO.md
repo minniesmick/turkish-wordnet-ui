@@ -13,7 +13,7 @@ Rakamlar 2026-10-23'te 500 gerçek BOUN sözcüğü ve 400 rastgele üretimle ö
 - Oflazer FSM yolu şekillerden elle kodlandı. `Sample.pdf`'teki 3 yol birebir doğrulandı; geri kalan yollar doğrulanmadı. 2026-10-23'te BOUN'dan rastgele 1500 sözcüğün Zemberek çözümlemelerinde (3190 çözümleme) %90,9 için yol çıkıyor. Çıkmayanlar şekilde olmayanlar: Adverb / Postp / Interj / Conj / Det kökleri (şekiller yalnızca isim ve fiil), isimden fiile türetme (Acquire, Become: lAn / lAş), AorPart, Neces, Ness / Related / Dim türevleri, bazı zamir ve sayı alt türleri. Pron ve Num köklerinin 2 numaralı isim köküne bağlanışı şekilde yok (varsayım olarak işaretli); Caus'un köke bağlanışı da öyle. Bileşik zamanlar (geliyordu, gelmişti, gelirse ...) şekilde var ama birinci zaman durumlarından 1320 / 1321 / 1330'a giden uzun çizgiler kesişiyor; hangi durumdan hangisine gidildiği dil bilgisine göre yorumlandı ("çıkarım" olarak işaretli, yolun yanında yazar). Zemberek etiketlerini şekil kenarlarına eşleme kararları bana ait.
 
 **N-gram ve korpus**
-- Backoff "stupid backoff": puan verir, normalize olasılık dağılımı vermez; bu yüzden perplexity'si yaklaşıktır. λ ağırlıkları elle girilir ya da held-out kümeden EM ile öğrenilir. Kneser-Ney (interpolated, D = 0,75) normalize bir dağılım verir; Katz backoff yok.
+- Backoff "stupid backoff": puan verir, normalize olasılık dağılımı vermez; bu yüzden perplexity'si yaklaşıktır. λ ağırlıkları elle girilir ya da held-out kümeden EM ile öğrenilir. Kneser-Ney (interpolated, D = 0,75) ve Katz (Good-Turing) normalize dağılım verir.
 - "Brown" korpusu SemCor cümleleridir (küçük harfli, noktalamasız), gerçek Brown'un tamamı değildir; cümleler eşit aralıkla seçilir.
 - PMI yalnızca ilk ~150 bin sözcüğü kullanır; "benzer bağlamlı sözcükler" gürültülüdür (BOUN gibi küçük korpusta özellikle; Brown'da `president` iyi, `good` / `school` zayıf).
 - Eğitim/test ayrımı sabittir (her 5. cümle); küçük korpuslarda test perplexity oynaktır. Rastgele cümle üretimi bilerek rastgeledir (her tıklamada farklı).
@@ -50,7 +50,8 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [x] PMI (slayt 34–39): pencere ±k, en yüksek çiftler, kolokasyonlar, PPMI kosinüs benzerliği. Rastgele cümle üretimi (slayt 28–29) ve eğitim/test perplexity karşılaştırması da var.
 - [x] Korpus gezgini (`static/js/corpus.js`, `g o`): BOUN ve Brown, sıklık, Zipf, KWIC; `/api/corpus` (gzip).
 - [x] N-gram: interpolated Kneser-Ney (D = 0,75, süreklilik sayımı), λ'ları held-out veriden EM ile öğrenme (deleted interpolation).
-- [ ] N-gram: Katz backoff (Good-Turing indirimi), D'yi ayarlama, SemCor dışı İngilizce korpus.
+- [x] N-gram: Katz backoff (Good-Turing indirimi, K = 5, normalize).
+- [ ] N-gram: D'yi ayarlama, SemCor dışı İngilizce korpus.
 
 ## Dışa aktarma
 

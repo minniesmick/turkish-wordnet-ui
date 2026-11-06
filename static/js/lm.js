@@ -95,10 +95,55 @@ export function learnLam(m, heldout, {iters = 40} = {}){
   return {lam, ll, N:rows.length};
 }
 
-// cfg: {smooth: "none" | "laplace" | "backoff" | "interp" | "kn", alpha, lam, D}
+// Katz backoff (Good-Turing indirimi): sayımı r ≤ K olan n-gram'ların sayımı d_r · r olarak indirilir, kurtarılan olasılık alt düzeye α(h) ile dağıtılır.
+// d_r = ((r+1) N_{r+1} / (r N_r) − (K+1) N_{K+1} / N_1) / (1 − (K+1) N_{K+1} / N_1);  N_r: sayımı r olan n-gram türü sayısı (o düzeyde). r > K için d = 1.
+export const KATZ_K = 5;
+export function katzDiscounts(m, k, K = KATZ_K){
+  m.gt = m.gt || {};
+  const key = k + "|" + K;
+  if(m.gt[key]) return m.gt[key];
+  const N = Array(K + 2).fill(0);
+  for(const e of m.orders[k].values()) for(const c of e.next.values()) if(c <= K + 1) N[c]++;
+  const d = Array(K + 1).fill(1), top = N[1] ? (K + 1) * N[K + 1] / N[1] : 0;
+  for(let r = 1; r <= K; r++){
+    if(!N[r] || !N[r + 1]){ d[r] = 1; continue; }
+    const v = ((r + 1) * N[r + 1] / (r * N[r]) - top) / (1 - top);
+    d[r] = v > 0 && v <= 1 ? v : 1;
+  }
+  return m.gt[key] = {d, N};
+}
+// P_katz(w | hist'), hist'= son k−1 sözcük; k. düzey tablosundan. Dönen: {p, k (cevabı veren düzey), c, h}
+function katzP(m, hist, w, k){
+  const n = m.n, key = k === 1 ? "" : hist.slice(n - k).join(SEP), ent = m.orders[k].get(key), {d} = katzDiscounts(m, k);
+  const disc = c => c > 0 && c <= KATZ_K ? d[c] : 1;
+  if(k === 1){
+    // en alt düzey: görülen sözcükler indirimli, kalan kütle görülmeyen sözlük öğelerine eşit dağıtılır
+    const tot = ent?.total || 0;
+    if(!tot) return {p:1 / m.V, k, c:0, h:0};
+    const c = ent.next.get(w) || 0;
+    if(c > 0) return {p:disc(c) * c / tot, k, c, h:tot};
+    let seen = 0; for(const x of ent.next.values()) seen += disc(x) * x / tot;
+    const unseen = m.V - ent.next.size;
+    return {p:Math.max(0, 1 - seen) / (unseen > 0 ? unseen : m.V), k, c:0, h:tot};   // sözlük dışı sözcük (UNK kapalı): kalan kütle V sözcüğe eşit bölünür
+  }
+  if(!ent) return katzP(m, hist, w, k - 1);
+  const c = ent.next.get(w) || 0;
+  if(c > 0) return {p:disc(c) * c / ent.total, k, c, h:ent.total};
+  let seenHi = 0, seenLo = 0;
+  for(const [x, cx] of ent.next){ seenHi += disc(cx) * cx / ent.total; seenLo += katzP(m, hist, x, k - 1).p; }
+  const alpha = (1 - seenHi) / Math.max(1 - seenLo, 1e-12), low = katzP(m, hist, w, k - 1);
+  return {p:Math.max(0, alpha) * low.p, k:low.k, c:0, h:ent.total, alpha};
+}
+function katzProb(m, hist, w){
+  const r = katzP(m, hist, w, m.n);
+  return {c:r.c, h:r.h, num:r.c, den:r.h, p:r.p, order:r.k, how:r.k === m.n ? `${m.n}-gram${r.c > 0 && r.c <= KATZ_K ? `, d = ${+katzDiscounts(m, m.n).d[r.c].toFixed(3)}` : ""}` : `${r.k}-gram'a düştü (α)`};
+}
+
+// cfg: {smooth: "none" | "laplace" | "backoff" | "interp" | "kn" | "katz", alpha, lam, D}
 function pFrom(m, e, w, cfg, hist){
   const n = m.n, sm = cfg.smooth || "none";
   if(sm === "kn") return knProb(m, hist, w, cfg.D ?? .75);
+  if(sm === "katz") return katzProb(m, hist, w);
   if(sm === "backoff"){
     const a = cfg.alpha ?? .4;
     for(let k = n; k >= 1; k--){

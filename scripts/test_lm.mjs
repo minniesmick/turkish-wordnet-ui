@@ -95,5 +95,23 @@ import {learnLam} from "../static/js/lm.js";
   const pDefault = perplexity(m3, dev, {smooth:"interp", lam:defaultLam(3)}).ppl, pLearn = perplexity(m3, dev, {smooth:"interp", lam:L.lam}).ppl;
   check("öğrenilen λ held-out'ta varsayılandan kötü değil", pLearn <= pDefault + 1e-9 ? 1 : 0, 1);
 }
+// Katz backoff
+import {katzDiscounts} from "../static/js/lm.js";
+{
+  const corp = toks("the dog barks\nthe cat sleeps\nthe dog sleeps\na cat barks\nthe dog saw the cat\na dog saw a cat\nthe cat saw the dog\nthe bird sings\na bird sings\nthe dog barks");
+  for(const n of [1, 2, 3]){
+    const m = buildModel(corp, n);
+    for(const hist of n === 1 ? [[]] : n === 2 ? [["the"], ["dog"], [BOS], ["zzz"]] : [[BOS, "the"], ["the", "dog"], ["saw", "the"], ["zzz", "yyy"]]){
+      const d = dist(m, hist, {smooth:"katz"}), sum = d.probs.reduce((a, b) => a + b, 0);
+      check(`Katz toplam 1 (n=${n}, ${hist.join(" ")})`, sum, 1);
+    }
+  }
+  const m2 = buildModel(corp, 2), {d} = katzDiscounts(m2, 2);
+  check("Katz indirimler (0, 1] içinde", d.slice(1).every(x => x > 0 && x <= 1) ? 1 : 0, 1);
+  check("Katz yüksek sayım indirimsiz (c > 5)", prob(m2, ["the"], "dog", {smooth:"katz"}).c > 0 ? 1 : 0, 1);
+  check("Katz görülmeyen çifte sıfırdan büyük", prob(m2, ["dog"], "bird", {smooth:"katz"}).p > 0 ? 1 : 0, 1);
+  check("Katz görülen > görülmeyen", prob(m2, ["the"], "dog", {smooth:"katz"}).p > prob(m2, ["the"], "sings", {smooth:"katz"}).p ? 1 : 0, 1);
+  check("Katz perplexity sonlu", isFinite(perplexity(m2, toks("the dog sings\na cat saw the bird"), {smooth:"katz"}).ppl) ? 1 : 0, 1);
+}
 console.log("dil modeli denetimi:", total - bad, "/", total);
 if(bad) process.exitCode = 1;
