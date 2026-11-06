@@ -887,3 +887,22 @@ mark.dm-w{padding:0 4px;border-radius:var(--r-sm);background:var(--wash-2);color
   .tr-step-control>output,.tr-step-control>button{grid-column:auto}
   .tr-diff-row{grid-template-columns:44px minmax(0,1fr);font-size:.76rem}
 }
+
+/* ───────────────────────── Derin Öğrenme Laboratuvarları (nn, emb, rnn, attn) ───────────────────────── */
+.nn-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:10px 0;padding:10px;background:var(--sunk);border-radius:var(--r)}
+.nn-controls label{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;color:var(--ink-2)}
+.nn-controls select,.nn-controls input[type=number],.nn-controls input[type=text]{padding:4px 8px;border:1px solid var(--rule);border-radius:var(--r-sm);background:var(--page);color:var(--ink);min-height:36px}
+.nn-layer-row{display:flex;align-items:center;gap:10px;margin:6px 0;padding:6px 10px;background:var(--page);border:1px solid var(--rule);border-radius:var(--r-sm)}
+.nn-weight-layers{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.nn-weight-layer{padding:8px;background:var(--page);border:1px solid var(--rule);border-radius:var(--r-sm)}
+.nn-explain,.nn-practice{margin-top:12px;padding:10px 14px;border-left:2px dashed var(--rule-2);background:var(--sunk);border-radius:0 var(--r) var(--r) 0;color:var(--ink-2)}
+.nn-explain p,.nn-practice p{margin:6px 0;font:400 .94rem/1.55 var(--font-text)}
+.nn-limit{font-size:.84rem;color:var(--ink-3);margin-top:6px}
+.emb-pt:hover circle{stroke:var(--spot);stroke-width:2px}
+.attn-cell:hover{stroke:var(--spot);stroke-width:2px}
+
+@media(max-width:520px){
+  .nn-controls{flex-direction:column;align-items:stretch}
+  .nn-controls label{justify-content:space-between;width:100%}
+  .nn-layer-row{flex-wrap:wrap}
+}

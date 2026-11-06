@@ -14,7 +14,11 @@ import "./parse.js";
 import "./deps.js";
 import "./corpus.js";
 import "./ngram.js";
+import "./nnlab.js";
 import "./textrep.js";
+import "./embedding.js";
+import "./rnnlab.js";
+import "./attention.js";
 import "./exportfig.js";
 import "./learn.js";
 

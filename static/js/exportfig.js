@@ -46,7 +46,7 @@ async function pngOf({xml, w, h}, scale = 2){
 
 document.addEventListener("click", async e => {
   const b = e.target.closest("[data-export]"); if(!b) return;
-  const svg = b.closest(".fig-box")?.querySelector("svg.pt, svg.dp, svg.zipf");
+  const svg = b.closest(".fig-box")?.querySelector("svg.pt, svg.dp, svg.zipf, svg.emb-pca, svg.nn-loss, svg.rnn-unroll, svg.attn-map");
   if(!svg){ toast("Dışa aktarılacak şekil yok"); return; }
   const name = (b.dataset.name || "sekil").replace(/[^\w.-]+/g, "_");
   try{

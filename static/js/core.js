@@ -87,7 +87,11 @@ const P = {
   check:'<path d="M5 12.5l4.5 4.5L19 7"/>', dice:'<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="15" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/><circle cx="9" cy="15" r="1" fill="currentColor"/>',
   filter:'<path d="M4 6h16M7 12h10M10 18h4"/>', down:'<path d="M6 9l6 6 6-6"/>',
   arrowup:'<path d="M12 19V5M6 11l6-6 6 6"/>',
-  focus:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>'
+  focus:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>',
+  nn:'<circle cx="6" cy="18" r="1.8"/><circle cx="12" cy="6" r="1.8"/><circle cx="18" cy="18" r="1.8"/><path d="M7.5 17L11 7.5M13 7.5l3.5 9.5M6 16.3V9M18 9v7.3M9 18h6"/>',
+  emb:'<rect x="3" y="10" width="4" height="4" rx=".8"/><rect x="10" y="4" width="4" height="4" rx=".8"/><rect x="10" y="16" width="4" height="4" rx=".8"/><rect x="17" y="10" width="4" height="4" rx=".8"/><path d="M7 12h3M14 12h3M12 10V8M12 14v2"/>',
+  rnn:'<rect x="3" y="8" width="5" height="8" rx="1"/><rect x="9.5" y="8" width="5" height="8" rx="1"/><rect x="16" y="8" width="5" height="8" rx="1"/><path d="M8 12h1.5M14.5 12H16M5.5 8V6M12 8V6M18.5 8V6"/><path d="M6.5 6a2 2 0 0 1 4 0M13 6a2 2 0 0 1 4 0"/>',
+  attn:'<path d="M4 12h16M4 8h10M4 16h7"/><circle cx="18" cy="8" r="2.5"/><path d="M18 10.5v3"/><circle cx="15" cy="16" r="2.5"/>'
 };
 export const icon = (n, cls = "") => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n] || ""}</svg>`;
 
@@ -97,13 +101,13 @@ export const VIEW_GROUPS = [
   {label:"Lecture 2", views:["morph","disamb"]},
   {label:"Lecture 3", views:["parse","deps"]},
   {label:"Lecture 5", views:["corpus","ngram"]},
-  {label:"Lecture 6 · Derin öğrenme", views:["tok"]},
+  {label:"Lecture 6 · Derin öğrenme", views:["nn","tok","emb","rnn","attn"]},
   {label:"Ders", views:["learn"]}
 ];
 export const VIEWS = VIEW_GROUPS.flatMap(group => group.views);
-export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", morph:"Morfoloji", disamb:"Belirsizlik", parse:"Ayrıştırma", deps:"Bağımlılık", corpus:"Korpus", ngram:"N-gram", tok:"Metin temsili", learn:"Ders"};
-export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"target", roles:"tag", frames:"frame", morph:"morph", disamb:"fork", parse:"tree", deps:"deps", corpus:"corpus", ngram:"list", tok:"list", learn:"book"};
-export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", morph:"m", disamb:"z", parse:"c", deps:"k", corpus:"o", ngram:"n", tok:"x", learn:"d"};
+export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", morph:"Morfoloji", disamb:"Belirsizlik", parse:"Ayrıştırma", deps:"Bağımlılık", corpus:"Korpus", ngram:"N-gram", nn:"Sinir ağı", tok:"Metin temsili", emb:"Embedding", rnn:"RNN", attn:"Attention", learn:"Ders"};
+export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"target", roles:"tag", frames:"frame", morph:"morph", disamb:"fork", parse:"tree", deps:"deps", corpus:"corpus", ngram:"list", nn:"nn", tok:"list", emb:"emb", rnn:"rnn", attn:"attn", learn:"book"};
+export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", morph:"m", disamb:"z", parse:"c", deps:"k", corpus:"o", ngram:"n", nn:"i", tok:"x", emb:"e", rnn:"y", attn:"a", learn:"d"};
 export const DS_VIEWS = ["search","graph","relate","wsd"];
 
 // Kullanım kipi: "Araç" (client) yalnızca sonuçları verir; "Öğrenci" ders bağlantılarını, formülleri, adım adım açıklamayı, alıştırma ve sınavı da açar.
