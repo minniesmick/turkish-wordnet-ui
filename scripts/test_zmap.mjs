@@ -25,7 +25,7 @@ check("matchZ UPOS yanlış", matchZ({lemma:"da", pos:"Conj", stem:"da", oflazer
 
 // sayaç: iki sözcüklü cümle ve bir noktalama
 const s = {f:["Evde", "kal", "."], l:["ev", "kal", "."], p:["NOUN", "VERB", "PUNCT"]};
-const tok = (tag, base, lemma) => ({base, dl:{tag}, ap:{tag}, cands:[{tag:base, lemma}, {tag, lemma}]});
+const tok = (tag, base, lemma) => ({base, dl:{tag}, ap:{tag}, nn:{tag}, cands:[{tag:base, lemma}, {tag, lemma}]});
 const mine = [tok("NOUN Case=Loc", "NOUN Case=Loc", "ev"), tok("NOUN Case=Nom", "VERB Mood=Imp", "kal"), tok("PUNCT _", "PUNCT _", ".")];
 const z = [{best:{lemma:"ev", pos:"Noun", stem:"ev", oflazer:"ev+Noun+A3sg+Pnon+Loc"}, all:[{lemma:"ev", pos:"Noun", stem:"ev", oflazer:"ev+Noun+A3sg+Pnon+Loc"}]},
   {best:{lemma:"kalmak", pos:"Verb", stem:"kal", oflazer:"kal+Verb+Pos+Imp+A2sg"}, all:[{lemma:"kalmak", pos:"Verb", stem:"kal", oflazer:"kal+Verb+Pos+Imp+A2sg"}]},
@@ -35,6 +35,7 @@ check("sayaç uygun cümle", tallySentence(T, s, mine, z, uposOf), true);
 check("sayaç sözcük (noktalamasız)", T.n, 2);
 check("Zemberek kök ve UPOS", T.rows.zem.l + "/" + T.rows.zem.u + "/" + T.rows.zem.b, "2/2/2");
 check("perceptron UPOS (ikinci sözcük yanlış)", T.rows.ap.u, 1);
+check("sinir ağı UPOS (perceptronla aynı sahte seçim)", T.rows.nn.u, 1);
 check("taban çizgisi UPOS (ikisi de doğru)", T.rows.base.u, 2);
 check("sayaç uyumsuz cümleyi atlar", tallySentence(T, s, mine, z.slice(0, 2), uposOf), false);
 check("atlanan sayısı", T.skipped, 1);

@@ -48,16 +48,19 @@ check("sınama sözcük sayısı (noktalamasız)", R.all.n, 2143);
 check("kümeler toplamı", R.amb.n + R.one.n + R.unk.n, R.all.n);
 check("bilinmeyen sözcükler", R.unk.n, 1095);
 check("tavan >= %85", R.all.ceil / R.all.n >= 0.85, true);
-check("hiçbir yöntem tavanı aşmaz", ["base", "dl", "ap"].every(k => R.all[k] <= R.all.ceil), true);
-check("UPOS doğruluğu tam etiketten düşük değil", ["base", "dl", "ap"].every(k => R.all[k + "U"] >= R.all[k]), true);
+check("hiçbir yöntem tavanı aşmaz", ["base", "dl", "ap", "nn"].every(k => R.all[k] <= R.all.ceil), true);
+check("UPOS doğruluğu tam etiketten düşük değil", ["base", "dl", "ap", "nn"].every(k => R.all[k + "U"] >= R.all[k]), true);
 check("tek adaylı sözcükte üç yöntem de aynı", R.one.base === R.one.dl && R.one.dl === R.one.ap, true);
 check("belirsiz sözcükte karar listesi taban çizgisinden iyi", R.amb.dl > R.amb.base, true);
 check("belirsiz sözcükte perceptron taban çizgisinden iyi", R.amb.ap > R.amb.base, true);
 check("tümünde perceptron taban çizgisinden iyi", R.all.ap > R.all.base, true);
+check("tümünde sinir ağı taban çizgisinden iyi", R.all.nn > R.all.base, true);
+check("sinir ağı kaybı her turda düşer", M.nn.loss.every((v, i) => i === 0 || v < M.nn.loss[i - 1]), true);
+check("sinir ağı olasılıkları 1 eder", Math.abs(analyze(M, ["gelir"])[0].nn.probs.reduce((a, b) => a + b[1], 0) - 1) < 1e-9, true);
 check("taban çizgisi >= %60", R.all.base / R.all.n >= 0.6, true);
 // kararlılık: aynı tohumla aynı sonuç
 const R2 = evaluate(train(tr), te);
-check("deterministik eğitim", R2.all.ap + "/" + R2.all.dl, R.all.ap + "/" + R.all.dl);
+check("deterministik eğitim", R2.all.ap + "/" + R2.all.dl + "/" + R2.all.nn, R.all.ap + "/" + R.all.dl + "/" + R.all.nn);
 // kural listesi sıralı ve olumlu
 const rules = topRules(M.dl, 10);
 check("kural listesi azalan güven", rules.every((x, i) => !i || rules[i - 1].score >= x.score), true);

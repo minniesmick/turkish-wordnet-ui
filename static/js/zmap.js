@@ -36,7 +36,7 @@ export function matchZ(a, goldLemma, goldUpos){
 // ───────────────────────── Zemberek ile bizim yöntemlerin karşılaştırması
 // Sınama cümlelerinde Zemberek'in cümle düzeyindeki seçimi, aday kümesi ve bizim üç yöntemimiz; ölçüt: kök (lemma) ve UPOS. Noktalama sayılmaz.
 // Zemberek kendi tokenlaştırmasını yapar: sözcük sayısı BOUN'la uymayan cümle atlanır.
-export const newTally = () => ({n:0, sents:0, skipped:0, rows:{zem:{l:0, u:0, b:0}, zemAny:{l:0, u:0, b:0}, base:{l:0, u:0, b:0}, dl:{l:0, u:0, b:0}, ap:{l:0, u:0, b:0}}});
+export const newTally = () => ({n:0, sents:0, skipped:0, rows:{zem:{l:0, u:0, b:0}, zemAny:{l:0, u:0, b:0}, base:{l:0, u:0, b:0}, dl:{l:0, u:0, b:0}, ap:{l:0, u:0, b:0}, nn:{l:0, u:0, b:0}}});
 // s: {f, l, p}; mine: md.analyze çıktısı; zws: Zemberek cümle çıktısı words[] ({best, all})
 export function tallySentence(T, s, mine, zws, uposOf){
   if(!zws || zws.length !== s.f.length){ T.skipped++; return false; }
@@ -51,7 +51,7 @@ export function tallySentence(T, s, mine, zws, uposOf){
     const all = zws[i].all.map(a => matchZ(a, s.l[i], s.p[i]));
     R.zemAny.l += all.some(x => x.lemma) ? 1 : 0; R.zemAny.u += all.some(x => x.upos) ? 1 : 0; R.zemAny.b += all.some(x => x.lemma && x.upos) ? 1 : 0;
     const t = mine[i];
-    for(const [m, tag] of [["base", t.base], ["dl", t.dl.tag], ["ap", t.ap.tag]]){
+    for(const [m, tag] of [["base", t.base], ["dl", t.dl.tag], ["ap", t.ap.tag], ["nn", t.nn.tag]]){
       const c = t.cands.find(x => x.tag === tag);
       add(R[m], c && c.lemma && lcTr(c.lemma) === gl, uposOf(tag) === s.p[i]);
     }

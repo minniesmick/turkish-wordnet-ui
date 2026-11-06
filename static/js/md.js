@@ -141,6 +141,61 @@ function trainAP(prep, epochs, seed){
   return m;
 }
 
+// ───────────────────────── sinir ağı (slayt 32'deki üçüncü yöntem): özellik kodlaması → tanh gizli katman → aday başına skor → aday kümesi üzerinde softmax
+// Özellikler (üç yöntemle aynı) B kovaya özetlenir (hashing); gizli katman h = tanh(b + Σ W[kova]); skor(t) = E[t]·h + c[t]. Kayıp: doğru etiketin çapraz entropisi (yalnızca adaylar arasında).
+const NB = 2048, NH = 24;
+const hashF = f => { let h = 2166136261; for(let i = 0; i < f.length; i++){ h ^= f.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) % NB; };
+class NN{
+  constructor(tags, seed){
+    const rnd = mulberry32(seed), g = () => (rnd() - .5) * .2;
+    this.tags = new Map(tags.map((t, i) => [t, i]));
+    this.W = Float64Array.from({length:NB * NH}, g); this.b = new Float64Array(NH);
+    this.E = Float64Array.from({length:tags.length * NH}, g); this.c = new Float64Array(tags.length);
+  }
+  hidden(fl){
+    const h = Float64Array.from(this.b), ids = [...new Set(fl.map(hashF))];
+    for(const id of ids){ const o = id * NH; for(let j = 0; j < NH; j++) h[j] += this.W[o + j]; }
+    for(let j = 0; j < NH; j++) h[j] = Math.tanh(h[j]);
+    return {h, ids};
+  }
+  score(h, t){ const i = this.tags.get(t); if(i === undefined) return -1e9; let s = this.c[i]; const o = i * NH; for(let j = 0; j < NH; j++) s += this.E[o + j] * h[j]; return s; }
+  probs(fl, C){
+    const {h, ids} = this.hidden(fl), sc = C.map(t => this.score(h, t)), mx = Math.max(...sc), ex = sc.map(x => Math.exp(x - mx)), z = ex.reduce((a, b) => a + b, 0);
+    return {h, ids, p:ex.map(x => x / z), sc};
+  }
+  step(fl, C, gold, lr){
+    const {h, ids, p} = this.probs(fl, C), dh = new Float64Array(NH);
+    C.forEach((t, k) => {
+      const i = this.tags.get(t); if(i === undefined) return;
+      const d = p[k] - (t === gold ? 1 : 0), o = i * NH;
+      for(let j = 0; j < NH; j++){ dh[j] += d * this.E[o + j]; this.E[o + j] -= lr * d * h[j]; }
+      this.c[i] -= lr * d;
+    });
+    for(let j = 0; j < NH; j++) dh[j] *= 1 - h[j] * h[j];
+    for(const id of ids){ const o = id * NH; for(let j = 0; j < NH; j++) this.W[o + j] -= lr * dh[j]; }
+    for(let j = 0; j < NH; j++) this.b[j] -= lr * dh[j];
+    return -Math.log(Math.max(p[C.indexOf(gold)], 1e-12));
+  }
+}
+function trainNN(prep, epochs, seed){
+  const tags = [...new Set(prep.flatMap(P => P.c.flat().concat(P.tags)))], m = new NN(tags, seed), rnd = mulberry32(seed + 1), order = prep.map((_, i) => i);
+  m.loss = [];
+  for(let e = 0; e < epochs; e++){
+    for(let i = order.length - 1; i > 0; i--){ const j = Math.floor(rnd() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    let L = 0, k = 0; const lr = .08 / (1 + .5 * e);
+    for(const idx of order){
+      const P = prep[idx]; let pt = "<S>", pt2 = "<S>";
+      for(let i = 0; i < P.fs.length; i++){
+        const C = P.c[i], g = P.tags[i];
+        if(C.length > 1){ L += m.step(feats(P.fs, P.orig, i, pt, pt2), C, g, lr); k++; }
+        pt2 = pt; pt = g;                                   // eğitimde önceki etiket gerçek etiket (teacher forcing)
+      }
+    }
+    m.loss.push(k ? L / k : 0);
+  }
+  return m;
+}
+
 // ───────────────────────── eğitim
 export function train(sents, {epochs = 6, seed = 7} = {}){
   const lex = buildLexicon(sents);
@@ -149,13 +204,13 @@ export function train(sents, {epochs = 6, seed = 7} = {}){
     const c = fs.map((w, i) => { const l = candidates(lex, w, tags[i]).list.map(x => x[0]); if(!l.includes(tags[i])) l.push(tags[i]); return l; });
     return {fs, orig:s.f, tags, c};
   });
-  return {lex, dl:trainDL(prep), ap:trainAP(prep, epochs, seed), n:sents.length, tokens:lex.N};
+  return {lex, dl:trainDL(prep), ap:trainAP(prep, epochs, seed), nn:trainNN(prep, epochs + 2, seed), n:sents.length, tokens:lex.N};
 }
 
 // ───────────────────────── tahmin: her yöntem kendi önceki etiketini kullanarak soldan sağa
 export function analyze(model, forms){
-  const {lex, dl, ap} = model, fs = forms.map(lc), out = [];
-  const path = {dl:["<S>", "<S>"], ap:["<S>", "<S>"]};
+  const {lex, dl, ap, nn} = model, fs = forms.map(lc), out = [];
+  const path = {dl:["<S>", "<S>"], ap:["<S>", "<S>"], nn:["<S>", "<S>"]};
   for(let i = 0; i < forms.length; i++){
     const r = candidates(lex, fs[i]), C = r.list.map(x => x[0]);
     const tok = {w:forms[i], known:r.known, cands:r.list.map(([t, n]) => ({tag:t, n, lemma:lemmaOf(lex, fs[i], t)})), base:C[0]};
@@ -167,7 +222,11 @@ export function analyze(model, forms){
     for(const x of sc) if(x[1] > best[1]) best = x;
     const second = sc.filter(x => x[0] !== best[0]).sort((a, b) => b[1] - a[1])[0];
     tok.ap = {tag:best[0], scores:sc, why:second ? whyAP(ap, fa, best[0], second[0]) : []};
-    path.dl = [path.dl[1], tok.dl.tag]; path.ap = [path.ap[1], tok.ap.tag];
+    if(C.length > 1){
+      const r = nn.probs(feats(fs, forms, i, path.nn[1], path.nn[0]), C), k = r.p.indexOf(Math.max(...r.p));
+      tok.nn = {tag:C[k], probs:C.map((t, j) => [t, r.p[j]])};
+    }else tok.nn = {tag:C[0], probs:[[C[0], 1]]};
+    path.dl = [path.dl[1], tok.dl.tag]; path.ap = [path.ap[1], tok.ap.tag]; path.nn = [path.nn[1], tok.nn.tag];
     out.push(tok);
   }
   return out;
@@ -180,7 +239,7 @@ function whyAP(ap, fl, a, b){
 }
 
 // ───────────────────────── değerlendirme (noktalama sayılmaz)
-export const METHODS = ["base", "dl", "ap"];
+export const METHODS = ["base", "dl", "ap", "nn"];
 export function evaluate(model, sents){
   const mk = () => ({n:0, ceil:0, ...Object.fromEntries(METHODS.map(m => [m, 0])), ...Object.fromEntries(METHODS.map(m => [m + "U", 0])), ceilU:0});
   const R = {all:mk(), amb:mk(), one:mk(), unk:mk()};
@@ -189,7 +248,7 @@ export function evaluate(model, sents){
     for(let i = 0; i < gold.length; i++){
       if(s.p[i] === "PUNCT") continue;
       const t = res[i], cat = !t.known ? "unk" : t.cands.length > 1 ? "amb" : "one";
-      const pick = {base:t.base, dl:t.dl.tag, ap:t.ap.tag};
+      const pick = {base:t.base, dl:t.dl.tag, ap:t.ap.tag, nn:t.nn.tag};
       for(const k of ["all", cat]){
         const r = R[k]; r.n++;
         if(t.cands.some(c => c.tag === gold[i])) r.ceil++;
