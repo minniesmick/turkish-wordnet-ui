@@ -108,6 +108,6 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 
 ## Geçmiş vizelerden çıkan eksikler (2021, 2022, 2024, 2025 cevap kâğıtları)
 - [x] Değerlendirme sekmesi: karışıklık matrisi, TP / FP / FN / TN, precision, recall, F1, accuracy, macro / weighted / micro, Cohen kappa; üç sınavın tabloları hazır örnek, sayılar kâğıtla birebir (`evalm.js`, `evallab.js`).
-- [ ] HMM ve Viterbi ile POS etiketleme (2024 ve 2025 vizelerinde 25–30 puan): geçiş ve yayma tabloları, HMM çizimi, Viterbi tablosu.
-- [ ] WordNet anlamsal uzaklık (2022, hiponim ağacından Sem(x, y)): Benzerlik sekmesinde yok.
-- [ ] Vize kapsamını doğrula: HMM ve POS bu sene işlendi mi?
+- [-] HMM ve Viterbi ile POS etiketleme: 2024 ve 2025 vizelerinde var ama bu sene işlenmedi (kullanıcı 2026-11-06), yapılmayacak.
+- [ ] WordNet anlamsal uzaklık (2022, hiponim ağacından Sem(x, y); formül soruda verilmişti): Benzerlik sekmesinde yok, düşük öncelik.
+- [x] Vize kapsamı: HMM ve POS işlenmedi; hoca işlenmeyen konuları sormayacağını söyledi.
