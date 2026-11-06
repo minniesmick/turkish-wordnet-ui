@@ -80,7 +80,7 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 ## Ayrıştırma laboratuvarı (InClass 2, 3, 4; Lecture 3)
 
 - [x] PCFG (InClass 2) ve CKY (InClass 3): sekme **Ayrıştırma** (`static/js/parse.js`, `g c`). InClass 2 cümlesi 2 ağaç verir ve ikisi de P = 3.527e-9 (eşit, kuralların çarpanları aynı); InClass 3 cümlesi gramerde yok (S yalnızca [0,7] kapsıyor, `time` bağlanamıyor).
-- [ ] Bağımlılık (çok sözcüklü belirteç gösterimi, arc-standard oracle adımları ve Zemberek ile çekim grubu (IG) tablosu yapıldı; okların IG düzeyinde bağlanması yok; gerçek öğrenen ayrıştırıcı yok): train/dev kümesi, öğrenen graph-based / transition-based ayrıştırıcı. ("Kendin ekle" alıştırması yapıldı: `depscore.js`, Bağımlılık sekmesi, yalnızca Öğrenci kipi.)
+- [ ] Bağımlılık (çok sözcüklü belirteç gösterimi, arc-standard oracle adımları ve Zemberek ile çekim grubu (IG) tablosu yapıldı; okların IG düzeyinde bağlanması yok; öğrenen geçiş tabanlı perceptron ayrıştırıcı yapıldı: UAS %68,3, LAS %58,1): graph-based ayrıştırıcı, ayrıştırıcıyı ayrı bir dev kümesiyle ayarlama. ("Kendin ekle" alıştırması yapıldı: `depscore.js`, Bağımlılık sekmesi, yalnızca Öğrenci kipi.)
 - [x] PCFG kural olasılığını parantezli ağaçlardan MLE ile öğrenme (`static/js/mle.js`, test `node scripts/test_mle.mjs`).
 - [x] Top-down (özyinelemeli iniş) ve shift-reduce adım adım izi (`static/js/parsers.js`, test `node scripts/test_parsers.mjs`).
 - [x] Earley ayrıştırıcı (slayt 3-1'de adı geçiyor).
