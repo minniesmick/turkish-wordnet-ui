@@ -102,3 +102,6 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [x] Self-attention laboratuvarı: Q·Kᵀ, softmax, ısı haritası ve maskeleme (DL-6/7).
 - [x] RNN açılımı laboratuvarı (DL-5).
 - [x] Küçük sinir ağı eğitimi: ileri / geri yayılım, kayıp ve karar sınırı (DL-1/2).
+
+## Final için (slaytlar gelince)
+- [ ] Doğrusal regresyon laboratuvarı: dağılım grafiği ve kalıntılar, en küçük kareler (normal denklem), MSE / R², gradyan inişi ve öğrenme oranı, çoklu değişken ve ölçekleme, polinom derecesi ve ridge / lasso (aşırı uyum). Kullanıcı kodu final slaytları gelince yazdıracak; önce slaytlar görülmeli.
