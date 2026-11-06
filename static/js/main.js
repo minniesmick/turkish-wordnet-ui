@@ -19,6 +19,7 @@ import "./textrep.js";
 import "./embedding.js";
 import "./rnnlab.js";
 import "./attention.js";
+import "./evallab.js";
 import "./exportfig.js";
 import "./learn.js";
 

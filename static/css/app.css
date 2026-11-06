@@ -916,3 +916,10 @@ mark.dm-w{padding:0 4px;border-radius:var(--r-sm);background:var(--wash-2);color
 .dp-ex-note{font-size:.88rem;color:var(--ink-2)}
 #dpEx .verdict{max-width:none;display:block}
 .dp-tbl tr.dp-mwt td{background:var(--sunk);color:var(--ink-2)}
+
+/* değerlendirme laboratuvarı */
+.ev-lab{width:100%;min-width:64px;height:30px;padding:0 6px;border:1px solid var(--rule-2);border-radius:var(--r);background:var(--page);color:var(--ink);font:600 .82rem var(--font-ui)}
+.ev-mx td.ev-diag{background:var(--wash)}
+.ev-cell{width:64px}
+.ev-steps{margin:8px 0 0;padding-left:18px;line-height:1.7}
+.ev-steps li{margin:2px 0}

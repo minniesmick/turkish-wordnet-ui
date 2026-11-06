@@ -105,3 +105,9 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 
 ## Final için (slaytlar gelince)
 - [ ] Doğrusal regresyon laboratuvarı: dağılım grafiği ve kalıntılar, en küçük kareler (normal denklem), MSE / R², gradyan inişi ve öğrenme oranı, çoklu değişken ve ölçekleme, polinom derecesi ve ridge / lasso (aşırı uyum). Kullanıcı kodu final slaytları gelince yazdıracak; önce slaytlar görülmeli.
+
+## Geçmiş vizelerden çıkan eksikler (2021, 2022, 2024, 2025 cevap kâğıtları)
+- [x] Değerlendirme sekmesi: karışıklık matrisi, TP / FP / FN / TN, precision, recall, F1, accuracy, macro / weighted / micro, Cohen kappa; üç sınavın tabloları hazır örnek, sayılar kâğıtla birebir (`evalm.js`, `evallab.js`).
+- [ ] HMM ve Viterbi ile POS etiketleme (2024 ve 2025 vizelerinde 25–30 puan): geçiş ve yayma tabloları, HMM çizimi, Viterbi tablosu.
+- [ ] WordNet anlamsal uzaklık (2022, hiponim ağacından Sem(x, y)): Benzerlik sekmesinde yok.
+- [ ] Vize kapsamını doğrula: HMM ve POS bu sene işlendi mi?
