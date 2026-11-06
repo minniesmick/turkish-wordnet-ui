@@ -20,7 +20,7 @@ Rakamlar 2026-10-23'te 500 gerçek BOUN sözcüğü ve 400 rastgele üretimle ö
 - "Kendin hesapla" yalnızca Yumuşatma Yok ya da Laplace iken çalışır.
 
 **Ayrıştırma ve bağımlılık**
-- CKY: tekli kural döngüleri atlanır, düğüm başına en iyi 60 alt ağaç tutulur, çok belirsiz cümlede en fazla 30 ağaç gösterilir. Adım adım yöntemler küçük cümleler için (üstten alta 400, shift-reduce 500 adım sınırı). Earley yok.
+- CKY: tekli kural döngüleri atlanır, düğüm başına en iyi 60 alt ağaç tutulur, çok belirsiz cümlede en fazla 30 ağaç gösterilir. Adım adım yöntemler küçük cümleler için (üstten alta 400, shift-reduce 500 adım sınırı). Earley için ε kuralı desteklenmez.
 - Bağımlılık verisi yalnızca UD Turkish-BOUN **test** kümesidir (979 cümle); çok sözcüklü belirteçler (1-2) atlanır.
 
 **Derin öğrenme laboratuvarları (Lecture 6: DL-1 … DL-7)**
@@ -80,7 +80,7 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [ ] Bağımlılık: train/dev kümesi, çok sözcüklü belirteç (1-2) gösterimi, çevrimiçi graph-based / transition-based ayrıştırıcı demosu, Turkish IG (çekim grupları) gösterimi.
 - [x] PCFG kural olasılığını parantezli ağaçlardan MLE ile öğrenme (`static/js/mle.js`, test `node scripts/test_mle.mjs`).
 - [x] Top-down (özyinelemeli iniş) ve shift-reduce adım adım izi (`static/js/parsers.js`, test `node scripts/test_parsers.mjs`).
-- [ ] Earley ayrıştırıcı (slayt 3-1'de adı geçiyor).
+- [x] Earley ayrıştırıcı (slayt 3-1'de adı geçiyor).
 - [x] Bağımlılık ağacı (InClass 4): sekme **Bağımlılık** (`static/js/deps.js`, `g k`, API `/api/ud`). Veri: `data/ud/tr_boun-ud-test.conllu` (UD Turkish-BOUN test, CC BY-SA 4.0).
 
 ## Önceki notlardan kalanlar

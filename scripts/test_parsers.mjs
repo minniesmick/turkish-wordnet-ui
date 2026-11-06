@@ -1,5 +1,5 @@
 // Üstten alta ve shift-reduce izleri için denetim: node scripts/test_parsers.mjs
-import {topDown, shiftReduce} from "../static/js/parsers.js";
+import {topDown, shiftReduce, earley} from "../static/js/parsers.js";
 const R = (...l) => l.map(s => { const [a, b] = s.split("->"); return {lhs:a.trim(), rhs:b.trim().split(/\s+/)}; });
 let bad = 0, total = 0;
 const check = (name, got, want) => { total++; if(got !== want){ bad++; console.log("FAIL", name, "beklenen", want, "bulunan", got); } };
@@ -27,5 +27,16 @@ const ic3 = R("S -> NP VP", "S -> VP NP", "NP -> D NP", "NP -> N", "NP -> ADJ NP
 check("InClass 3, shift-reduce: yok", shiftReduce(ic3, "the open position may require quick response time".split(" "), "S", {cap:5000}).ok, false);
 check("InClass 3, shift-reduce: the quick response may help var", shiftReduce(ic3, "the quick response may help".split(" "), "S", {cap:5000}).ok, true);
 check("InClass 3, top-down: the quick response may help var", topDown(ic3, "the quick response may help".split(" "), "S", {cap:5000}).ok, true);
+// Earley
+check("earley: the dog barks", earley(g, "the dog barks".split(" "), "S").ok, true);
+check("earley: the cat saw the dog", earley(g, "the cat saw the dog".split(" "), "S").ok, true);
+check("earley: dog the (olmaz)", earley(g, "dog the".split(" "), "S").exhausted, true);
+check("earley: sol özyineleme bitiyor ve başarıyor", earley(lr, sent, "S").ok, true);
+check("earley: sol özyineleme sınıra takılmıyor", earley(lr, sent, "S").capped, false);
+check("earley: InClass 3 yok", earley(ic3, "the open position may require quick response time".split(" "), "S").ok, false);
+check("earley: InClass 3 the quick response may help var", earley(ic3, "the quick response may help".split(" "), "S").ok, true);
+check("earley: scan, predict, complete üçü de var", ["scan", "predict", "complete"].every(k => earley(g, "the dog barks".split(" "), "S").steps.some(s => s.kind === k)), true);
+// Earley CKY ile aynı kararı verir: her cümle için shift-reduce ile uyuşur
+for(const s of ["the dog barks", "the cat saw the dog", "dog the", "saw the dog", "the dog saw"]) check("earley = shift-reduce: " + s, earley(g, s.split(" "), "S").ok, shiftReduce(g, s.split(" "), "S").ok);
 console.log("ayrıştırma yöntemleri denetimi:", total - bad, "/", total);
 if(bad) process.exitCode = 1;

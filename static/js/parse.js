@@ -1,7 +1,7 @@
 // Ayrıştırma: Lecture 3 (CFG, PCFG, CKY). Gramer yaz, cümle ver; CKY tablosunu, ayrıştırma ağaçlarını ve olasılıkları gör. Tamamı tarayıcıda.
 import {$, $$, esc, registerView, MODE, toast} from "./core.js";
 import {parseTrees, learn, toGrammar} from "./mle.js";
-import {topDown, shiftReduce} from "./parsers.js";
+import {topDown, shiftReduce, earley} from "./parsers.js";
 
 const PRESETS = {
   inclass2: {stu:true, label:"InClass 2 · PCFG", sent:"Alice said the scientist that believed the student proved the experiment", ex:["Alice said the student proved the experiment"], grammar:
@@ -283,11 +283,16 @@ const leaves = n => typeof n === "string" ? [n] : n.kids.flatMap(leaves);
 
 // ───────────────────────── ayrıştırma yöntemleri, adım adım (öğrenci kipi)
 let METH = null;
-const KIND = {expand:"Genişlet", match:"Eşleştir", fail:"Başarısız", retry:"Geri dön", accept:"Kabul", init:"Başla", exhaust:"Tükendi", cap:"Sınır", shift:"Shift", reduce:"Reduce", back:"Geri dön"};
+const KIND = {expand:"Genişlet", match:"Eşleştir", fail:"Başarısız", retry:"Geri dön", accept:"Kabul", init:"Başla", exhaust:"Tükendi", cap:"Sınır", shift:"Shift", reduce:"Reduce", back:"Geri dön", predict:"Predict", scan:"Scan", complete:"Complete"};
 function methTable(r){
   if(!METH) return "";
   const res = METH, total = res.steps.length, k = PS.stp == null ? total : Math.max(1, Math.min(PS.stp, total));
-  const td = PS.meth === "td";
+  const td = PS.meth === "td", er = PS.meth === "er";
+  if(er){
+    const rowsE = res.steps.slice(0, k).map((st, i) => `<tr class="mt-${st.kind} ${i === k - 1 ? "now" : ""}"><td>${i + 1}</td><td>${st.col}</td><td class="mt-g">${esc(st.item) || "·"}</td><td>${st.item ? `[${st.org}, ${st.col}]` : ""}</td><td><span class="tag">${esc(KIND[st.kind] || st.kind)}</span> ${esc(st.note)}</td></tr>`).join("");
+    const verdictE = res.ok ? `<span class="ng-ok">Başarı ✓</span> · ${total - 1} durumda ayrıştırıldı` : res.capped ? `<b>Sınıra takıldı</b>: ${total - 1} durumda bitmedi` : "<b>Ayrıştırılamadı</b>: son sütunda biten başlangıç durumu yok";
+    return `<p class="verdict" style="font-size:1.1rem">${verdictE}</p><div class="ck-scroll" role="region" tabindex="0" aria-label="Earley çizelgesi adımları"><table class="ng-tbl mt-tbl"><tr><th>#</th><th>Sütun</th><th>Durum</th><th>Aralık</th><th>Eylem</th></tr>${rowsE}</table></div>`;
+  }
   const rows = res.steps.slice(0, k).map((st, i) => {
     const input = `${r.toks.slice(0, st.pos).map(x => `<span class="muted">${esc(x)}</span>`).join(" ")} <b>${r.toks.slice(st.pos).map(esc).join(" ")}</b>`;
     const goals = td ? esc(st.goals.join(" ")) : esc(st.stack.join(" "));
@@ -299,12 +304,12 @@ function methTable(r){
 function methHTML(r){
   if(!r.rules.length || !r.toks.length) return '<div class="empty" style="padding:24px 0">Gramer ve cümle yaz.</div>';
   const rules = r.rules.map(x => ({lhs:x.lhs, rhs:x.rhs}));
-  METH = PS.meth === "td" ? topDown(rules, r.toks, PS.start, {cap:400, prune:PS.prune}) : shiftReduce(rules, r.toks, PS.start, {cap:500});
+  METH = PS.meth === "td" ? topDown(rules, r.toks, PS.start, {cap:400, prune:PS.prune}) : PS.meth === "er" ? earley(rules, r.toks, PS.start, {cap:600}) : shiftReduce(rules, r.toks, PS.start, {cap:500});
   const total = METH.steps.length, k = PS.stp == null ? total : Math.max(1, Math.min(PS.stp, total));
-  return `<div class="ng-ctl" style="margin-top:0"><div class="seg" role="group" aria-label="Yöntem"><button data-meth="td" aria-pressed="${PS.meth === "td"}">Üstten alta (özyinelemeli iniş)</button><button data-meth="sr" aria-pressed="${PS.meth === "sr"}">Alttan üste (shift-reduce)</button></div>
+  return `<div class="ng-ctl" style="margin-top:0"><div class="seg" role="group" aria-label="Yöntem"><button data-meth="td" aria-pressed="${PS.meth === "td"}">Üstten alta (özyinelemeli iniş)</button><button data-meth="sr" aria-pressed="${PS.meth === "sr"}">Alttan üste (shift-reduce)</button><button data-meth="er" aria-pressed="${PS.meth === "er"}">Earley</button></div>
     ${PS.meth === "td" ? `<label class="chk"><input type="checkbox" id="pgPrune" ${PS.prune ? "checked" : ""}> gereksiz dalları ele (kalan hedef sayısı kalan sözcükten çoksa)</label>` : ""}
     <label class="muted" style="font-size:.88rem;display:inline-flex;gap:8px;align-items:center">Adım <input type="range" id="pgStep" min="1" max="${total}" value="${k}" style="width:180px"> <b id="pgStepN">${k} / ${total}</b></label></div>
-    <p class="ck-meta">${PS.meth === "td" ? "Başlangıç simgesinden başlanır: sol baştaki simge bir kuralla genişletilir ya da bir sözcükle eşleştirilir; çıkmaza girilince son seçime geri dönülür (derinlik öncelikli arama). Sol özyinelemeli gramerde budama kapalıyken sonsuz döngü oluşur." : "Sözcükler tek tek yığına konur (shift); yığının tepesi bir kuralın sağ tarafıysa sol tarafıyla değiştirilir (reduce). Hedef: yığında yalnızca başlangıç simgesi kalması. Çıkmazda geri dönülür."} CKY ise tüm alt aralıkları bir kez hesaplar, geri dönüş yoktur.</p>
+    <p class="ck-meta">${PS.meth === "td" ? "Başlangıç simgesinden başlanır: sol baştaki simge bir kuralla genişletilir ya da bir sözcükle eşleştirilir; çıkmaza girilince son seçime geri dönülür (derinlik öncelikli arama). Sol özyinelemeli gramerde budama kapalıyken sonsuz döngü oluşur." : PS.meth === "er" ? "Earley her sütunda (j sözcük okunmuş) durumları tutar: lhs → α • β [org, j]. Predict: noktadan sonra ulam varsa onun kurallarını ekler. Scan: noktadan sonra sözcük varsa ve girdiyle eşleşirse noktayı ilerletip bir sonraki sütuna yazar. Complete: biten durum, başladığı sütunda onu bekleyen durumların noktasını ilerletir. Aynı durum bir sütunda yalnızca bir kez tutulur, bu yüzden geri dönüş yoktur ve sol özyineleme sonsuz döngü yaratmaz. Kabul: son sütunda γ → S • [0, n]." : "Sözcükler tek tek yığına konur (shift); yığının tepesi bir kuralın sağ tarafıysa sol tarafıyla değiştirilir (reduce). Hedef: yığında yalnızca başlangıç simgesi kalması. Çıkmazda geri dönülür."} CKY ise tüm alt aralıkları bir kez hesaplar, geri dönüş yoktur.</p>
     <div id="pgMethTbl">${methTable(r)}</div>`;
 }
 // CKY tablosu: satır = aralık uzunluğu, sütun = başlangıç sözcüğü

@@ -89,3 +89,46 @@ export function shiftReduce(rules, toks, start, {cap = 500} = {}){
   if(capped) steps.push({kind:"cap", stack:[], pos:0, note:`${cap} adımda bitmedi`});
   return {steps, ok, capped, exhausted};
 }
+
+// Earley (Lecture 3-1): dinamik programlama + üstten alta tahmin. Çizelge sütunu j = j sözcük okunmuş durumlar.
+// Durum: {lhs, rhs, dot, org}, anlamı: lhs → rhs[0..dot) • rhs[dot..], bu durum org'dan başladı. Üç işlem: predict (nokta sonrası ulamdan kuralları ekle), scan (nokta sonrası sözcüğü okuyup bir sonraki sütuna aktar), complete (biten durum, başladığı sütunda onu bekleyen durumları ilerletir).
+// Boş (ε) kural desteklenmez. Her durum sütunda bir kez tutulur, bu yüzden sol özyineleme sorun olmaz.
+export function earley(rules, toks, start, {cap = 600} = {}){
+  const nts = new Set(rules.map(r => r.lhs)), n = toks.length, steps = [], chart = Array.from({length:n + 1}, () => []);
+  const by = new Map();
+  for(const r of rules){ if(!by.has(r.lhs)) by.set(r.lhs, []); by.get(r.lhs).push(r); }
+  const GAMMA = "γ", keyOf = s => `${s.lhs}|${s.rhs.join(" ")}|${s.dot}|${s.org}`;
+  const seen = Array.from({length:n + 1}, () => new Set());
+  const text = s => `${s.lhs} → ${s.rhs.slice(0, s.dot).join(" ")}${s.dot ? " " : ""}•${s.dot < s.rhs.length ? " " : ""}${s.rhs.slice(s.dot).join(" ")}`;
+  let capped = false;
+  const add = (j, s, kind, note) => {
+    if(seen[j].has(keyOf(s))) return false;
+    if(steps.length >= cap){ capped = true; return false; }
+    seen[j].add(keyOf(s)); chart[j].push(s);
+    steps.push({kind, col:j, item:text(s), org:s.org, note});
+    return true;
+  };
+  add(0, {lhs:GAMMA, rhs:[start], dot:0, org:0}, "init", `başlangıç: ${GAMMA} → • ${start}`);
+  for(let j = 0; j <= n && !capped; j++){
+    for(let q = 0; q < chart[j].length && !capped; q++){
+      const s = chart[j][q];
+      if(s.dot < s.rhs.length){
+        const nx = s.rhs[s.dot];
+        if(nts.has(nx)){
+          for(const r of by.get(nx)) add(j, {lhs:r.lhs, rhs:r.rhs, dot:0, org:j}, "predict", `predict: ${text(s)} ulamı ${nx} bekliyor, ${nx} kurallarını ekle`);
+        }else if(j < n && toks[j].toLocaleLowerCase("tr") === nx.toLocaleLowerCase("tr")){
+          add(j + 1, {lhs:s.lhs, rhs:s.rhs, dot:s.dot + 1, org:s.org}, "scan", `scan: “${toks[j]}” okundu, nokta ilerledi`);
+        }
+      }else{
+        for(const w of chart[s.org].slice()){
+          if(w.dot < w.rhs.length && w.rhs[w.dot] === s.lhs) add(j, {lhs:w.lhs, rhs:w.rhs, dot:w.dot + 1, org:w.org}, "complete", `complete: ${s.lhs} [${s.org},${j}] bitti, ${text(w)} durumu ilerledi`);
+        }
+      }
+    }
+  }
+  const ok = chart[n].some(s => s.lhs === GAMMA && s.dot === 1);
+  if(ok) steps.push({kind:"accept", col:n, item:`${GAMMA} → ${start} •`, org:0, note:`başarı: son sütunda ${GAMMA} → ${start} • [0,${n}] var`});
+  else if(!capped) steps.push({kind:"exhaust", col:n, item:"", org:0, note:`son sütunda ${GAMMA} → ${start} • yok: cümle bu gramerde değil`});
+  if(capped) steps.push({kind:"cap", col:0, item:"", org:0, note:`${cap} durumda bitmedi`});
+  return {steps, ok, capped, exhausted:!ok && !capped, chart};
+}
