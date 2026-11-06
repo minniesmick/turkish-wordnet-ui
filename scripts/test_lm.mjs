@@ -67,5 +67,33 @@ check("pmi nadir çifti şişirir (c-d > a-b)", pmi(pm, "c", "d") > pmi(pm, "a",
 check("topPairs boş değil", topPairs(pm, 2, 5).length > 0 ? 1 : 0, 1);
 check("collocates", collocates(pm, "a", 1, 3)[0].b, "b");
 check("similar", similar(pm, "d", 1, 3).length >= 0 ? 1 : 0, 1);
+// Kneser-Ney ve λ öğrenme
+import {learnLam} from "../static/js/lm.js";
+{
+  const corp = toks("the dog barks\nthe cat sleeps\nthe dog sleeps\na cat barks\nthe dog saw the cat\na dog saw a cat\nthe cat saw the dog");
+  for(const n of [1, 2, 3]){
+    const m = buildModel(corp, n);
+    for(const hist of n === 1 ? [[]] : n === 2 ? [["the"], ["dog"], [BOS], ["zzz"]] : [[BOS, "the"], ["the", "dog"], ["saw", "the"], ["zzz", "yyy"]]){
+      const d = dist(m, hist, {smooth:"kn", D:.75}), sum = d.probs.reduce((a, b) => a + b, 0);
+      check(`KN toplam 1 (n=${n}, ${hist.join(" ")})`, sum, 1);
+      check(`KN görülmeyen sözcük sıfır değil (n=${n})`, prob(m, hist, m.cols[0], {smooth:"kn"}).p > 0 ? 1 : 0, 1);
+    }
+  }
+  const m2 = buildModel(corp, 2);
+  const seen = prob(m2, ["the"], "dog", {smooth:"kn"}).p, unseen = prob(m2, ["the"], "sleeps", {smooth:"kn"}).p;
+  check("KN görülen > görülmeyen", seen > unseen ? 1 : 0, 1);
+  // süreklilik: "saw" yalnızca "dog" ve "cat" sonrasında; "cat" ve "dog" çok farklı bağlamdan gelir
+  const low = prob(m2, ["zzz"], "dog", {smooth:"kn"}).p;
+  check("KN bilinmeyen bağlamda alt düzeye düşer", low > 0 ? 1 : 0, 1);
+  check("KN perplexity sonlu", isFinite(perplexity(m2, toks("the dog sleeps\na cat saw the dog"), {smooth:"kn"}).ppl) ? 1 : 0, 1);
+  // learnLam
+  const train = corp.filter((_, i) => i % 3 !== 0), dev = corp.filter((_, i) => i % 3 === 0);
+  const m3 = buildModel(train, 3), L = learnLam(m3, dev);
+  check("λ toplam 1", L.lam.reduce((a, b) => a + b, 0), 1);
+  check("λ uzunluğu n", L.lam.length, 3);
+  check("EM log-olabilirlik azalmaz", L.ll.every((v, i) => i === 0 || v >= L.ll[i - 1] - 1e-9) ? 1 : 0, 1);
+  const pDefault = perplexity(m3, dev, {smooth:"interp", lam:defaultLam(3)}).ppl, pLearn = perplexity(m3, dev, {smooth:"interp", lam:L.lam}).ppl;
+  check("öğrenilen λ held-out'ta varsayılandan kötü değil", pLearn <= pDefault + 1e-9 ? 1 : 0, 1);
+}
 console.log("dil modeli denetimi:", total - bad, "/", total);
 if(bad) process.exitCode = 1;

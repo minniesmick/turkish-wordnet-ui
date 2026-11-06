@@ -39,9 +39,66 @@ export const mapWord = (m, w) => m.unk > 0 && !m.known.has(w) ? UNK : w;
 export const padHist = (m, toks) => { if(m.n === 1) return []; const t = toks.slice(-(m.n - 1)); return [...Array(m.n - 1 - t.length).fill(BOS), ...t]; };
 
 const ents = (m, hist) => { const e = [null]; for(let k = 1; k <= m.n; k++) e.push(m.orders[k].get(hist.slice(m.n - k).join(SEP))); return e; };
-// cfg: {smooth: "none" | "laplace" | "backoff" | "interp", alpha, lam}
-function pFrom(m, e, w, cfg){
+// Kneser-Ney için süreklilik sayımı: düşük düzeyde (h', w) çiftinin sayımı yerine, w'den önce kaç FARKLI sözcüğün geldiği.
+// kn[k]: k. düzey (k < n) için h' bağlamı → {total, next:Map(w → süreklilik sayımı)}; k+1. düzey tablosundan kurulur.
+function knTables(m){
+  if(m.kn) return m.kn;
+  const kn = Array.from({length:m.n + 1}, () => new Map());
+  for(let k = 1; k < m.n; k++){
+    for(const [key, e] of m.orders[k + 1]){
+      const rest = k === 1 ? "" : key.split(SEP).slice(1).join(SEP);
+      let t = kn[k].get(rest);
+      if(!t){ t = {total:0, next:new Map()}; kn[k].set(rest, t); }
+      for(const w of e.next.keys()){ t.next.set(w, (t.next.get(w) || 0) + 1); t.total++; }
+    }
+  }
+  return m.kn = kn;
+}
+// interpolated Kneser-Ney (mutlak indirim D): P(w|h) = max(c − D, 0) / c(h) + D · N1+(h•) / c(h) · P_alt(w | h'); en altta tekdüze 1/V ile karışır
+function knProb(m, hist, w, D){
+  const n = m.n, kn = n > 1 ? knTables(m) : null;
+  let p = 1 / m.V, c = 0, h = 0;
+  for(let k = 1; k <= n; k++){
+    const key = k === 1 ? "" : hist.slice(n - k).join(SEP), ent = (k === n ? m.orders[k] : kn[k]).get(key);
+    if(!ent) continue;
+    c = ent.next.get(w) || 0; h = ent.total;
+    p = Math.max(c - D, 0) / h + D * ent.next.size / h * p;
+  }
+  return {c, h, num:c, den:h, p, order:n, how:`Kneser-Ney, D = ${D}`};
+}
+// λ'ları held-out cümlelerden öğren (deleted interpolation, EM): her sözcük için karışımın hangi düzeyden geldiği sorumluluk olarak dağıtılır, λ'lar ortalama sorumluluğa yaklaşır
+// m: eğitim modeli; heldout: eğitimde olmayan cümleler. Dönen: {lam, ll: her turdaki log-olabilirlik, N}
+export function learnLam(m, heldout, {iters = 40} = {}){
+  const n = m.n, rows = [];
+  for(const s of heldout){
+    const toks = s.map(w => mapWord(m, w)), p = n > 1 ? [...Array(n - 1).fill(BOS), ...toks, EOS] : toks;
+    for(let i = n > 1 ? n - 1 : 0; i < p.length; i++){
+      const hist = n > 1 ? p.slice(i - n + 1, i) : [], e = ents(m, hist), q = [];
+      for(let k = 1; k <= n; k++) q.push(e[k]?.total > 0 ? (e[k].next.get(p[i]) || 0) / e[k].total : 0);
+      if(q.some(x => x > 0)) rows.push(q);
+    }
+  }
+  let lam = Array(n).fill(1 / n);
+  const ll = [];
+  for(let it = 0; it < iters; it++){
+    const acc = Array(n).fill(0); let L = 0;
+    for(const q of rows){
+      const mix = q.reduce((a, x, k) => a + lam[k] * x, 0);
+      if(!mix) continue;
+      L += Math.log2(mix);
+      q.forEach((x, k) => { acc[k] += lam[k] * x / mix; });
+    }
+    ll.push(L);
+    const tot = acc.reduce((a, b) => a + b, 0) || 1;
+    lam = acc.map(a => a / tot);
+  }
+  return {lam, ll, N:rows.length};
+}
+
+// cfg: {smooth: "none" | "laplace" | "backoff" | "interp" | "kn", alpha, lam, D}
+function pFrom(m, e, w, cfg, hist){
   const n = m.n, sm = cfg.smooth || "none";
+  if(sm === "kn") return knProb(m, hist, w, cfg.D ?? .75);
   if(sm === "backoff"){
     const a = cfg.alpha ?? .4;
     for(let k = n; k >= 1; k--){
@@ -62,13 +119,13 @@ function pFrom(m, e, w, cfg){
   const num = c + k, den = h + k * m.V;
   return {c, h, num, den, p:den ? num / den : 0, und:!den, order:n, how:""};
 }
-export const prob = (m, hist, w, cfg) => pFrom(m, ents(m, hist), w, cfg);
+export const prob = (m, hist, w, cfg) => pFrom(m, ents(m, hist), w, cfg, hist);
 
 // bağlamdan sonra gelebilecek sözcükler ve (normalize) olasılıkları. none: yalnızca görülenler; diğerleri: tüm sözlük
 export function dist(m, hist, cfg){
   const e = ents(m, hist), sm = cfg.smooth || "none";
   let words = sm === "none" ? [...(e[m.n]?.next.keys() || [])] : m.cols;
-  const probs = words.map(w => pFrom(m, e, w, cfg).p), sum = probs.reduce((a, b) => a + b, 0);
+  const probs = words.map(w => pFrom(m, e, w, cfg, hist).p), sum = probs.reduce((a, b) => a + b, 0);
   if(!sum) return {words:[], probs:[]};
   return {words, probs:probs.map(p => p / sum)};
 }

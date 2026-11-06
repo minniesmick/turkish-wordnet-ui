@@ -1,7 +1,7 @@
 // N-gram laboratuvarı (Lecture 5): korpustan sayım, olasılık, Laplace / backoff / interpolation, UNK, cümle olasılığı, perplexity, rastgele üretim, PMI.
 // Hesap lm.js içinde; burada yalnızca arayüz var. Korpus: elle yazılan metin, BOUN (Türkçe) ya da Brown (İngilizce).
-import {$, $$, esc, registerView, setView, tr as num} from "./core.js";
-import {BOS, EOS, SEP, buildModel, mapWord, padHist, prob, support, sample, seqProb, perplexity, defaultLam, pmiBuild, topPairs, collocates, similar} from "./lm.js";
+import {$, $$, esc, registerView, setView, tr as num, toast} from "./core.js";
+import {BOS, EOS, SEP, buildModel, mapWord, padHist, prob, support, sample, seqProb, perplexity, defaultLam, learnLam, pmiBuild, topPairs, collocates, similar} from "./lm.js";
 import {loadCorpus, tokensOf, CORPORA} from "./corpusdata.js";
 
 const PRESETS = {
@@ -11,7 +11,7 @@ const PRESETS = {
 };
 const NG = {src:"text", limit:5000, text:PRESETS.slayt.text, n:2, lower:false, smooth:"none", unk:0, alpha:.4, lam:{}, pred:PRESETS.slayt.pred, sent:PRESETS.slayt.sent, hist:"", preset:"slayt", pk:2, pmin:3, pw:""};
 const KEY = "wn:ngram";
-const SM = {none:"Yok", laplace:"Laplace +1", backoff:"Backoff", interp:"Interpolation"};
+const SM = {none:"Yok", laplace:"Laplace +1", backoff:"Backoff", interp:"Interpolation", kn:"Kneser-Ney"};
 let root = null, S = [], M = null, token = 0;
 const cache = new Map();
 const memo = (k, f) => { if(!cache.has(k)){ if(cache.size > 30) cache.delete(cache.keys().next().value); cache.set(k, f()); } return cache.get(k); };
@@ -45,12 +45,13 @@ const lgs = v => v === -Infinity ? "−∞" : v.toFixed(3).replace("-", "−");
 const T = s => `<span class="ng-t">${esc(s)}</span>`;
 const meter = v => `<div class="meter"><i><b style="width:${Math.min(1, v) * 100}%"></b></i></div>`;
 const ppl = v => !isFinite(v) ? "∞" : v >= 1000 ? String(Math.round(v)) : v.toFixed(2);
-const fr = r => NG.smooth === "interp" ? "karışım" : `${r.num}/${r.den}`;
+const fr = r => NG.smooth === "interp" || NG.smooth === "kn" ? "karışım" : `${r.num}/${r.den}`;
 const histLabel = key => key.split(SEP).map(esc).join(" ");
-const howMode = () => NG.smooth === "backoff" || NG.smooth === "interp";
+const howMode = () => NG.smooth === "backoff" || NG.smooth === "interp" || NG.smooth === "kn";
 
 function formula(m){
   const n = m.n, h = n === 2 ? "wᵢ₋₁" : "wᵢ₋₂ wᵢ₋₁";
+  if(NG.smooth === "kn") return n === 1 ? "P(w) = C(w) / N" : "P_KN(wᵢ | h) = max(C(h wᵢ) − D, 0) / C(h) + D · N₁₊(h •) / C(h) · P_KN(wᵢ | h kısa)   (D = 0,75; alt düzeylerde C yerine kaç farklı sözcükten sonra geldiği sayılır)";
   if(NG.smooth === "interp") return n === 1 ? "P(w) = C(w) / N" : `P̂(wᵢ | …) = ${Array.from({length:n}, (_, k) => `λ${k + 1}·P${k + 1}`).join(" + ")}   (Σλ = 1; bağlamı görülmeyen düzey atlanır)`;
   if(NG.smooth === "backoff") return n === 1 ? "P(w) = C(w) / N" : `S(wᵢ | ${h}) = C(${h} wᵢ)/C(${h}) varsa; yoksa α · S(wᵢ | daha kısa bağlam)   (α = ${NG.alpha})`;
   if(n === 1) return NG.smooth === "laplace" ? "P(w) = (C(w) + 1) / (N + V)" : "P(w) = C(w) / N";
@@ -61,6 +62,7 @@ function explainHTML(){
     none:"Yumuşatma yok: görülmeyen n-gram'ın olasılığı 0; bir çarpan 0 olunca cümlenin tüm olasılığı 0 olur.",
     laplace:"Laplace (add-one): her sayıma 1 eklenir, payda V kadar büyür; görülmeyen n-gram'a küçük ama sıfır olmayan pay düşer. Büyük sözlükte olasılığın çoğunu görülmeyenlere kaydırır.",
     backoff:"Backoff: trigram varsa onu kullan, yoksa bigram'a, o da yoksa unigram'a düş (slayt 32). Düşülen her adımda α ile çarpılır (stupid backoff); sonuç puandır, olasılık dağılımı olarak normalize değildir.",
+    kn:"Kneser-Ney: Interpolation'ın daha iyi bir hâli. Her sayımdan sabit bir D (0,75) indirilir; kurtarılan olasılık alt düzeye aktarılır. Alt düzeyde bir sözcüğün ne kadar sık geçtiği değil, kaç farklı sözcükten sonra geldiği sayılır (süreklilik): “Francisco” sık ama hep “San”dan sonra gelir, bu yüzden bilinmeyen bağlamda düşük olasılık alır. Sonuç normalize edilmiş bir olasılık dağılımıdır, perplexity kesindir. Katz backoff (Good-Turing indirimi) uygulanmadı.",
     interp:"Interpolation: trigram, bigram ve unigram olasılıkları her zaman λ ağırlıklarıyla karıştırılır (slayt 32). Ağırlıkların toplamı 1'dir; bağlamı hiç görülmemiş düzey karışımdan çıkarılır, kalan ağırlıklar yeniden normalize edilir."
   };
   const u = NG.unk ? `UNK: eğitimde sayımı ≤ ${NG.unk} olan ${num(M?.unkTypes || 0)} sözcük türü <UNK> simgesine çevrildi; sorgu metnindeki bilinmeyen sözcük de <UNK> sayılır (açık sözlük, slayt 33). Böylece bilinmeyen sözcük bile sıfır olmayan olasılık alır.` : "UNK kapalı: kapalı sözlük varsayımı (tüm sözcükler eğitimde görülmüş). Sözlüğün dışındaki bir sözcük, backoff ve interpolation'da bile olasılık 0 verir.";
@@ -272,7 +274,7 @@ function syncControls(){
   $("#ngAlpha", root).classList.toggle("hidden", NG.smooth !== "backoff");
   const li = $("#ngLam", root), showLam = NG.smooth === "interp" && NG.n >= 2;
   li.classList.toggle("hidden", !showLam);
-  if(showLam) li.innerHTML = `<span class="muted" style="font-size:.88rem">λ (birimden ${NG.n}-gram'a):</span>` + lamFor(NG.n).map((v, i) => `<input class="dp-num" data-lam="${i}" type="number" step="0.05" min="0" max="1" value="${v}" aria-label="λ${i + 1}">`).join("") + `<small class="muted stu">toplam 1'e normalize edilir</small>`;
+  if(showLam) li.innerHTML = `<span class="muted" style="font-size:.88rem">λ (birimden ${NG.n}-gram'a):</span>` + lamFor(NG.n).map((v, i) => `<input class="dp-num" data-lam="${i}" type="number" step="0.05" min="0" max="1" value="${v}" aria-label="λ${i + 1}">`).join("") + `<button class="btn sm ghost" data-learn="lam" title="Cümlelerin %80'iyle say, %20'siyle (her 5. cümle) λ'ları EM ile öğren">λ'yı korpustan öğren</button><small class="muted stu">toplam 1'e normalize edilir${NG.learned?.[NG.n] ? ` · öğrenildi: ${NG.learned[NG.n].n} held-out sözcük, ${NG.learned[NG.n].it} tur EM` : ""}</small>`;
   $("#ngAlphaIn", root).value = NG.alpha;
 }
 function renderAll(){
@@ -386,6 +388,13 @@ function mount(){
   root.addEventListener("click", e => {
     const go = e.target.closest("[data-go]"); if(go){ e.preventDefault(); setView(go.dataset.go); return; }
     const nq = e.target.closest("[data-nq]"); if(nq){ nqAct(nq.dataset.nq, nq.dataset); return; }
+    if(e.target.closest("[data-learn]")){
+      if(S.length < 10){ toast("λ öğrenmek için en az 10 cümle gerekli"); return; }
+      const train = S.filter((_, i) => i % 5 !== 0), dev = S.filter((_, i) => i % 5 === 0);
+      const L = learnLam(buildModel(train, NG.n, {unk:NG.unk}), dev, {iters:60});
+      NG.lam[NG.n] = L.lam.map(v => +v.toFixed(3)); NG.learned = {...(NG.learned || {}), [NG.n]:{n:L.N, it:60}};
+      refresh(); return;
+    }
     const b = e.target.closest("[data-n],[data-sm],[data-src],[data-preset],[data-hist],[data-ex]"); if(!b) return;
     const d = b.dataset;
     if(d.n){ NG.n = +d.n; NG.hist = ""; }
