@@ -915,3 +915,4 @@ mark.dm-w{padding:0 4px;border-radius:var(--r-sm);background:var(--wash-2);color
 .dp-ex-tbl tr.dp-ex-half td{background:var(--wash)}
 .dp-ex-note{font-size:.88rem;color:var(--ink-2)}
 #dpEx .verdict{max-width:none;display:block}
+.dp-tbl tr.dp-mwt td{background:var(--sunk);color:var(--ink-2)}

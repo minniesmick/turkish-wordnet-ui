@@ -23,7 +23,7 @@ const save = () => { try{ localStorage.setItem(KEY, JSON.stringify({q:DS.q, min:
 
 // ───────────────────────── CoNLL-U
 function parseConllu(text){
-  const meta = {}, toks = [];
+  const meta = {}, toks = [], mwt = [];
   for(const raw of text.replace(/\r/g, "").split("\n")){
     const line = raw.trim();
     if(!line) continue;
@@ -31,10 +31,12 @@ function parseConllu(text){
     if(m){ meta[m[1]] = m[2]; continue; }
     if(line[0] === "#") continue;
     const c = (raw.includes("\t") ? raw.split("\t") : line.split(/\s+/));
-    if(c.length < 8 || !/^\d+$/.test(c[0])) continue;          // 1-2 (çok sözcüklü belirteç) ve 1.1 (boş düğüm) atlanır
+    const rg = c[0].match(/^(\d+)-(\d+)$/);
+    if(rg && c.length >= 2){ mwt.push({from:+rg[1], to:+rg[2], form:c[1]}); continue; }   // çok sözcüklü belirteç (ör. 4-5 ağlayacaktı): tabloda gösterilir, ağaçta yok
+    if(c.length < 8 || !/^\d+$/.test(c[0])) continue;          // 1.1 (boş düğüm) atlanır
     toks.push({id:+c[0], form:c[1], lemma:c[2], upos:c[3], feats:c[5], head:+c[6], rel:c[7]});
   }
-  return {meta, toks};
+  return {meta, toks, mwt};
 }
 // özellik kontrolleri (slayt: tek kök, bağlı, tek başlı, döngüsüz, projektif)
 function check(toks){
@@ -116,9 +118,11 @@ function checksHTML(toks, c){
     ${li(!c.bad.length, "Tek başlı", "her sözcüğün (kök hariç) tam bir HEAD'i var")}
     ${li(!c.nonproj.length, "Projektif", c.nonproj.length ? `kesişen ok: ${c.nonproj.map(i => `<i>${esc(toks.find(t => t.id === i)?.form)}</i>`).join(", ")}` : "kesişen ok yok; her alt ağaç ardışık bir aralık")}</ul>`;
 }
-function tableHTML(toks){
+function tableHTML(toks, mwt = []){
+  const mw = new Map(mwt.map(m => [m.from, m]));
+  const mwRow = m => `<tr class="dp-mwt"><td>${m.from}-${m.to}</td><td colspan="6"><b>${esc(m.form)}</b> <small class="muted">çok sözcüklü belirteç: ${toks.filter(t => t.id >= m.from && t.id <= m.to).map(t => esc(t.form)).join(" + ")}</small></td></tr>`;
   return `<div class="dp-scroll" role="region" tabindex="0" aria-label="CoNLL-U tablosu, yatay kaydırılabilir"><table class="ng-tbl dp-tbl"><tr><th>ID</th><th>FORM</th><th>LEMMA</th><th>UPOS</th><th>FEATS</th><th class="sec">HEAD</th><th class="sec">DEPREL</th></tr>
-  ${toks.map(t => `<tr data-tok="${t.id}" class="${DS.sel === t.id ? "sel" : ""}"><td>${t.id}</td><td><b>${esc(t.form)}</b></td><td>${esc(t.lemma)}</td><td>${esc(t.upos)}</td><td class="f">${esc(t.feats === "_" ? "" : t.feats.replace(/\|/g, " · "))}</td><td class="sec">${t.head}${t.head ? ` <small>${esc(toks.find(x => x.id === t.head)?.form || "?")}</small>` : ""}</td><td class="sec">${esc(t.rel)}</td></tr>`).join("")}</table></div>`;
+  ${toks.map(t => `${mw.has(t.id) ? mwRow(mw.get(t.id)) : ""}<tr data-tok="${t.id}" class="${DS.sel === t.id ? "sel" : ""}"><td>${t.id}</td><td><b>${esc(t.form)}</b></td><td>${esc(t.lemma)}</td><td>${esc(t.upos)}</td><td class="f">${esc(t.feats === "_" ? "" : t.feats.replace(/\|/g, " · "))}</td><td class="sec">${t.head}${t.head ? ` <small>${esc(toks.find(x => x.id === t.head)?.form || "?")}</small>` : ""}</td><td class="sec">${esc(t.rel)}</td></tr>`).join("")}</table></div>`;
 }
 function relsHTML(toks){
   const used = [...new Set(toks.map(t => t.rel))].sort();
@@ -162,7 +166,7 @@ function render(){
     <h3 class="ng-h3 stu">Özellikler <small>Lecture 3, bağımlılık ağacı</small></h3>${checksHTML(toks, c)}
     <h3 class="ng-h3 stu">Bu cümledeki ilişkiler</h3>${relsHTML(toks)}
     <h3 class="ng-h3 stu">Kendin ekle <small>ağacı kendin kur</small></h3><div class="stu" id="dpEx">${exHTML(toks)}</div>
-    <h3 class="ng-h3">CoNLL-U tablosu</h3>${tableHTML(toks)}`;
+    <h3 class="ng-h3">CoNLL-U tablosu</h3>${sent.mwt.length ? `<p class="ck-meta stu">${sent.mwt.length} çok sözcüklü belirteç var: yazıda bitişik görünen sözcük, ağaçta ayrı düğümlere bölünür (örn. <i>${esc(sent.mwt[0].form)}</i>). Ağaç bu bölünmüş parçalar üzerine kurulur.</p>` : ""}${tableHTML(toks, sent.mwt)}`;
 }
 function setSent(text, id){
   sent = parseConllu(text); DS.ex = EX0(); DS.conllu = text; DS.id = id || sent.meta.sent_id || ""; DS.sel = 0; save(); render(); renderList();
