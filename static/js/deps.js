@@ -1,6 +1,7 @@
 // Bağımlılık ağacı: Lecture 3 (Dependency Parsing), InClass 4. UD Turkish-BOUN cümlesi seç ya da CoNLL-U yapıştır; ok ve ağaç çizimi, özellik kontrolleri.
 import {$, $$, esc, api, registerView, MODE} from "./core.js";
 import {scoreDeps, treeProblems} from "./depscore.js";
+import {oracle} from "./depparse.js";
 
 // Universal Dependencies ilişkileri: kısa Türkçe açıklama
 const REL = {
@@ -14,7 +15,7 @@ const REL = {
 };
 const relText = r => REL[r] || REL[r.split(":")[0]] || "";
 const EX0 = () => ({head:{}, rel:{}, chk:false, hints:0, shown:false});
-const DS = {ex:EX0(), q:"", min:5, max:12, results:[], total:0, id:"", conllu:"", hide:false, view:"arc", sel:0, paste:false};
+const DS = {tr:null, ex:EX0(), q:"", min:5, max:12, results:[], total:0, id:"", conllu:"", hide:false, view:"arc", sel:0, paste:false};
 const KEY = "wn:deps";
 let root = null, sent = null;
 
@@ -133,6 +134,17 @@ function selHTML(toks){
   const h = toks.find(x => x.id === t.head), kids = toks.filter(x => x.head === t.id);
   return `<p class="verdict" style="font-size:1.15rem"><b>${esc(t.form)}</b> ${h ? `→ bağımlısı olduğu baş: <b>${esc(h.form)}</b> · ilişki <span class="ck-s">${esc(t.rel)}</span> <small class="muted stu">${esc(relText(t.rel))}</small>` : `cümlenin <b>kökü</b>`}.${kids.length ? ` Bağımlıları: ${kids.map(k => `<button class="rel" data-tok="${k.id}">${esc(k.form)}<sub>${esc(k.rel)}</sub></button>`).join(" ")}` : " Bağımlısı yok (yaprak)."}</p>`;
 }
+// ───────────────────────── geçiş tabanlı ayrıştırma (arc-standard), altın ağacı üreten eylem dizisiyle
+function trHTML(toks){
+  const r = oracle(toks), total = r.steps.length, k = DS.tr == null ? total : Math.max(1, Math.min(DS.tr, total));
+  const nm = id => id === 0 ? "ROOT" : esc(toks.find(t => t.id === id)?.form ?? id);
+  const rows = r.steps.slice(0, k).map((s, i) => `<tr class="${i === k - 1 ? "now" : ""}"><td>${i}</td><td class="mt-g">${s.stack.map(nm).join(" ") || "·"}</td><td>${s.buffer.map(nm).join(" ") || "·"}</td><td><span class="tag">${esc(s.act)}${s.rel ? " " + esc(s.rel) : ""}</span> ${esc(s.note)}</td></tr>`).join("");
+  const arcs = r.steps[k - 1].arcs;
+  return `<p class="ck-meta">Geçiş tabanlı ayrıştırıcı cümleyi soldan sağa işler: yığın, tampon ve üç eylem (SHIFT, LEFT-ARC, RIGHT-ARC) ile ağacı adım adım kurar. Burada eylemleri altın ağaçtan çıkaran bir kılavuz (oracle) gösterilir; gerçek bir ayrıştırıcı her adımda eylemi bir sınıflandırıcıyla seçer. Her sözcük bir kez shift ve bir kez ok olduğundan 2n adım gerekir (doğrusal zaman); grafik tabanlı yöntemler tüm olası okları puanlar.</p>
+    ${r.ok ? `<label class="muted" style="font-size:.88rem;display:inline-flex;gap:8px;align-items:center">Adım <input type="range" id="dpTrIn" min="1" max="${total}" value="${k}" style="width:200px" aria-label="Geçiş adımı"> <b id="dpTrN">${k} / ${total}</b></label>
+    <div class="ck-scroll" role="region" tabindex="0" aria-label="Geçiş tabanlı ayrıştırma adımları"><table class="ng-tbl mt-tbl"><tr><th>#</th><th>Yığın</th><th>Tampon</th><th>Eylem</th></tr>${rows}</table></div>
+    <p class="ck-meta">Kurulan yaylar (${arcs.length}/${toks.length}): ${arcs.map(a => `${nm(a.h)} → ${nm(a.d)} <small>${esc(a.rel)}</small>`).join("; ") || "henüz yok"}</p>` : `<div class="notice warn">${esc(r.reason)}. Arc-standard yalnızca projektif ağaçları kurabilir; kesişen yayları için swap gibi ek eylemler gerekir.</div>`}`;
+}
 // ───────────────────────── alıştırma: ağacı kendin kur (öğrenci kipi)
 function exHTML(toks){
   const ex = DS.ex, gold = toks.map(t => ({id:t.id, head:t.head, rel:t.rel}));
@@ -165,11 +177,12 @@ function render(){
     <div id="dpSel" aria-live="polite">${selHTML(toks)}</div>
     <h3 class="ng-h3 stu">Özellikler <small>Lecture 3, bağımlılık ağacı</small></h3>${checksHTML(toks, c)}
     <h3 class="ng-h3 stu">Bu cümledeki ilişkiler</h3>${relsHTML(toks)}
+    <h3 class="ng-h3 stu">Geçiş tabanlı ayrıştırma <small>arc-standard</small></h3><div class="stu" id="dpTr">${trHTML(toks)}</div>
     <h3 class="ng-h3 stu">Kendin ekle <small>ağacı kendin kur</small></h3><div class="stu" id="dpEx">${exHTML(toks)}</div>
     <h3 class="ng-h3">CoNLL-U tablosu</h3>${sent.mwt.length ? `<p class="ck-meta stu">${sent.mwt.length} çok sözcüklü belirteç var: yazıda bitişik görünen sözcük, ağaçta ayrı düğümlere bölünür (örn. <i>${esc(sent.mwt[0].form)}</i>). Ağaç bu bölünmüş parçalar üzerine kurulur.</p>` : ""}${tableHTML(toks, sent.mwt)}`;
 }
 function setSent(text, id){
-  sent = parseConllu(text); DS.ex = EX0(); DS.conllu = text; DS.id = id || sent.meta.sent_id || ""; DS.sel = 0; save(); render(); renderList();
+  sent = parseConllu(text); DS.ex = EX0(); DS.tr = null; DS.conllu = text; DS.id = id || sent.meta.sent_id || ""; DS.sel = 0; save(); render(); renderList();
 }
 function renderList(){
   $("#dpList", root).innerHTML = DS.results.length
@@ -213,7 +226,7 @@ function mount(){
     const r = all.results[Math.floor(Math.random() * all.results.length)]; if(r) pick(r.id);
   });
   $("#dpPaste", root).addEventListener("click", () => { DS.paste = !DS.paste; $("#dpPasteBox", root).classList.toggle("hidden", !DS.paste); if(DS.paste) $("#dpTa", root).focus(); });
-  $("#dpTa", root).addEventListener("input", e => { const s = parseConllu(e.target.value); if(s.toks.length){ sent = s; DS.ex = EX0(); DS.conllu = e.target.value; DS.id = ""; DS.sel = 0; save(); render(); } });
+  $("#dpTa", root).addEventListener("input", e => { const s = parseConllu(e.target.value); if(s.toks.length){ sent = s; DS.ex = EX0(); DS.tr = null; DS.conllu = e.target.value; DS.id = ""; DS.sel = 0; save(); render(); } });
   root.addEventListener("click", e => {
     const el = e.target.closest("[data-id],[data-dv],[data-tok]"); if(!el) return;
     if(el.dataset.id) return pick(el.dataset.id);
@@ -227,6 +240,11 @@ function mount(){
     DS.sel = +el.dataset.tok;
     render();
     root.querySelector(`.dp-word[data-tok="${DS.sel}"],.dp-node[data-tok="${DS.sel}"]`)?.focus();
+  });
+  root.addEventListener("input", e => {
+    if(e.target.id !== "dpTrIn") return;
+    DS.tr = +e.target.value; $("#dpTrN", root).textContent = DS.tr + " / " + e.target.max;
+    const r = $("#dpTr", root); r.innerHTML = trHTML(sent.toks); const i = $("#dpTrIn", root); i.focus();
   });
   root.addEventListener("change", e => {
     if(e.target.id === "dpHide"){ DS.hide = e.target.checked; render(); return; }
