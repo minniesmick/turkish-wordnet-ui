@@ -95,7 +95,7 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [x] DL-1…DL-7 slaytlarını Ders sekmesine ekle: 28 bölüm ve 42 açıklamalı soru (her PDF'den 6 soru).
 - [x] Metin temsili laboratuvarı (DL-4, slayt 4–26): ön işleme, sözcük/karakter/BPE karşılaştırması, adım adım BPE ve gidiş-dönüş kodlama; BOUN ilk 10 cümlede 99 sözcük / 12 birleştirme ile tarayıcıda denendi. `node scripts/test_tok.mjs` klasik slayt örneğini, eşitlik sırasını, Türkçe harfleri, sınırları ve 200 gidiş-dönüşü denetler.
 - [ ] Metin temsili sınırları: genel Türkçe kök bulucu değildir; stemming yalnızca DL-4'teki `ate/eaten/eating → eat` örneğini kapsar. BPE eğitiminde sözcük-sonu işareti yoktur; en çok 20.000 sözcük ve 500 birleştirme işlenir. BOUN örneklemesi ilk N cümleyle sınırlıdır (en çok 979).
-- [ ] Word embedding laboratuvarı: BOUN üzerinde embedding ve en yakın komşular (DL-3/4).
-- [ ] Self-attention laboratuvarı: Q·Kᵀ, softmax, ısı haritası ve maskeleme (DL-6/7).
-- [ ] RNN açılımı laboratuvarı (DL-5).
-- [ ] Küçük sinir ağı eğitimi: ileri / geri yayılım, kayıp ve karar sınırı (DL-1/2).
+- [x] Word embedding laboratuvarı: BOUN üzerinde embedding ve en yakın komşular (DL-3/4).
+- [x] Self-attention laboratuvarı: Q·Kᵀ, softmax, ısı haritası ve maskeleme (DL-6/7).
+- [x] RNN açılımı laboratuvarı (DL-5).
+- [x] Küçük sinir ağı eğitimi: ileri / geri yayılım, kayıp ve karar sınırı (DL-1/2).
