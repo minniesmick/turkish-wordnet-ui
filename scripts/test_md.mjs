@@ -1,6 +1,6 @@
 // Morfolojik belirsizlik giderme denetimi: node scripts/test_md.mjs
 import fs from "node:fs";
-import {parseConllu, split, train, evaluate, analyze, candidates, buildLexicon, topRules, tagOf, uposOf, featsOf} from "../static/js/md.js";
+import {buildZMap, zemCands, parseConllu, split, train, evaluate, analyze, candidates, buildLexicon, topRules, tagOf, uposOf, featsOf} from "../static/js/md.js";
 let bad = 0, total = 0;
 const check = (name, got, want) => { total++; if(got !== want){ bad++; console.log("FAIL", name, "beklenen", want, "bulunan", got); } };
 const S = (pairs) => ({f:pairs.map(p => p[0]), l:pairs.map(p => p[0]), p:pairs.map(p => p[1]), x:pairs.map(p => p[2] || "_")});
@@ -65,5 +65,27 @@ check("deterministik eğitim", R2.all.ap + "/" + R2.all.dl + "/" + R2.all.nn, R.
 const rules = topRules(M.dl, 10);
 check("kural listesi azalan güven", rules.every((x, i) => !i || rules[i - 1].score >= x.score), true);
 check("kurallar doğru > yanlış", rules.every(x => x.p > x.n), true);
+// Zemberek adayları (öğrenilmiş imza → etiket eşlemesi)
+{
+  const NT = "NOUN Case=Nom|Number=Sing|Person=3", LT = "NOUN Case=Loc|Number=Sing|Person=3";
+  const ZS = {ev:[{o:"ev+Noun+A3sg", l:"ev"}], okul:[{o:"okul+Noun+A3sg", l:"okul"}], evde:[{o:"ev+Noun+A3sg+Loc", l:"ev"}], okulda:[{o:"okul+Noun+A3sg+Loc", l:"okul"}], masa:[{o:"masa+Noun+A3sg", l:"masa"}], masada:[{o:"masa+Noun+A3sg+Loc", l:"masa"}]};
+  const mk = (f, p, x) => ({f:[f], l:[f], p:[p], x:[x]});
+  const corp = [mk("ev", "NOUN", "Case=Nom|Number=Sing|Person=3"), mk("okul", "NOUN", "Case=Nom|Number=Sing|Person=3"), mk("evde", "NOUN", "Case=Loc|Number=Sing|Person=3"), mk("okulda", "NOUN", "Case=Loc|Number=Sing|Person=3")];
+  const zm = buildZMap(corp, ZS);
+  const c = zemCands(zm, "masada");
+  check("Zemberek eşlemesi: yeni sözcüğün Loc adayı öğrenildi", c.some(x => x[0] === LT), true);
+  check("Zemberek eşlemesi: lemma Zemberek'ten", c.find(x => x[0] === LT)[2], "masa");
+  check("Zemberek eşlemesi: imza başına yalnızca ilgili etiket", c.every(x => x[0] === LT), true);
+  check("Zemberek eşlemesi: bilinmeyen imza aday vermez", zemCands(zm, "yok").length, 0);
+  // leave-one-out: evde tek örnek olan Loc imzasını yalnızca evde taşıyorsa, kendi katkısı düşünce boş kalmalı
+  const only = buildZMap([mk("evde", "NOUN", "Case=Loc|Number=Sing|Person=3")], ZS);
+  check("leave-one-out: kendi katkısı düşünce aday yok", zemCands(only, "evde", LT).length, 0);
+  check("leave-one-out yokken aday var", zemCands(only, "evde").length, 1);
+  const M2 = train(corp, {Z:ZS});
+  const t = analyze(M2, ["masada"])[0];
+  check("analyze: Zemberek adayı kümede", t.cands.some(x => x.tag === LT), true);
+  check("analyze: Zemberek aday lemması", t.cands.find(x => x.tag === LT).lemma, "masa");
+  check("analyze: Zemberek verilmezse aday eklenmez", analyze(train(corp), ["masada"])[0].cands.some(x => x.z), false);
+}
 console.log("belirsizlik giderme denetimi:", total - bad, "/", total);
 if(bad) process.exitCode = 1;

@@ -1543,7 +1543,14 @@ class Handler(SimpleHTTPRequestHandler):
                     return self.send_json({"loading": True}, 503)
                 if st != "ready":
                     return self.send_json({"available": False, "error": ZEM["error"]})
-                if p.get("w"):
+                if p.get("ws"):
+                    # toplu: sekmeyle ayrılmış en çok 200 sözcük; her biri için yalnızca Oflazer biçimi, sözlük maddesi ve tür döner
+                    out = {}
+                    for w in p["ws"][0].split(TAB)[:200]:
+                        r = zem_call("A", w)
+                        out[w] = [{"o": x.get("oflazer", ""), "l": x.get("lemma", ""), "p": x.get("pos", "")} for x in r.get("analyses", []) if not x.get("unknown")]
+                    self.send_json({"available": True, "words": out})
+                elif p.get("w"):
                     self.send_json({"available": True, **zem_call("A", p["w"][0])})
                 elif p.get("s"):
                     self.send_json({"available": True, **zem_call("S", p["s"][0])})

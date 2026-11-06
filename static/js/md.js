@@ -3,6 +3,8 @@
 // Üç yöntem: en sık çözümleme (taban çizgisi), karar listesi (Yuret & Ture) ve ortalama perceptron (Sak, Gungor, Saraclar).
 // Çözümleme = "UPOS FEATS" (UD etiketi), örn. "NOUN Case=Loc|Number=Sing|Person=3". Saf hesap; arayüz disamb.js içinde.
 
+import {zLemma} from "./zmap.js";
+
 export const lc = s => s.toLocaleLowerCase("tr");
 const PUNCT = /^[^\p{L}\p{N}]+$/u;
 export const tagOf = (p, x) => `${p} ${x && x !== "_" ? x : "_"}`;
@@ -55,6 +57,41 @@ export function candidates(lex, w, excl = null){
     if(l.length && (k === 1 || l.reduce((a, b) => a + b[1], 0) >= MINSUF)) return {known:false, list:l.slice(0, CAP)};
   }
   return {known:false, list:ranked(lex.glob, excl).slice(0, CAP)};
+}
+// ───────────────────────── Zemberek adayları: Zemberek çözümlemesi (Oflazer biçimi) → BOUN etiketi eşlemesi eğitim verisinden ÖĞRENİLİR
+// "kök" atılmış ek dizisi (ör. "Noun+A3sg+Loc") imzadır. Eğitimde bir imza, sözcüğün BOUN etiketiyle birlikte kaç kez göründü sayılır; oran = birlikte / imza sayısı.
+// Bir sözcüğün Zemberek çözümlemelerinin imzaları, oranı eşik üstü olan (imza başına en çok 3) BOUN etiketlerine eşlenir. Böylece BOUN'un kendine özgü kararları (Evident, Aspect, VerbForm) elle kural yazmadan gelir.
+// Eğitim sırasında bir belirtecin kendi katkısı sayımlardan düşülür (leave-one-out), böylece eğitim adayları sınamadakine benzer.
+const zsig = o => o.split("^DB+").map((g, i) => { const p = g.split("+"); if(i === 0) p.shift(); return p.join("+"); }).join("^");
+export function buildZMap(sents, Z, {min = .15} = {}){
+  const sc = new Map(), pair = new Map();
+  for(const s of sents){
+    const tg = sentTags(s);
+    for(let i = 0; i < s.f.length; i++){
+      const an = Z[lc(s.f[i])]; if(!an) continue;
+      for(const sg of new Set(an.map(a => zsig(a.o)))){
+        sc.set(sg, (sc.get(sg) || 0) + 1);
+        let m = pair.get(sg); if(!m){ m = new Map(); pair.set(sg, m); }
+        m.set(tg[i], (m.get(tg[i]) || 0) + 1);
+      }
+    }
+  }
+  const rows = new Map();
+  for(const [sg, m] of pair) rows.set(sg, [...m].sort((a, b) => b[1] - a[1]).slice(0, 12));
+  return {Z, sc, rows, min};
+}
+// w için Zemberek kaynaklı adaylar: [[tag, oran, lemma]], orana göre azalan. loo: eğitimde belirtecin kendi etiketi
+export function zemCands(zm, w, loo = null){
+  const out = new Map();
+  for(const a of zm.Z[w] || []){
+    const sg = zsig(a.o), base = (zm.sc.get(sg) || 0) - (loo ? 1 : 0), rows = zm.rows.get(sg);
+    if(!rows || base <= 0) continue;
+    const got = [];
+    for(const [g, c] of rows){ const cc = c - (loo === g ? 1 : 0); if(cc > 0 && cc / base >= zm.min) got.push([g, cc / base]); }
+    got.sort((x, y) => y[1] - x[1]);
+    for(const [g, r] of got.slice(0, 3)){ const o = out.get(g); if(!o || r > o[1]) out.set(g, [g, r, o ? o[2] : zLemma({lemma:a.l, oflazer:a.o})]); }
+  }
+  return [...out.values()].sort((x, y) => y[1] - x[1]);
 }
 export const lemmaOf = (lex, w, tag) => { const m = lex.lem.get(w + "\t" + tag); return m ? ranked(m, null)[0][0] : null; };
 
@@ -197,23 +234,29 @@ function trainNN(prep, epochs, seed){
 }
 
 // ───────────────────────── eğitim
-export function train(sents, {epochs = 6, seed = 7} = {}){
-  const lex = buildLexicon(sents);
+export function train(sents, {epochs = 6, seed = 7, Z = null} = {}){
+  const lex = buildLexicon(sents), zm = Z ? buildZMap(sents, Z) : null;
   const prep = sents.map(s => {
     const fs = s.f.map(lc), tags = sentTags(s);
-    const c = fs.map((w, i) => { const l = candidates(lex, w, tags[i]).list.map(x => x[0]); if(!l.includes(tags[i])) l.push(tags[i]); return l; });
+    const c = fs.map((w, i) => {
+      const l = candidates(lex, w, tags[i]).list.map(x => x[0]);
+      if(zm) for(const [t] of zemCands(zm, w, tags[i])) if(!l.includes(t)) l.push(t);
+      if(!l.includes(tags[i])) l.push(tags[i]);
+      return l;
+    });
     return {fs, orig:s.f, tags, c};
   });
-  return {lex, dl:trainDL(prep), ap:trainAP(prep, epochs, seed), nn:trainNN(prep, epochs + 2, seed), n:sents.length, tokens:lex.N};
+  return {lex, zm, dl:trainDL(prep), ap:trainAP(prep, epochs, seed), nn:trainNN(prep, epochs + 2, seed), n:sents.length, tokens:lex.N};
 }
 
 // ───────────────────────── tahmin: her yöntem kendi önceki etiketini kullanarak soldan sağa
 export function analyze(model, forms){
-  const {lex, dl, ap, nn} = model, fs = forms.map(lc), out = [];
+  const {lex, zm, dl, ap, nn} = model, fs = forms.map(lc), out = [];
   const path = {dl:["<S>", "<S>"], ap:["<S>", "<S>"], nn:["<S>", "<S>"]};
   for(let i = 0; i < forms.length; i++){
-    const r = candidates(lex, fs[i]), C = r.list.map(x => x[0]);
-    const tok = {w:forms[i], known:r.known, cands:r.list.map(([t, n]) => ({tag:t, n, lemma:lemmaOf(lex, fs[i], t)})), base:C[0]};
+    const r = candidates(lex, fs[i]), C = r.list.map(x => x[0]), zl = new Map(), zadd = new Set();
+    if(zm) for(const [t, , lem] of zemCands(zm, fs[i])){ zl.set(t, lem); if(!C.includes(t)){ C.push(t); r.list.push([t, 0]); zadd.add(t); } }
+    const tok = {w:forms[i], known:r.known, cands:r.list.map(([t, n]) => ({tag:t, n, lemma:lemmaOf(lex, fs[i], t) || zl.get(t) || null, z:zadd.has(t)})), base:C[0]};
     const fd = feats(fs, forms, i, path.dl[1], path.dl[0]), rule = C.length > 1 ? dlPick(dl, fd, C) : null;
     tok.dl = {tag:rule ? rule.t : C[0], rule:rule ? {f:rule.f, score:rule.score, p:rule.p, n:rule.n} : null};
     const fa = feats(fs, forms, i, path.ap[1], path.ap[0]);

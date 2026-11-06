@@ -94,6 +94,26 @@ const cur = () => {
 };
 // ───────────────────────── Zemberek (isteğe bağlı): cümle içi sütun ve toplu karşılaştırma
 const ZE = {avail:null, cache:new Map(), tally:null, busy:0, total:0};
+// Zemberek adayları: açıkken eğitim sözlüğüne ek olarak her sözcüğün Zemberek çözümlemeleri öğrenilmiş bir eşlemeyle BOUN etiketlerine çevrilip aday kümesine eklenir (md.js buildZMap)
+const ZC = {on:false, busy:false, done:0, total:0, Z:{}};
+async function zemFetch(words){
+  const need = [...new Set(words.map(lc))].filter(w => !(w in ZC.Z));
+  for(let i = 0; i < need.length; i += 100){
+    const j = await api("/api/zemberek", {ws:need.slice(i, i + 100).join("\t")});
+    Object.assign(ZC.Z, j.words || {});
+    ZC.done = Math.min(need.length, i + 100); $("#dmZem", root).innerHTML = zemHTML();
+  }
+}
+async function toggleZC(on){
+  if(ZC.busy) return;
+  ZC.busy = true; ZC.total = on ? new Set(C.sents.flatMap(s => s.f.map(lc))).size : 0; ZC.done = 0; $("#dmZem", root).innerHTML = zemHTML();
+  try{
+    if(on){ await zemFetch(C.sents.flatMap(s => s.f)); await new Promise(r => setTimeout(r, 20)); M = train(SP.train, {Z:ZC.Z}); }
+    else M = train(SP.train);
+    R = evaluate(M, SP.test); ZC.on = on; ZE.tally = null;
+  }catch(e){ ZC.on = false; M = train(SP.train); R = evaluate(M, SP.test); }
+  ZC.busy = false; renderAll();
+}
 async function zemAvail(){
   if(ZE.avail === null){ try{ ZE.avail = !!(await api("/api/zemberek", {})).available; }catch(_){ ZE.avail = false; } }
   return ZE.avail;
@@ -109,6 +129,7 @@ async function loadZ(){
   const S = cur();
   if(!S.forms.length || !(await zemAvail())) return;
   const key = S.forms.join(" ");
+  if(ZC.on && !ZC.busy && S.forms.some(w => !(lc(w) in ZC.Z))){ try{ await zemFetch(S.forms); }catch(_){} if(cur().forms.join(" ") === key) $("#dmSent", root).innerHTML = sentHTML(); }
   if(ZE.cache.has(key)) return;
   try{ await zemWords(S.forms); }catch(_){ return; }
   if(cur().forms.join(" ") === key) $("#dmSent", root).innerHTML = sentHTML();
@@ -117,12 +138,13 @@ function zemHTML(){
   if(ZE.avail === false) return `<p class="muted">Zemberek bulunamadı (lib/zemberek-full.jar ve bir JDK gerekir); karşılaştırma yapılamıyor.</p>`;
   if(ZE.avail === null) return "";
   const T = ZE.tally, busy = ZE.busy > 0;
+  const zc = `<label class="chk" style="display:flex;gap:8px;align-items:center;margin:0 0 8px"><input type="checkbox" id="dmZc" ${ZC.on ? "checked" : ""} ${ZC.busy ? "disabled" : ""}> Aday kümesine Zemberek çözümlemelerini ekle <small class="muted">${ZC.busy ? `çekiliyor ve eğitiliyor… ${ZC.done} / ${ZC.total}` : ZC.on ? "açık: tavan yukarıdaki istatistiklerde" : "tavanı yükseltir; eğitim ve sınama yeniden hesaplanır"}</small></label>`;
   const btn = `<button class="btn sm" data-zem="run" ${busy ? "disabled" : ""}>${busy ? `ölçülüyor… ${ZE.busy} / ${ZE.total}` : T ? "Yeniden ölç" : "Zemberek ile karşılaştır"}</button>`;
-  if(!T) return `<div class="ng-ctl">${btn}<span class="muted" style="font-size:.88rem">Sınama cümlelerinin tümü Zemberek'e gönderilir (birkaç saniye).</span></div>`;
+  if(!T) return `${zc}<div class="ng-ctl">${btn}<span class="muted" style="font-size:.88rem">Sınama cümlelerinin tümü Zemberek'e gönderilir (birkaç saniye).</span></div>`;
   const rows = [["zem", "Zemberek: cümle bağlamında seçim"], ["zemAny", "Zemberek: aday kümesinde var (tavan)"], ["base", NAME.base], ["dl", NAME.dl], ["ap", NAME.ap], ["nn", NAME.nn]];
   const pc = (a, n) => (100 * a / n).toFixed(1);
   const best = k => Math.max(...["zem", "base", "dl", "ap", "nn"].map(r => T.rows[r][k]));
-  return `<div class="ng-ctl">${btn}</div><div class="ng-scroll" role="region" tabindex="0" aria-label="Zemberek karşılaştırma tablosu, yatay kaydırılabilir"><table class="ng-tbl ng-cmp"><caption>Zemberek karşılaştırması (%): ${num(T.n)} sözcük, ${T.sents} cümle${T.skipped ? `; ${T.skipped} cümle tokenlaştırma farkı yüzünden atlandı` : ""}. Noktalama sayılmaz.</caption>
+  return `${zc}<div class="ng-ctl">${btn}</div><div class="ng-scroll" role="region" tabindex="0" aria-label="Zemberek karşılaştırma tablosu, yatay kaydırılabilir"><table class="ng-tbl ng-cmp"><caption>Zemberek karşılaştırması (%): ${num(T.n)} sözcük, ${T.sents} cümle${T.skipped ? `; ${T.skipped} cümle tokenlaştırma farkı yüzünden atlandı` : ""}. Noktalama sayılmaz.</caption>
     <thead><tr><th>Yöntem</th><th title="Seçilen çözümlemenin kökü BOUN lemmasıyla aynı">Kök</th><th title="Eşlenen sözcük türü BOUN UPOS'uyla aynı">Sözcük türü (UPOS)</th><th>İkisi birden</th></tr></thead>
     <tbody>${rows.map(([r, label]) => `<tr><td>${esc(label)}</td>${["l", "u", "b"].map(k => `<td class="${r !== "zemAny" && T.rows[r][k] === best(k) ? "best" : ""}">${pc(T.rows[r][k], T.n)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
     <p class="ng-formula stu" style="margin:6px 0 0">Zemberek BOUN'la eğitilmedi ve etiket kümesi UD değil: UPOS eşlemesi <code>zmap.js</code>'te ve bana ait (örn. da/de için Zemberek bağlaç, BOUN parçacık; ad / özel ad ayrımı). Bizim yöntemlerin kökü yalnızca eğitimde görülen sözcüklerde bulunur; Zemberek gerçek çözümleyici olduğu için aday kümesi eğitim verisine bağlı değildir.</p>`;
@@ -144,7 +166,7 @@ async function runZem(){
 function candHTML(t, k, gold){
   const tot = t.cands.reduce((a, c) => a + c.n, 0);
   const badges = tag => [tag === t.base ? "taban" : "", tag === t.dl.tag ? "karar listesi" : "", tag === t.ap.tag ? "perceptron" : "", tag === t.nn.tag ? "sinir ağı" : "", tag === gold ? "doğru" : ""].filter(Boolean).map(b => `<span class="dm-b${b === "doğru" ? " g" : ""}">${b}</span>`).join("");
-  const rows = t.cands.slice(0, 8).map(c => `<div class="dm-c"><div>${tagHTML(c.tag)} ${badges(c.tag)}${c.lemma ? ` <span class="muted">kök: ${esc(c.lemma)}</span>` : ""}<small class="stu muted" style="display:block">${esc(glossOf(c.tag))}</small></div>${meter(c.n / tot)}<span class="muted">${c.n}</span></div>`).join("");
+  const rows = t.cands.slice(0, 8).map(c => `<div class="dm-c"><div>${tagHTML(c.tag)} ${badges(c.tag)}${c.z ? ` <span class="dm-b" title="Bu aday eğitim sözlüğünden değil, Zemberek çözümlemesinden öğrenilmiş eşlemeyle geldi">Zemberek</span>` : ""}${c.lemma ? ` <span class="muted">kök: ${esc(c.lemma)}</span>` : ""}<small class="stu muted" style="display:block">${esc(glossOf(c.tag))}</small></div>${meter(c.n / tot)}<span class="muted">${c.n}</span></div>`).join("");
   const more = t.cands.length > 8 ? `<p class="muted" style="margin:4px 0 0">+ ${t.cands.length - 8} aday daha</p>` : "";
   const why = [];
   if(t.cands.length > 1){
@@ -288,6 +310,7 @@ function mount(){
     if(e.target.id === "dmText"){ DM.text = e.target.value; DM.open = []; clearTimeout(t); t = setTimeout(renderSent, 200); }
     else if(e.target.id === "dmWord"){ DM.word = e.target.value; clearTimeout(t); t = setTimeout(() => { $("#dmWordOut", root).innerHTML = wordHTML(); $$("#dmBad .chip", root).forEach(c => c.setAttribute("aria-pressed", c.dataset.bad === lc(DM.word.trim()))); save(); }, 200); }
   });
+  root.addEventListener("change", e => { if(e.target.id === "dmZc") toggleZC(e.target.checked); });
   root.addEventListener("click", e => {
     if(!M) return;
     const g = e.target.closest("[data-go]"); if(g){ e.preventDefault(); setView(g.dataset.go); return; }
