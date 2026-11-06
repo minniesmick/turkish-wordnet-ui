@@ -20,6 +20,7 @@ import "./embedding.js";
 import "./rnnlab.js";
 import "./attention.js";
 import "./evallab.js";
+import "./tablab.js";
 import "./exportfig.js";
 import "./learn.js";
 

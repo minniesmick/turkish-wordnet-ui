@@ -923,3 +923,7 @@ mark.dm-w{padding:0 4px;border-radius:var(--r-sm);background:var(--wash-2);color
 .ev-cell{width:64px}
 .ev-steps{margin:8px 0 0;padding-left:18px;line-height:1.7}
 .ev-steps li{margin:2px 0}
+
+/* tablo verisi sekmesi */
+pre.ck-code{margin:8px 0;padding:12px 14px;background:var(--sunk);border:1px solid var(--rule);border-radius:var(--r);font:500 .8rem/1.55 var(--font-mono);overflow-x:auto;white-space:pre}
+.tab-loss{width:100%;max-width:640px;height:auto;color:var(--ink-3)}

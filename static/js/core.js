@@ -103,13 +103,13 @@ export const VIEW_GROUPS = [
   {label:"Lecture 3", views:["parse","deps"]},
   {label:"Lecture 5", views:["corpus","ngram"]},
   {label:"Sınıflandırma", views:["eval"]},
-  {label:"Lecture 6 · Derin öğrenme", views:["nn","tok","emb","rnn","attn"]},
+  {label:"Lecture 6 · Derin öğrenme", views:["nn","tab","tok","emb","rnn","attn"]},
   {label:"Ders", views:["learn"]}
 ];
 export const VIEWS = VIEW_GROUPS.flatMap(group => group.views);
-export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", morph:"Morfoloji", disamb:"Belirsizlik", parse:"Ayrıştırma", deps:"Bağımlılık", corpus:"Korpus", ngram:"N-gram", nn:"Sinir ağı", tok:"Metin temsili", emb:"Embedding", rnn:"RNN", attn:"Attention", eval:"Değerlendirme", learn:"Ders"};
-export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"target", roles:"tag", frames:"frame", morph:"morph", disamb:"fork", parse:"tree", deps:"deps", corpus:"corpus", ngram:"list", nn:"nn", tok:"list", emb:"emb", rnn:"rnn", attn:"attn", eval:"eval", learn:"book"};
-export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", morph:"m", disamb:"z", parse:"c", deps:"k", corpus:"o", ngram:"n", nn:"i", tok:"x", emb:"e", rnn:"y", attn:"a", eval:"v", learn:"d"};
+export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", morph:"Morfoloji", disamb:"Belirsizlik", parse:"Ayrıştırma", deps:"Bağımlılık", corpus:"Korpus", ngram:"N-gram", nn:"Sinir ağı", tok:"Metin temsili", emb:"Embedding", rnn:"RNN", attn:"Attention", tab:"Tablo verisi", eval:"Değerlendirme", learn:"Ders"};
+export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"target", roles:"tag", frames:"frame", morph:"morph", disamb:"fork", parse:"tree", deps:"deps", corpus:"corpus", ngram:"list", nn:"nn", tok:"list", emb:"emb", rnn:"rnn", attn:"attn", tab:"corpus", eval:"eval", learn:"book"};
+export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", morph:"m", disamb:"z", parse:"c", deps:"k", corpus:"o", ngram:"n", nn:"i", tok:"x", emb:"e", rnn:"y", attn:"a", tab:"j", eval:"v", learn:"d"};
 export const DS_VIEWS = ["search","graph","relate","wsd"];
 
 // Kullanım kipi: "Araç" (client) yalnızca sonuçları verir; "Öğrenci" ders bağlantılarını, formülleri, adım adım açıklamayı, alıştırma ve sınavı da açar.

@@ -99,6 +99,12 @@ export function lossCE(pred, target) {
   for (let i = 0; i < pred.length; i++) s -= target[i] * Math.log(Math.max(pred[i], 1e-15));
   return s;
 }
+// İkili çapraz entropi (BCE): tek sigmoid çıktı, hedef 0 ya da 1
+export function lossBCE(pred, target) {
+  let s = 0;
+  for (let i = 0; i < pred.length; i++) s -= target[i] * Math.log(Math.max(pred[i], 1e-15)) + (1 - target[i]) * Math.log(Math.max(1 - pred[i], 1e-15));
+  return s / pred.length;
+}
 // softmax + CE birleşik gradyanı: pred (softmax sonrası) - target
 export function lossCESoftmaxGrad(pred, target) {
   return pred.map((p, i) => p - target[i]);
@@ -167,7 +173,10 @@ export function backward(network, activations, zs, target, loss = "mse") {
   // Çıktı katmanı gradyanı
   let delta;
   const lastLayer = network[n - 1];
-  if (lastLayer.act === "softmax" && loss === "ce") {
+  if (lastLayer.act === "sigmoid" && loss === "bce") {
+    // sigmoid + BCE: türevler sadeleşir, delta = pred - target (PyTorch BCELoss ile sigmoid birlikte)
+    delta = new Float64Array(pred.map((p, i) => p - tgt[i]));
+  } else if (lastLayer.act === "softmax" && loss === "ce") {
     // softmax + CE: delta = pred - target
     delta = new Float64Array(lossCESoftmaxGrad(pred, tgt));
   } else {
@@ -365,6 +374,9 @@ export function predictGrid(network, resolution = 40) {
   return pts;
 }
 
+// kayıp türüne göre kayıp değeri (mse, ce, bce)
+export function lossOf(type, pred, target) { return type === "ce" ? lossCE(pred, target) : type === "bce" ? lossBCE(pred, target) : lossMSE(pred, target); }
+
 // ─────────────────────────── sayısal gradyan (test/doğrulama için)
 export function numericalGrad(network, x, target, lossType, eps = 1e-5) {
   const nGrads = network.map(l => ({
@@ -382,8 +394,8 @@ export function numericalGrad(network, x, target, lossType, eps = 1e-5) {
       const { activations: a2 } = forward(network, x);
       const p2 = [...a2[a2.length - 1]];
       network[l].W.data[i] = orig;
-      const L1 = lossType === "ce" ? lossCE(p1, target) : lossMSE(p1, target);
-      const L2 = lossType === "ce" ? lossCE(p2, target) : lossMSE(p2, target);
+      const L1 = lossOf(lossType, p1, target);
+      const L2 = lossOf(lossType, p2, target);
       nGrads[l].dW.data[i] = (L1 - L2) / (2 * eps);
     }
     // b için
@@ -396,8 +408,8 @@ export function numericalGrad(network, x, target, lossType, eps = 1e-5) {
       const { activations: a2 } = forward(network, x);
       const p2 = [...a2[a2.length - 1]];
       network[l].b[j] = orig;
-      const L1 = lossType === "ce" ? lossCE(p1, target) : lossMSE(p1, target);
-      const L2 = lossType === "ce" ? lossCE(p2, target) : lossMSE(p2, target);
+      const L1 = lossOf(lossType, p1, target);
+      const L2 = lossOf(lossType, p2, target);
       nGrads[l].db[j] = (L1 - L2) / (2 * eps);
     }
   }

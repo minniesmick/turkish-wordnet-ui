@@ -111,3 +111,6 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 - [-] HMM ve Viterbi ile POS etiketleme: 2024 ve 2025 vizelerinde var ama bu sene işlenmedi (kullanıcı 2026-11-06), yapılmayacak.
 - [ ] WordNet anlamsal uzaklık (2022, hiponim ağacından Sem(x, y); formül soruda verilmişti): Benzerlik sekmesinde yok, düşük öncelik.
 - [x] Vize kapsamı: HMM ve POS işlenmedi; hoca işlenmeyen konuları sormayacağını söyledi.
+
+## Haftalık ders: Colab-1 (vize kapsamı dışı, Güz 2026)
+- [x] Tablo verisi sekmesi: Colab-1 not defterlerinin (ikili sınıflandırma BCE + sigmoid, çok sınıflı CE + softmax, regresyon MSE) tarayıcı karşılığı; veri `static/colab1/*.csv`, çekirdek `tabnn.js`; BCE kaybı `nn.js`'e eklendi. Not defteri ayarlarıyla ikili görevde SGD lr 0,01 + 40 epoch neredeyse hiç öğrenmez (kayıp 0,694 → 0,691, accuracy ≈ 0,54); Adam ile 0,785. PyTorch'la birebir aynı sayı çıkmaz (başlatma ve bölme rastgeleliği).
