@@ -11,3 +11,6 @@ lib/
 # arayüz inceleme ekran görüntüleri (yerel, repoya girmez)
 docs/ui-review/before/
 docs/ui-review/after/
+
+# ders materyalleri (slaytlar, sınavlar, not defterleri): yerelde durur, repoya girmez
+course/
