@@ -46,6 +46,17 @@ P -> with [0.6]`},
 A -> B A | a
 B -> C C | b
 C -> A B | a`},
+  vize2025: {stu:true, label:"Vize 2025 · CKY (the old man saw the dog)", sent:"the old man saw the dog", ex:["the man saw the dog", "the cat liked the young dog"], grammar:
+`S -> NP VP | VP
+NP -> Det N | Det AdjN | N | NP PP
+AdjN -> Adj N
+VP -> V NP | V PP | V NP PP
+PP -> P NP
+Det -> the | a
+N -> cat | dog | man
+Adj -> old | young
+V -> saw | liked
+P -> with | near`},
   pp: {label:"Örnek · PP bağlanması", sent:"kids saw birds with binoculars", ex:["kids saw birds with fish"], grammar:
 `S -> NP VP
 NP -> N | NP PP
