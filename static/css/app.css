@@ -927,3 +927,8 @@ mark.dm-w{padding:0 4px;border-radius:var(--r-sm);background:var(--wash-2);color
 /* tablo verisi sekmesi */
 pre.ck-code{margin:8px 0;padding:12px 14px;background:var(--sunk);border:1px solid var(--rule);border-radius:var(--r);font:500 .8rem/1.55 var(--font-mono);overflow-x:auto;white-space:pre}
 .tab-loss{width:100%;max-width:640px;height:auto;color:var(--ink-3)}
+
+/* bigram tablosu alıştırması */
+.nf-tbl input{width:64px;height:30px;padding:0 6px;border:1px solid var(--rule-2);border-radius:var(--r);background:var(--page);color:var(--ink);font:500 .85rem var(--font-mono);text-align:center}
+.nf-tbl td.nf-ok input{border:2px solid var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--page))}
+.nf-tbl td.nf-bad input{border:2px solid var(--bad);background:color-mix(in srgb,var(--bad) 10%,var(--page))}

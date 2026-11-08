@@ -7,6 +7,7 @@ import {loadCorpus, tokensOf, CORPORA} from "./corpusdata.js";
 const PRESETS = {
   slayt: {stu:true, label:"Slayt 24 · I am Sam", text:"I am Sam\nSam I am\nI fly", n:2, pred:"I", sent:"I am Sam", extra:["I am fly", "Sam fly"]},
   inclass5: {stu:true, label:"InClass 5", text:"the dog barks\nthe cat laughs\nthe cat saw the dog\nthe\ncat the dog the\ncat cat cat", n:2, pred:"the cat", sent:"the cat laughs", extra:["the cat saw the dog", "the cat barks"]},
+  vize2022: {stu:true, label:"Vize 2022 · MEF", text:"MEF Comp Engr Univ\nComp Engr MEF MEF\nDept MEF Comp Engr\nUniv MEF Engr Comp\nMEF Maslak Comp Istanbul\nComp Engr MEF Istanbul", n:2, pred:"MEF", sent:"MEF Comp Engr Univ MEF Istanbul", extra:["MEF Engr Comp Engr Univ MEF"]},
   tr: {label:"Türkçe örnek", text:"bu çocuk bugün okula gidecek\nbu çocuk yarın okula gidecek\no çocuk bugün eve gidecek\nbu kız bugün okula gitmedi", n:2, pred:"bu çocuk", sent:"bu çocuk bugün okula gidecek", extra:["bu çocuk yarın eve gidecek"]}
 };
 const NG = {src:"text", limit:5000, text:PRESETS.slayt.text, n:2, lower:false, smooth:"none", unk:0, alpha:.4, lam:{}, D:.75, pred:PRESETS.slayt.pred, sent:PRESETS.slayt.sent, hist:"", preset:"slayt", pk:2, pmin:3, pw:""};
@@ -294,11 +295,51 @@ function renderAll(){
 }
 const renderPred = () => { if(M){ $("#ngPredOut", root).innerHTML = predHTML(); save(); } };
 const renderSent = () => { if(M){ $("#ngSentOut", root).innerHTML = sentHTML(); save(); } };
+// ───────────────────────── bigram tablosunu kendin doldur (öğrenci kipi): satır = önceki sözcük, sütun = sonraki sözcük
+const NF = {ans:{}, chk:false, sig:""};
+const parseFill = t => { t = String(t ?? "").trim().replace(",", "."); if(!t) return 0; const m = t.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/); if(m) return +m[2] ? +m[1] / +m[2] : NaN; return /^\d*\.?\d+$/.test(t) ? +t : NaN; };
+function fillHTML(){
+  if(!M) return "";
+  const sig = srcKey() + "|" + NG.n + "|" + NG.smooth;
+  if(NF.sig !== sig){ NF.sig = sig; NF.ans = {}; NF.chk = false; }
+  if(NG.src !== "text" || M.n !== 2 || NG.smooth !== "none" || M.V > 12) return '<div class="notice">Bu alıştırma elle yazılan küçük bir korpusta (en çok 12 sözcük türü), <b>bigram</b> ve yumuşatma <b>Yok</b> iken çalışır. Üstten "Vize 2022 · MEF" örneğini seç.</div>';
+  const rows = [BOS, ...M.words], cols = M.cols, cfgN = {smooth:"none"};
+  const exp = (i, j) => prob(M, [rows[i]], cols[j], cfgN);
+  let ok = 0, bad = 0, sums = [];
+  const body = rows.map((r, i) => {
+    let sum = 0;
+    const cells = cols.map((c, j) => {
+      const key = i + "," + j, e = exp(i, j), raw = NF.ans[key] ?? "", v = parseFill(raw);
+      sum += Number.isFinite(v) ? v : 0;
+      let cls = "";
+      if(NF.chk){ const right = Number.isFinite(v) && Math.abs(v - e.p) < (raw.includes("/") ? 1e-9 : 0.0006); if(right){ ok++; cls = raw.trim() ? "ok" : ""; } else { bad++; cls = "bad"; } }
+      return `<td class="nf-${cls}"><input data-nf="${key}" value="${esc(raw)}" aria-label="${esc(r)} ardından ${esc(c)}" autocomplete="off" spellcheck="false"></td>`;
+    }).join("");
+    sums.push(sum);
+    return `<tr><th scope="row">${T(r)}</th>${cells}<td class="muted">${NF.chk ? f4(sum) : ""}</td></tr>`;
+  }).join("");
+  const verdict = NF.chk ? `<p class="verdict" style="font-size:1.05rem">${bad ? `${bad} hücre yanlış ya da eksik` : '<span class="ng-ok">Tüm hücreler doğru ✓</span>'} <small class="muted">(boş hücre = 0; her satırın toplamı 1 olmalı)</small></p>` : "";
+  return `<p class="ck-meta">Satır: <b>ilk sözcük</b>, sütun: <b>ondan sonra gelen</b>. Hücre: P(sütun | satır) = (ikilinin sayısı) / (satırdaki sözcüğün sayısı). Kesir (2/7) ya da ondalık yazabilirsin; boş bırakırsan 0 sayılır. <code>&lt;s&gt;</code> satırının paydası cümle sayısı.</p>
+    <div class="ng-scroll" role="region" tabindex="0" aria-label="Bigram tablosu alıştırması"><table class="ng-tbl nf-tbl"><tr><th>ilk ↓ sonra →</th>${cols.map(c => `<th>${T(c)}</th>`).join("")}<th>Σ</th></tr>${body}</table></div>
+    <div class="ck-tool"><button class="btn sm" data-nfa="chk">Kontrol et</button><button class="btn sm ghost" data-nfa="hint">İpucu: bir hücreyi doldur</button><button class="btn sm ghost" data-nfa="show">Doğru tabloyu göster</button><button class="btn sm ghost" data-nfa="clr">Temizle</button></div>${verdict}`;
+}
+const f4 = x => String(+x.toFixed(4));
+function fillAct(a){
+  const rows = [BOS, ...M.words], cols = M.cols, e = (i, j) => prob(M, [rows[i]], cols[j], {smooth:"none"});
+  const wrong = () => { for(let i = 0; i < rows.length; i++) for(let j = 0; j < cols.length; j++){ const v = parseFill(NF.ans[i + "," + j]), r = e(i, j); if(!(Number.isFinite(v) && Math.abs(v - r.p) < (String(NF.ans[i + "," + j] ?? "").includes("/") ? 1e-9 : 0.0006))) return [i, j, r]; } return null; };
+  const show = (i, j, r) => { NF.ans[i + "," + j] = r.p === 0 ? "0" : `${r.num}/${r.den}`; };
+  if(a === "chk") NF.chk = true;
+  else if(a === "clr"){ NF.ans = {}; NF.chk = false; }
+  else if(a === "hint"){ const w = wrong(); if(w) show(...w); NF.chk = true; }
+  else if(a === "show"){ rows.forEach((_, i) => cols.forEach((_, j) => show(i, j, e(i, j)))); NF.chk = true; }
+  $("#ngFill", root).innerHTML = fillHTML();
+}
 function renderMore(){
   $("#ngGen", root).innerHTML = genHTML();
   $("#ngCmp", root).innerHTML = cmpHTML();
   $("#ngPmi", root).innerHTML = pmiHTML();
   renderNQ();
+  $("#ngFill", root).innerHTML = fillHTML();
 }
 function renderTablesOnly(){ if(!M) return; $("#ngTables", root).innerHTML = tablesHTML(); renderPred(); renderSent(); $("#ngStats", root).innerHTML = statsHTML(); save(); }
 function ex(kind){
@@ -369,6 +410,7 @@ function mount(){
     <div id="ngCmp"></div>
     <h2 class="ng-h" id="ngSecPmi" tabindex="-1">7 · PMI <small>birlikte geçiş</small></h2>
     <div id="ngPmi"></div>
+    <div class="stu"><h2 class="ng-h" id="ngSecFill" tabindex="-1">9 · Bigram tablosunu kendin doldur <small>vize 2022, soru 1</small></h2><div id="ngFill"></div></div>
     <div class="stu"><h2 class="ng-h" id="ngSecQuiz" tabindex="-1">8 · Kendin hesapla <small>önce sen, sonra kontrol</small></h2><div id="ngQuiz"></div></div>
     <div style="height:56px"></div></div>`;
   const text = $("#ngText", root);
@@ -382,6 +424,8 @@ function mount(){
   $("#ngSize", root).addEventListener("change", e => { NG.limit = +e.target.value; refresh(); });
   $("#ngDIn", root).addEventListener("input", e => { NG.D = Math.min(.95, Math.max(.05, +e.target.value || .75)); later(() => { renderAll(); }); });
   $("#ngAlphaIn", root).addEventListener("input", e => { NG.alpha = Math.min(1, Math.max(0, +e.target.value)); later(() => { renderAll(); }); });
+  root.addEventListener("input", e => { const k = e.target.dataset?.nf; if(k !== undefined) NF.ans[k] = e.target.value; });
+  root.addEventListener("click", e => { const b = e.target.closest("[data-nfa]"); if(b) fillAct(b.dataset.nfa); });
   $("#ngRegen", root).addEventListener("click", () => { $("#ngGen", root).innerHTML = genHTML(); });
   root.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.id === "nqIn") root.querySelector('[data-nq="check"]')?.click(); });
   root.addEventListener("input", e => {
