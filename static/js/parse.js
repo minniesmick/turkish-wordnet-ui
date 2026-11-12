@@ -57,6 +57,18 @@ N -> cat | dog | man
 Adj -> old | young
 V -> saw | liked
 P -> with | near`},
+  vize2024: {stu:true, label:"Vize 2024 · CFG ağacı (that…)", sent:"the man that saw the dog saw the cat", ex:["the man that the cat saw saw the dog", "the man saw the dog"], grammar:
+`S -> NP VP
+NP -> DT NN | NP RELC
+VP -> Vt NP | Vdt NP NP
+RELC -> WH S-GAP
+S-GAP -> VP | NP VP-GAP
+VP-GAP -> Vt | Vdt NP
+WH -> this | that
+DT -> the | a
+NN -> man | dog | cat | park
+Vt -> saw | thought
+Vdt -> gave | brought`},
   pp: {label:"Örnek · PP bağlanması", sent:"kids saw birds with binoculars", ex:["kids saw birds with fish"], grammar:
 `S -> NP VP
 NP -> N | NP PP
