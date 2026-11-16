@@ -932,3 +932,23 @@ pre.ck-code{margin:8px 0;padding:12px 14px;background:var(--sunk);border:1px sol
 .nf-tbl input{width:64px;height:30px;padding:0 6px;border:1px solid var(--rule-2);border-radius:var(--r);background:var(--page);color:var(--ink);font:500 .85rem var(--font-mono);text-align:center}
 .nf-tbl td.nf-ok input{border:2px solid var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--page))}
 .nf-tbl td.nf-bad input{border:2px solid var(--bad);background:color-mix(in srgb,var(--bad) 10%,var(--page))}
+
+/* Proje 1 · Metot sekmesi */
+.mt-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:8px 32px;align-items:start}
+.mt-grp{margin:0 0 14px}.mt-grp h4,.mt-two>div>h4{margin:0 0 6px;font:650 .78rem var(--font-ui);color:var(--ink-3);letter-spacing:.02em}
+.mt-row{display:grid;grid-template-columns:150px 1fr 48px;gap:10px;align-items:center;margin:5px 0;font-size:.88rem}
+.mt-row b{text-align:right;font-variant-numeric:tabular-nums}
+.mt-track{height:12px;background:var(--sunk);border-radius:3px;overflow:hidden}.mt-track i{display:block;height:100%;border-radius:3px;transition:width .6s var(--ease)}
+.mt-flow,.mt-stack{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:0;max-width:640px}
+.mt-flow li,.mt-stack li{display:grid;grid-template-columns:84px 1fr;gap:2px 14px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--rule)}
+.mt-flow li:last-child,.mt-stack li:last-child{border-bottom:0}
+.mt-flow li b{font:700 1.25rem var(--font-ui);font-variant-numeric:tabular-nums;text-align:right}
+.mt-flow li small,.mt-stack li small{grid-column:2;color:var(--ink-3)}
+.mt-stack li{grid-template-columns:1fr}.mt-stack li span{font-weight:650}.mt-stack li small{grid-column:1}
+.mt-ul{margin:8px 0;padding-left:20px;max-width:75ch}.mt-ul li{margin:6px 0}
+.mt-tokrow{margin:0 0 16px}.mt-th{display:flex;gap:12px;align-items:baseline;margin-bottom:5px}.mt-th .num{color:var(--ink-3);font-size:.82rem;font-variant-numeric:tabular-nums}
+.mt-toks{display:flex;flex-wrap:wrap;gap:2px;font:.8rem/1.2 var(--font-mono)}
+.mt-tk{padding:4px 5px;border-radius:3px;white-space:pre}.mt-tk.ws{margin-left:5px}.mt-tk.sp{border:1px dashed var(--rule-2);color:var(--ink-3)}
+.mt-tk.c0{background:color-mix(in srgb,var(--k) 18%,var(--page))}.mt-tk.c1{background:color-mix(in srgb,var(--k) 34%,var(--page))}
+.mt-chart{width:100%;height:auto;color:var(--ink-3);overflow:visible}
+@media (prefers-reduced-motion:reduce){.mt-track i{transition:none}}

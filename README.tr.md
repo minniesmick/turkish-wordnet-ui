@@ -8,6 +8,7 @@
 <a href="https://www.mef.edu.tr/"><img alt="MEF University" src="https://img.shields.io/badge/MEF%20University-COMP%20451-b42318?style=for-the-badge"></a>
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/kod-MIT-2b3bd6?style=for-the-badge"></a>
 <a href="data/README.md"><img alt="Veri lisansları" src="https://img.shields.io/badge/veri-CC%20BY--SA%204.0%20%2B%20di%C4%9Ferleri-6b7280?style=for-the-badge"></a>
+<a href="https://gitdiagram.com/minniesmick/turkish-wordnet-ui?utm_source=readme&amp;utm_medium=badge"><img alt="Architecture diagram" src="https://gitdiagram.com/diagram-badge.svg"></a>
 </p>
 
 > **Ders çalışma için üretilmiştir.** Bu repo, **MEF Üniversitesi COMP 451 – Doğal Dil İşlemeye Giriş** dersi (Güz 2026) için çalışma aracı olarak hazırlandı. Bir öğrenci projesidir; resmî ders materyali değildir ve üniversiteyle bağlantılı değildir.

@@ -8,6 +8,7 @@
 <a href="https://www.mef.edu.tr/"><img alt="MEF University" src="https://img.shields.io/badge/MEF%20University-COMP%20451-b42318?style=for-the-badge"></a>
 <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/code-MIT-2b3bd6?style=for-the-badge"></a>
 <a href="data/README.md"><img alt="Data licenses" src="https://img.shields.io/badge/data-CC%20BY--SA%204.0%20%2B%20others-6b7280?style=for-the-badge"></a>
+<a href="https://gitdiagram.com/minniesmick/turkish-wordnet-ui?utm_source=readme&amp;utm_medium=badge"><img alt="Architecture diagram" src="https://gitdiagram.com/diagram-badge.svg"></a>
 </p>
 
 > **Made for studying.** This repository was built as a study aid for **COMP 451 – Introduction to Natural Language Processing** at **MEF University** (Fall 2026). It is a student project, not official course material, and is not affiliated with the university.

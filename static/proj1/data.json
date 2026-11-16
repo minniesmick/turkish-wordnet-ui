@@ -1,0 +1,3067 @@
+{
+  "task": "tweet sentiment (TweetEval)",
+  "data": {
+    "source": "cardiffnlp/tweet_eval/sentiment",
+    "seed": 42,
+    "pooled_examples": 59899,
+    "duplicates_removed": 29,
+    "dataset1_train_pool": {
+      "size": 59620,
+      "labels": {
+        "negative": 11328,
+        "positive": 20946,
+        "neutral": 27346
+      }
+    },
+    "dataset2_test": {
+      "size": 250,
+      "labels": {
+        "neutral": 115,
+        "negative": 47,
+        "positive": 88
+      }
+    }
+  },
+  "models": [
+    {
+      "key": "model1_char",
+      "tokenizer": "char",
+      "parameters": 1949571,
+      "epochs_run": 12,
+      "best_val_macro_f1": 0.6055,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.9852,
+          "val_loss": 0.9133,
+          "val_accuracy": 0.5677,
+          "val_macro_f1": 0.4804,
+          "seconds": 29.1
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.9121,
+          "val_loss": 0.9025,
+          "val_accuracy": 0.5562,
+          "val_macro_f1": 0.5383,
+          "seconds": 58.1
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.8746,
+          "val_loss": 0.8885,
+          "val_accuracy": 0.5878,
+          "val_macro_f1": 0.5261,
+          "seconds": 87.2
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.8484,
+          "val_loss": 0.8614,
+          "val_accuracy": 0.6004,
+          "val_macro_f1": 0.5615,
+          "seconds": 116.1
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.8194,
+          "val_loss": 0.8543,
+          "val_accuracy": 0.5995,
+          "val_macro_f1": 0.5686,
+          "seconds": 145.5
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.7944,
+          "val_loss": 0.857,
+          "val_accuracy": 0.5884,
+          "val_macro_f1": 0.5761,
+          "seconds": 176.3
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.7693,
+          "val_loss": 0.8344,
+          "val_accuracy": 0.6245,
+          "val_macro_f1": 0.585,
+          "seconds": 205.3
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.7477,
+          "val_loss": 0.8696,
+          "val_accuracy": 0.6048,
+          "val_macro_f1": 0.5823,
+          "seconds": 234.4
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.7288,
+          "val_loss": 0.8305,
+          "val_accuracy": 0.6221,
+          "val_macro_f1": 0.6055,
+          "seconds": 263.5
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.7024,
+          "val_loss": 0.8476,
+          "val_accuracy": 0.6237,
+          "val_macro_f1": 0.5896,
+          "seconds": 294.0
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.6829,
+          "val_loss": 0.8526,
+          "val_accuracy": 0.617,
+          "val_macro_f1": 0.5977,
+          "seconds": 327.7
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.6686,
+          "val_loss": 0.8546,
+          "val_accuracy": 0.6231,
+          "val_macro_f1": 0.6026,
+          "seconds": 360.7
+        }
+      ],
+      "mlm_history": [
+        {
+          "epoch": 1,
+          "mlm_loss": 3.2491
+        },
+        {
+          "epoch": 2,
+          "mlm_loss": 2.6366
+        },
+        {
+          "epoch": 3,
+          "mlm_loss": 1.9214
+        },
+        {
+          "epoch": 4,
+          "mlm_loss": 1.5958
+        },
+        {
+          "epoch": 5,
+          "mlm_loss": 1.4465
+        },
+        {
+          "epoch": 6,
+          "mlm_loss": 1.3349
+        },
+        {
+          "epoch": 7,
+          "mlm_loss": 1.2711
+        },
+        {
+          "epoch": 8,
+          "mlm_loss": 1.2151
+        },
+        {
+          "epoch": 9,
+          "mlm_loss": 1.1765
+        },
+        {
+          "epoch": 10,
+          "mlm_loss": 1.1444
+        },
+        {
+          "epoch": 11,
+          "mlm_loss": 1.1183
+        },
+        {
+          "epoch": 12,
+          "mlm_loss": 1.0929
+        },
+        {
+          "epoch": 13,
+          "mlm_loss": 1.0783
+        },
+        {
+          "epoch": 14,
+          "mlm_loss": 1.0634
+        },
+        {
+          "epoch": 15,
+          "mlm_loss": 1.0553
+        }
+      ],
+      "config": {
+        "vocab_size": 462,
+        "hidden_size": 192,
+        "num_hidden_layers": 4,
+        "num_attention_heads": 4,
+        "intermediate_size": 768,
+        "max_position_embeddings": 224
+      },
+      "lr": 0.0005,
+      "batch_size": 64,
+      "mlm_epochs": 15,
+      "metrics": {
+        "accuracy": 0.636,
+        "macro_precision": 0.6158,
+        "macro_recall": 0.6215,
+        "macro_f1": 0.6178,
+        "weighted_f1": 0.6379,
+        "per_class": {
+          "negative": {
+            "precision": 0.4906,
+            "recall": 0.5532,
+            "f1": 0.52,
+            "support": 47
+          },
+          "neutral": {
+            "precision": 0.6579,
+            "recall": 0.6522,
+            "f1": 0.655,
+            "support": 115
+          },
+          "positive": {
+            "precision": 0.6988,
+            "recall": 0.6591,
+            "f1": 0.6784,
+            "support": 88
+          }
+        },
+        "confusion_matrix": {
+          "rows": "gold",
+          "cols": "pred",
+          "labels": [
+            "negative",
+            "neutral",
+            "positive"
+          ],
+          "matrix": [
+            [
+              26,
+              15,
+              6
+            ],
+            [
+              21,
+              75,
+              19
+            ],
+            [
+              6,
+              24,
+              58
+            ]
+          ]
+        }
+      },
+      "inference_seconds": 0.3
+    },
+    {
+      "key": "model2_bpe",
+      "tokenizer": "bpe",
+      "parameters": 3372291,
+      "epochs_run": 6,
+      "best_val_macro_f1": 0.6634,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.8417,
+          "val_loss": 0.7445,
+          "val_accuracy": 0.6534,
+          "val_macro_f1": 0.6386,
+          "seconds": 18.5
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.6817,
+          "val_loss": 0.7139,
+          "val_accuracy": 0.6747,
+          "val_macro_f1": 0.6634,
+          "seconds": 37.1
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.5841,
+          "val_loss": 0.7497,
+          "val_accuracy": 0.6763,
+          "val_macro_f1": 0.6627,
+          "seconds": 55.7
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.4953,
+          "val_loss": 0.7866,
+          "val_accuracy": 0.6739,
+          "val_macro_f1": 0.658,
+          "seconds": 74.4
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.4045,
+          "val_loss": 0.8675,
+          "val_accuracy": 0.6578,
+          "val_macro_f1": 0.6459,
+          "seconds": 92.9
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.3265,
+          "val_loss": 0.9987,
+          "val_accuracy": 0.6497,
+          "val_macro_f1": 0.6379,
+          "seconds": 111.4
+        }
+      ],
+      "mlm_history": [
+        {
+          "epoch": 1,
+          "mlm_loss": 7.2919
+        },
+        {
+          "epoch": 2,
+          "mlm_loss": 6.3272
+        },
+        {
+          "epoch": 3,
+          "mlm_loss": 5.5322
+        },
+        {
+          "epoch": 4,
+          "mlm_loss": 5.0727
+        },
+        {
+          "epoch": 5,
+          "mlm_loss": 4.8228
+        },
+        {
+          "epoch": 6,
+          "mlm_loss": 4.6643
+        },
+        {
+          "epoch": 7,
+          "mlm_loss": 4.5232
+        },
+        {
+          "epoch": 8,
+          "mlm_loss": 4.402
+        },
+        {
+          "epoch": 9,
+          "mlm_loss": 4.3156
+        },
+        {
+          "epoch": 10,
+          "mlm_loss": 4.2281
+        },
+        {
+          "epoch": 11,
+          "mlm_loss": 4.1653
+        },
+        {
+          "epoch": 12,
+          "mlm_loss": 4.112
+        },
+        {
+          "epoch": 13,
+          "mlm_loss": 4.0737
+        },
+        {
+          "epoch": 14,
+          "mlm_loss": 4.0251
+        },
+        {
+          "epoch": 15,
+          "mlm_loss": 3.9965
+        }
+      ],
+      "config": {
+        "vocab_size": 8000,
+        "hidden_size": 192,
+        "num_hidden_layers": 4,
+        "num_attention_heads": 4,
+        "intermediate_size": 768,
+        "max_position_embeddings": 96
+      },
+      "lr": 0.0005,
+      "batch_size": 64,
+      "mlm_epochs": 15,
+      "metrics": {
+        "accuracy": 0.704,
+        "macro_precision": 0.6925,
+        "macro_recall": 0.713,
+        "macro_f1": 0.7003,
+        "weighted_f1": 0.7047,
+        "per_class": {
+          "negative": {
+            "precision": 0.614,
+            "recall": 0.7447,
+            "f1": 0.6731,
+            "support": 47
+          },
+          "neutral": {
+            "precision": 0.7222,
+            "recall": 0.6783,
+            "f1": 0.6996,
+            "support": 115
+          },
+          "positive": {
+            "precision": 0.7412,
+            "recall": 0.7159,
+            "f1": 0.7283,
+            "support": 88
+          }
+        },
+        "confusion_matrix": {
+          "rows": "gold",
+          "cols": "pred",
+          "labels": [
+            "negative",
+            "neutral",
+            "positive"
+          ],
+          "matrix": [
+            [
+              35,
+              10,
+              2
+            ],
+            [
+              17,
+              78,
+              20
+            ],
+            [
+              5,
+              20,
+              63
+            ]
+          ]
+        }
+      },
+      "inference_seconds": 0.29
+    },
+    {
+      "key": "model3_distilbert",
+      "tokenizer": "wordpiece (distilbert)",
+      "parameters": 66955779,
+      "epochs_run": 3,
+      "best_val_macro_f1": 0.7175,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.6952,
+          "val_loss": 0.6256,
+          "val_accuracy": 0.7143,
+          "val_macro_f1": 0.7086,
+          "seconds": 86.1
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.5266,
+          "val_loss": 0.647,
+          "val_accuracy": 0.7189,
+          "val_macro_f1": 0.7155,
+          "seconds": 175.4
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.4194,
+          "val_loss": 0.6843,
+          "val_accuracy": 0.7229,
+          "val_macro_f1": 0.7175,
+          "seconds": 262.8
+        }
+      ],
+      "mlm_history": [],
+      "config": {
+        "vocab_size": 30522,
+        "hidden_size": null,
+        "num_hidden_layers": null,
+        "num_attention_heads": null,
+        "intermediate_size": null,
+        "max_position_embeddings": 512
+      },
+      "lr": 2e-05,
+      "batch_size": 32,
+      "mlm_epochs": null,
+      "metrics": {
+        "accuracy": 0.708,
+        "macro_precision": 0.6884,
+        "macro_recall": 0.7044,
+        "macro_f1": 0.6948,
+        "weighted_f1": 0.7093,
+        "per_class": {
+          "negative": {
+            "precision": 0.5636,
+            "recall": 0.6596,
+            "f1": 0.6078,
+            "support": 47
+          },
+          "neutral": {
+            "precision": 0.7264,
+            "recall": 0.6696,
+            "f1": 0.6968,
+            "support": 115
+          },
+          "positive": {
+            "precision": 0.7753,
+            "recall": 0.7841,
+            "f1": 0.7797,
+            "support": 88
+          }
+        },
+        "confusion_matrix": {
+          "rows": "gold",
+          "cols": "pred",
+          "labels": [
+            "negative",
+            "neutral",
+            "positive"
+          ],
+          "matrix": [
+            [
+              31,
+              14,
+              2
+            ],
+            [
+              20,
+              77,
+              18
+            ],
+            [
+              4,
+              15,
+              69
+            ]
+          ]
+        }
+      },
+      "inference_seconds": 0.36
+    }
+  ],
+  "examples": [
+    {
+      "text": "Channing tatum will be in white oak tomorrow...for all you stalkers out there",
+      "label": "neutral",
+      "tokens": {
+        "model1_char": [
+          {
+            "t": "[CLS]",
+            "ws": false,
+            "sp": true
+          },
+          {
+            "t": "c",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "g",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "u",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "m",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "w",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "l",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "l",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "b",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "w",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "k",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "m",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "r",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "r",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "w",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ".",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ".",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ".",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "f",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "r",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "l",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "l",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "y",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "u",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "l",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "k",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "r",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "u",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "r",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "[SEP]",
+            "ws": false,
+            "sp": true
+          }
+        ],
+        "model2_bpe": [
+          {
+            "t": "[CLS]",
+            "ws": false,
+            "sp": true
+          },
+          {
+            "t": "chan",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "ning",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "at",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "um",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "will",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "be",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "in",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "white",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "oak",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "tomorrow",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "...",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "for",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "all",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "you",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "st",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "alk",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "ers",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "out",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "there",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "[SEP]",
+            "ws": false,
+            "sp": true
+          }
+        ],
+        "model3_distilbert": [
+          {
+            "t": "[CLS]",
+            "ws": false,
+            "sp": true
+          },
+          {
+            "t": "chan",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##ning",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "tatum",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "will",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "be",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "in",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "white",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "oak",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "tomorrow",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ".",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ".",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ".",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "for",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "all",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "you",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "stalker",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "out",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "there",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "[SEP]",
+            "ws": false,
+            "sp": true
+          }
+        ]
+      }
+    },
+    {
+      "text": "Ahhhh i want this cake 😍 #bestdisneyfilm #taleasoldastime #BeautyAndTheBeast",
+      "label": "positive",
+      "tokens": {
+        "model1_char": [
+          {
+            "t": "[CLS]",
+            "ws": false,
+            "sp": true
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "w",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "c",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "k",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "😍",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "#",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "b",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "d",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "y",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "f",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "l",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "m",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "#",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "l",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "l",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "d",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "m",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "#",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "b",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "u",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "y",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "d",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "b",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "[SEP]",
+            "ws": false,
+            "sp": true
+          }
+        ],
+        "model2_bpe": [
+          {
+            "t": "[CLS]",
+            "ws": false,
+            "sp": true
+          },
+          {
+            "t": "a",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "hhhh",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "want",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "this",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "cake",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "ðŁĺį",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "#",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "best",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "disney",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "fil",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "m",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "#",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "ale",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "as",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "old",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "ast",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "ime",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "#",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "beautyandthebeast",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "[SEP]",
+            "ws": false,
+            "sp": true
+          }
+        ],
+        "model3_distilbert": [
+          {
+            "t": "[CLS]",
+            "ws": false,
+            "sp": true
+          },
+          {
+            "t": "ah",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##hh",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "want",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "this",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "cake",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "[UNK]",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "#",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "best",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##dis",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##ney",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##film",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "#",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "tale",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##as",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##old",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##ast",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##ime",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "#",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "beauty",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##and",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##the",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##be",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "##ast",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "[SEP]",
+            "ws": false,
+            "sp": true
+          }
+        ]
+      }
+    },
+    {
+      "text": "How about this? 6 anti-woman policies Scott Walker may want voters to forget:",
+      "label": "negative",
+      "tokens": {
+        "model1_char": [
+          {
+            "t": "[CLS]",
+            "ws": false,
+            "sp": true
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "w",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "b",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "u",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "?",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "6",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "-",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "w",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "m",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "p",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "l",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "c",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "c",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "w",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "l",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "k",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "r",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "m",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "y",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "w",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "v",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "r",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "f",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "r",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "g",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ":",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "[SEP]",
+            "ws": false,
+            "sp": true
+          }
+        ],
+        "model2_bpe": [
+          {
+            "t": "[CLS]",
+            "ws": false,
+            "sp": true
+          },
+          {
+            "t": "how",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "about",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "this",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "?",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "6",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "anti",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "-",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "wom",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "an",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "polic",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "ies",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "scott",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "walker",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "may",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "want",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "voters",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "to",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "forget",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": ":",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "[SEP]",
+            "ws": false,
+            "sp": true
+          }
+        ],
+        "model3_distilbert": [
+          {
+            "t": "[CLS]",
+            "ws": false,
+            "sp": true
+          },
+          {
+            "t": "how",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "about",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "this",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "?",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "6",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "anti",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "-",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "woman",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "policies",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "scott",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "walker",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "may",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "want",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "voters",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "to",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "forget",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ":",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "[SEP]",
+            "ws": false,
+            "sp": true
+          }
+        ]
+      }
+    },
+    {
+      "text": "Hanging out with the sis tonight :) watching ridiculous amounts of Jersey shore. #best",
+      "label": "positive",
+      "tokens": {
+        "model1_char": [
+          {
+            "t": "[CLS]",
+            "ws": false,
+            "sp": true
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "g",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "g",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "u",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "w",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "g",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ":",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ")",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "w",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "c",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "g",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "r",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "d",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "i",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "c",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "u",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "l",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "u",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "a",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "m",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "u",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "n",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "f",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "j",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "r",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "y",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "h",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "o",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "r",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ".",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": " ",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "#",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "b",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "e",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "t",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "[SEP]",
+            "ws": false,
+            "sp": true
+          }
+        ],
+        "model2_bpe": [
+          {
+            "t": "[CLS]",
+            "ws": false,
+            "sp": true
+          },
+          {
+            "t": "hanging",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "out",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "with",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "the",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "sis",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "tonight",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": ":)",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "watching",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "ridiculous",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "amount",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "s",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "of",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "jersey",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "shore",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": ".",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "#",
+            "ws": true,
+            "sp": false
+          },
+          {
+            "t": "best",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "[SEP]",
+            "ws": false,
+            "sp": true
+          }
+        ],
+        "model3_distilbert": [
+          {
+            "t": "[CLS]",
+            "ws": false,
+            "sp": true
+          },
+          {
+            "t": "hanging",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "out",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "with",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "the",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "sis",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "tonight",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ":",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ")",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "watching",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "ridiculous",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "amounts",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "of",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "jersey",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "shore",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": ".",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "#",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "best",
+            "ws": false,
+            "sp": false
+          },
+          {
+            "t": "[SEP]",
+            "ws": false,
+            "sp": true
+          }
+        ]
+      }
+    }
+  ]
+}
