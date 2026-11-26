@@ -3,6 +3,7 @@
 import {$, $$, esc, registerView, setView, tr as num, toast} from "./core.js";
 import {BOS, EOS, SEP, buildModel, mapWord, padHist, prob, support, sample, seqProb, perplexity, defaultLam, learnLam, tuneD, pmiBuild, topPairs, collocates, similar} from "./lm.js";
 import {loadCorpus, tokensOf, CORPORA} from "./corpusdata.js";
+import {extBtn, isExt, setExt} from "./extra.js";
 
 const PRESETS = {
   slayt: {stu:true, label:"Slayt 24 · I am Sam", text:"I am Sam\nSam I am\nI fly", n:2, pred:"I", sent:"I am Sam", extra:["I am fly", "Sam fly"]},
@@ -21,6 +22,7 @@ const load = () => {
   try{ Object.assign(NG, JSON.parse(localStorage.getItem(KEY)) || {}); }catch(_){}
   if(NG.smooth === true) NG.smooth = "laplace";
   if(!SM[NG.smooth]) NG.smooth = "none";
+  if((NG.smooth === "kn" || NG.smooth === "katz") && !isExt("ngx")) setExt("ngx", true);   // kayıtlı seçim ek yöntemse ek bölüm açık başlar
   if(!["text", "boun", "brown"].includes(NG.src)) NG.src = "text";
   if(!NG.lam || typeof NG.lam !== "object") NG.lam = {};
 };
@@ -77,7 +79,7 @@ function statsHTML(){
   const cell = (a, b) => `<div><b>${a}</b><span>${b}</span></div>`;
   const grams = [...M.orders[M.n].values()].reduce((a, e) => a + e.next.size, 0);
   const p = M.N > 250000 ? null : perplexity(M, S, cfg());
-  return `<div class="ng-stats">${cell(num(M.S), "cümle")}${cell(num(M.N), "sözcük (N)")}${cell(num(M.vocab.size), "sözcük türü")}${cell(num(M.V), "V (tahmin edilen simge)")}${cell(num(grams), M.n === 1 ? "farklı unigram" : "farklı " + M.n + "-gram")}${M.unk ? cell(num(M.unkTypes), "&lt;UNK&gt;'a çevrilen tür") : ""}${cell(p ? ppl(p.ppl) : "—", "eğitim perplexity")}</div>`;
+  return `<div class="ng-stats">${cell(num(M.S), "cümle")}${cell(num(M.N), "sözcük (N)")}${cell(num(M.vocab.size), "sözcük türü")}${cell(num(M.V), "V (tahmin edilen simge)")}${cell(num(grams), M.n === 1 ? "farklı unigram" : "farklı " + M.n + "-gram")}${M.unk ? cell(num(M.unkTypes), "&lt;UNK&gt;'a çevrilen tür") : ""}${cell(p ? ppl(p.ppl) : "—", "eğitim perplexity").replace("<div>", '<div data-ext="ngx">')}</div>`;
 }
 
 // ───────────────────────── sayımlar ve olasılıklar
@@ -150,7 +152,7 @@ function sentHTML(){
     ${r.steps.map((s, i) => `<tr class="${s.p === 0 ? "bad" : ""}"><td>${i + 1}</td><td>${lab(s)}</td><td>${how ? `<small class="muted">${esc(s.how)}</small>` : s.und ? "0/0" : fr(s)}</td><td><b>${dec(s.p)}</b></td><td>${lgs(lg(s.p))}</td><td>${dec(s.prod)}</td></tr>`).join("")}
     <tr class="sum"><td></td><td>Toplam</td><td></td><td><b>${dec(r.prod)}</b></td><td><b>${lgs(r.ls)}</b></td><td></td></tr></table></div>
     <p class="ng-formula stu">${esc(fracs)}</p>
-    <p class="verdict" style="margin-top:10px">Perplexity = ${isFinite(r.ls) ? `2<sup>${(-r.ls).toFixed(3)} / ${r.N}</sup> = ` : ""}<b>${isFinite(r.ppl) ? r.ppl.toFixed(3) : "∞"}</b> <small class="muted stu">(düşük = model cümleyi daha az “şaşırtıcı” buluyor${cf.smooth === "backoff" ? "; backoff puanları normalize değil, perplexity yaklaşık" : ""})</small></p>`;
+    <p class="verdict" data-ext="ngx" style="margin-top:10px">Perplexity = ${isFinite(r.ls) ? `2<sup>${(-r.ls).toFixed(3)} / ${r.N}</sup> = ` : ""}<b>${isFinite(r.ppl) ? r.ppl.toFixed(3) : "∞"}</b> <small class="muted stu">(düşük = model cümleyi daha az “şaşırtıcı” buluyor${cf.smooth === "backoff" ? "; backoff puanları normalize değil, perplexity yaklaşık" : ""})</small></p>`;
 }
 
 // ───────────────────────── rastgele üretim (slayt 28–29)
@@ -279,7 +281,7 @@ function syncControls(){
   $("#ngDIn", root).value = NG.D;
   const li = $("#ngLam", root), showLam = NG.smooth === "interp" && NG.n >= 2;
   li.classList.toggle("hidden", !showLam);
-  if(showLam) li.innerHTML = `<span class="muted" style="font-size:.88rem">λ (birimden ${NG.n}-gram'a):</span>` + lamFor(NG.n).map((v, i) => `<input class="dp-num" data-lam="${i}" type="number" step="0.05" min="0" max="1" value="${v}" aria-label="λ${i + 1}">`).join("") + `<button class="btn sm ghost" data-learn="lam" title="Cümlelerin %80'iyle say, %20'siyle (her 5. cümle) λ'ları EM ile öğren">λ'yı korpustan öğren</button><small class="muted stu">toplam 1'e normalize edilir${NG.learned?.[NG.n] ? ` · öğrenildi: ${NG.learned[NG.n].n} held-out sözcük, ${NG.learned[NG.n].it} tur EM` : ""}</small>`;
+  if(showLam) li.innerHTML = `<span class="muted" style="font-size:.88rem">λ (birimden ${NG.n}-gram'a):</span>` + lamFor(NG.n).map((v, i) => `<input class="dp-num" data-lam="${i}" type="number" step="0.05" min="0" max="1" value="${v}" aria-label="λ${i + 1}">`).join("") + `<button class="btn sm ghost" data-ext="ngx" data-learn="lam" title="Cümlelerin %80'iyle say, %20'siyle (her 5. cümle) λ'ları EM ile öğren">λ'yı korpustan öğren</button><small class="muted stu">toplam 1'e normalize edilir${NG.learned?.[NG.n] ? ` · öğrenildi: ${NG.learned[NG.n].n} held-out sözcük, ${NG.learned[NG.n].it} tur EM` : ""}</small>`;
   $("#ngAlphaIn", root).value = NG.alpha;
 }
 function renderAll(){
@@ -373,7 +375,7 @@ function mount(){
     <p class="lesson-intro" style="margin:0">Bir korpustan sözcük dizilerinin olasılığını hesapla: sayımlar, koşullu olasılık, yumuşatma (Laplace, backoff, interpolation), bilinmeyen sözcük (UNK), cümle olasılığı, perplexity, rastgele cümle üretimi ve PMI.<span class="stu"> Slayt 17–39, InClass 5.</span></p>
     <details class="section-index"><summary>Bu görünümde</summary><nav aria-label="N-gram bölümleri">
       <a href="#ngSecCorpus">Korpus</a><a href="#ngSecCounts">Sayımlar</a><a href="#ngSecNext">Sonraki sözcük</a>
-      <a href="#ngSecSentence">Cümle olasılığı</a><a href="#ngSecGenerate">Üretim</a><a href="#ngSecCompare">Karşılaştırma</a><a href="#ngSecPmi">PMI</a><a class="stu" href="#ngSecQuiz">Alıştırma</a>
+      <a href="#ngSecSentence">Cümle olasılığı</a><a href="#ngSecGenerate">Üretim</a><a href="#ngSecCompare" data-ext="ngx">Karşılaştırma</a><a href="#ngSecPmi">PMI</a><a class="stu" href="#ngSecQuiz">Alıştırma</a>
     </nav></details>
     <h2 class="ng-h" id="ngSecCorpus" tabindex="-1">1 · Korpus <small id="ngState" role="status" aria-live="polite"></small></h2>
     <div class="ng-ctl" style="margin-top:0"><div class="seg" role="group" aria-label="Korpus kaynağı"><button data-src="text">Kendi metnim</button><button data-src="boun">${esc(CORPORA.boun.label)}</button><button data-src="brown">${esc(CORPORA.brown.label)}</button></div>
@@ -384,11 +386,11 @@ function mount(){
     <div class="chips" style="margin-top:10px">${Object.entries(PRESETS).map(([k, p]) => `<button class="chip${p.stu ? " stu" : ""}" data-preset="${k}">${esc(p.label)}</button>`).join("")}</div></div>
     <div class="ng-ctl">
       <div class="seg" role="group" aria-label="N-gram uzunluğu"><button data-n="1">Unigram</button><button data-n="2">Bigram</button><button data-n="3">Trigram</button></div>
-      <div class="seg" role="group" aria-label="Yumuşatma">${Object.entries(SM).map(([k, v]) => `<button data-sm="${k}">${esc(v)}</button>`).join("")}</div>
+      <div class="seg" role="group" aria-label="Yumuşatma">${Object.entries(SM).map(([k, v]) => `<button data-sm="${k}"${k === "kn" || k === "katz" ? ' data-ext="ngx"' : ""}>${esc(v)}</button>`).join("")}</div>${extBtn("ngx", "Perplexity, Katz, Kneser-Ney ve λ / D öğrenme")}
       <details class="ng-advanced"><summary>Diğer seçenekler <small>UNK · harf biçimi · α · λ</small></summary><div class="ng-ctl">
         <label class="muted">UNK eşiği <select id="ngUnk" class="btn sm"><option value="0">kapalı</option><option value="1">sayım ≤ 1</option><option value="2">sayım ≤ 2</option><option value="5">sayım ≤ 5</option></select></label>
         <label class="chk"><input type="checkbox" id="ngLower"> küçük harf</label>
-        <span id="ngD" class="muted hidden"><label>D <input id="ngDIn" class="dp-num" type="number" step="0.05" min="0.05" max="0.95" value="0.75"></label> <button class="btn sm ghost" data-learn="d" title="Cümlelerin %80'iyle say, %20'siyle (her 5. cümle) D'yi seç">D'yi korpustan seç</button></span>
+        <span id="ngD" class="muted hidden"><label>D <input id="ngDIn" class="dp-num" type="number" step="0.05" min="0.05" max="0.95" value="0.75"></label> <button class="btn sm ghost" data-ext="ngx" data-learn="d" title="Cümlelerin %80'iyle say, %20'siyle (her 5. cümle) D'yi seç">D'yi korpustan seç</button></span>
         <label id="ngAlpha" class="muted hidden">α <input id="ngAlphaIn" class="dp-num" type="number" step="0.05" min="0" max="1" value="0.4"></label>
         <span id="ngLam" class="hidden" style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"></span>
       </div></details></div>
@@ -406,13 +408,14 @@ function mount(){
     <div id="ngSentOut" aria-live="polite"></div>
     <h2 class="ng-h" id="ngSecGenerate" tabindex="-1">5 · Rastgele cümle üretimi <small><button class="btn sm" id="ngRegen">Yeniden üret</button></small></h2>
     <div id="ngGen"></div>
-    <h2 class="ng-h" id="ngSecCompare" tabindex="-1">6 · Yumuşatma karşılaştırması <small>test perplexity</small></h2>
-    <div id="ngCmp"></div>
+    <div data-ext="ngx"><h2 class="ng-h" id="ngSecCompare" tabindex="-1">6 · Yumuşatma karşılaştırması <small>test perplexity</small></h2>
+    <div id="ngCmp"></div></div>
     <h2 class="ng-h" id="ngSecPmi" tabindex="-1">7 · PMI <small>birlikte geçiş</small></h2>
     <div id="ngPmi"></div>
     <div class="stu"><h2 class="ng-h" id="ngSecFill" tabindex="-1">9 · Bigram tablosunu kendin doldur <small>vize 2022, soru 1</small></h2><div id="ngFill"></div></div>
     <div class="stu"><h2 class="ng-h" id="ngSecQuiz" tabindex="-1">8 · Kendin hesapla <small>önce sen, sonra kontrol</small></h2><div id="ngQuiz"></div></div>
     <div style="height:56px"></div></div>`;
+  root.addEventListener("click", e => { if(e.target.closest('[data-ext-toggle="ngx"]')) setTimeout(() => { if(!isExt("ngx") && (NG.smooth === "kn" || NG.smooth === "katz")){ NG.smooth = "laplace"; renderAll(); } }, 0); });   // ek kapanınca ek yumuşatmadan çık
   const text = $("#ngText", root);
   let t;
   const later = f => { clearTimeout(t); t = setTimeout(f, 220); };

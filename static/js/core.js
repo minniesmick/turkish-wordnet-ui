@@ -98,14 +98,15 @@ export const icon = (n, cls = "") => `<svg class="i ${cls}" viewBox="0 0 24 24" 
 
 // ───────────────────────── durum
 export const VIEW_GROUPS = [
-  {label:"Sözcük anlamı", views:["search","graph","relate","wsd","roles","frames"]},
+  {label:"Sözcük anlamı", views:["search","graph","relate","wsd"]},
   {label:"Lecture 2", views:["morph","disamb"]},
   {label:"Lecture 3", views:["parse","deps"]},
   {label:"Lecture 5", views:["corpus","ngram"]},
   {label:"Sınıflandırma", views:["eval"]},
   {label:"Lecture 6 · Derin öğrenme", views:["nn","tab","tok","emb","rnn","attn"]},
   {label:"Proje 1", views:["method"]},
-  {label:"Ders", views:["learn"]}
+  {label:"Ders", views:["learn"]},
+  {label:"Ek · slayt dışı", views:["roles","frames"], ext:"rail"}   // slaytlarda yalnızca adı geçen konular; varsayılan kapalı (bkz. extra.js)
 ];
 export const VIEWS = VIEW_GROUPS.flatMap(group => group.views);
 export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", morph:"Morfoloji", disamb:"Belirsizlik", parse:"Ayrıştırma", deps:"Bağımlılık", corpus:"Korpus", ngram:"N-gram", nn:"Sinir ağı", tok:"Metin temsili", emb:"Embedding", rnn:"RNN", attn:"Attention", tab:"Tablo verisi", eval:"Değerlendirme", method:"Metot", learn:"Ders"};

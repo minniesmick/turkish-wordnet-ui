@@ -1,6 +1,7 @@
 // Değerlendirme laboratuvarı: karışıklık matrisi, TP / FP / FN / TN, precision, recall, F1, accuracy, macro / weighted F1 ve Cohen'in kappası.
 // Geçmiş vize sorularının (2021, 2022, 2025) hazır örnekleri vardır; hesaplar evalm.js'te. Arayüz modülü.
 import {$, $$, esc, registerView} from "./core.js";
+import {extBtn} from "./extra.js";
 import {transpose, totals, perClass, accuracy, averages, macroWeighted, kappa, fromPairs, PRESETS, IAA, randomMatrix} from "./evalm.js";
 
 const KEY = "wn:eval";
@@ -138,7 +139,8 @@ function mount(){
     <h2 class="ng-h">2 · Sonuçlar</h2><div id="evRes"></div>
     <h3 class="ng-h3 stu">Adım adım</h3><div class="stu" id="evStep"></div>
     <h2 class="ng-h">3 · Macro ve weighted F1</h2><div id="evMWOut"></div>
-    <h2 class="ng-h">4 · Anotatörler arası uyum <small>Cohen'in kappası</small></h2><div id="evKappa"></div>
+    <div style="margin:18px 0 4px">${extBtn("evx", "Cohen'in kappası (anotatörler arası uyum)")}</div>
+    <div data-ext="evx"><h2 class="ng-h">4 · Anotatörler arası uyum <small>Cohen'in kappası</small></h2><div id="evKappa"></div></div>
     <h2 class="ng-h stu">5 · Alıştırma</h2><div class="stu" id="evPrac"></div>
     <div style="height:56px"></div></div>`;
   renderAll(); $("#evPrac", root).innerHTML = pracHTML();

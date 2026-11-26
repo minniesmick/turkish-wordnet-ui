@@ -1,5 +1,6 @@
 // Korpus gezgini: Lecture 5'in korpus kısmı. BOUN (Türkçe) ya da Brown (İngilizce) üzerinde sıklık listesi, Zipf grafiği, KWIC ve korpus istatistikleri.
 import {$, $$, esc, tr as num, registerView, setView, MODE} from "./core.js";
+import {extBtn} from "./extra.js";
 import {CORPORA, loadCorpus, tokensOf} from "./corpusdata.js";
 
 const CS = {name:"boun", n:5000, unit:"form", lower:true, punct:false, ngram:1, minf:1, q:"", kw:"", win:5, sort:"pos", upos:""};
@@ -144,13 +145,14 @@ function mount(){
     <h1 class="page-title">Korpus gezgini</h1>
     <p class="lesson-intro" style="margin:0">Gerçek metin üzerinde sözcük sıklıkları, Zipf dağılımı ve bağlam satırları (KWIC). Türkçe için BOUN treebank'i (lemma ve UPOS etiketli), İngilizce için Brown cümleleri.<span class="stu"> Lecture 5: korpus.</span></p>
     <details class="section-index"><summary>Bu görünümde</summary><nav aria-label="Korpus bölümleri">
-      <a href="#cpSecCorpus">Korpus</a><a href="#cpSecFrequency">Sıklık listesi</a><a href="#cpSecContext">Bağlam (KWIC)</a>
+      <a href="#cpSecCorpus">Korpus</a><a href="#cpSecFrequency">Sıklık listesi</a><a href="#cpSecContext" data-ext="cpx">Bağlam (KWIC)</a>
     </nav></details>
     <h2 class="ng-h" id="cpSecCorpus" tabindex="-1">1 · Korpus <small id="cpState" role="status" aria-live="polite"></small></h2>
     <div class="ng-ctl" style="margin-top:0"><div class="seg" role="group" aria-label="Korpus">${Object.entries(CORPORA).map(([k, c]) => `<button data-act="corp" data-c="${k}">${esc(c.label)}</button>`).join("")}</div>
       <label id="cpBrown" class="muted hidden" style="font-size:.88rem">Cümle sayısı <select id="cpSize" class="btn sm"><option value="1000">1.000</option><option value="5000">5.000</option><option value="20000">20.000</option><option value="0">tümü (35.795)</option></select></label>
       <button class="btn sm" data-act="ngram">Bu korpusta n-gram modeli kur →</button></div>
     <div id="cpStats"></div><div id="cpMeta"></div>
+    <div style="margin:8px 0">${extBtn("cpx", "Zipf grafiği ve KWIC bağlam satırları")}</div>
     <h2 class="ng-h" id="cpSecFrequency" tabindex="-1">2 · Sıklık listesi</h2>
     <div class="ng-ctl" style="margin-top:0">
       <div class="seg" role="group" aria-label="Birim"><button data-act="gram" data-g="1">Sözcük</button><button data-act="gram" data-g="2">Bigram</button><button data-act="gram" data-g="3">Trigram</button></div>
@@ -158,13 +160,14 @@ function mount(){
       <label class="chk"><input type="checkbox" id="cpLower"> küçük harf</label>
       <label class="muted" style="font-size:.88rem">en az <input id="cpMin" class="dp-num" type="number" min="1" value="1"> kez</label>
       <label class="field sm" style="flex:1 1 180px;min-width:150px"><input id="cpQ" type="text" placeholder="Süz (örn. ler)" autocomplete="off" spellcheck="false"></label></div>
-    <div class="cp-two"><div id="cpFreq"></div><div id="cpZipf"></div></div>
-    <h2 class="ng-h" id="cpSecContext" tabindex="-1">3 · Bağlam <small>KWIC: anahtar sözcük ve çevresi</small></h2>
+    <div class="cp-two"><div id="cpFreq"></div><div id="cpZipf" data-ext="cpx"></div></div>
+    <div data-ext="cpx"><h2 class="ng-h" id="cpSecContext" tabindex="-1">3 · Bağlam <small>KWIC: anahtar sözcük ve çevresi</small></h2>
     <div class="ng-ctl" style="margin-top:0"><label class="field sm" style="flex:1 1 220px"><input id="cpKw" type="text" placeholder="Anahtar sözcük (birden çok sözcük de olur)" autocomplete="off" spellcheck="false"></label>
       <label class="muted" style="font-size:.88rem">pencere ±<input id="cpWin" class="dp-num" type="number" min="1" max="12" value="5"></label>
       <div class="seg" role="group" aria-label="Sıralama"><button data-act="sort" data-s="pos">Metin sırası</button><button data-act="sort" data-s="right">Sağa göre</button><button data-act="sort" data-s="left">Sola göre</button></div></div>
     <div id="cpKwic"></div>
     <p class="ck-meta stu">KWIC (keyword in context) dizini, bir sözcüğün hangi sözcüklerle birlikte geçtiğini gösterir; sağ ya da sol komşuya göre sıralamak kalıpları (kolokasyonları) ortaya çıkarır. Bu, n-gram sayımlarının ham hâlidir.</p>
+    </div>
     <div style="height:56px"></div></div>`;
   let t;
   const later = f => { clearTimeout(t); t = setTimeout(f, 200); };

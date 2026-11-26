@@ -952,3 +952,22 @@ pre.ck-code{margin:8px 0;padding:12px 14px;background:var(--sunk);border:1px sol
 .mt-tk.c0{background:color-mix(in srgb,var(--k) 18%,var(--page))}.mt-tk.c1{background:color-mix(in srgb,var(--k) 34%,var(--page))}
 .mt-chart{width:100%;height:auto;color:var(--ink-3);overflow:visible}
 @media (prefers-reduced-motion:reduce){.mt-track i{transition:none}}
+
+/* Ek (slayt dışı) içerik: varsayılan kapalı, düğmeyle açılır (bkz. js/extra.js) */
+body:not(.ext-sim) [data-ext="sim"], body:not(.ext-nb) [data-ext="nb"], body:not(.ext-ngx) [data-ext="ngx"], body:not(.ext-cpx) [data-ext="cpx"],
+body:not(.ext-md) [data-ext="md"], body:not(.ext-dp) [data-ext="dp"], body:not(.ext-evx) [data-ext="evx"]{display:none!important}
+.ext-toggle{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:3px 12px 3px 8px;border:1px solid var(--rule-2);border-radius:var(--r);background:none;color:var(--ink-2);font:600 .86rem/1.3 var(--font-ui);text-align:left;cursor:pointer}
+.ext-toggle:hover{background:var(--sunk);color:var(--ink)}
+.ext-toggle small{font:500 .7rem var(--font-mono);color:var(--ink-3);letter-spacing:.03em}
+.ext-chev{flex:none;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);margin:0 3px 0 2px;transition:transform .18s var(--ease)}
+[aria-expanded="true"]>.ext-chev{transform:rotate(45deg)}
+.tab-group-toggle{display:flex;align-items:center;gap:6px;width:100%;margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-align:left;cursor:pointer}
+.tab-group-toggle:hover{color:var(--ink)}
+.tab-group-body{display:flex;flex-direction:column;gap:2px}
+.tab-group-ext:not(.has-current) .tab-group-body{display:none}
+body.ext-rail .tab-group-ext:not(.has-current) .tab-group-body{display:flex}
+.tf-tbl td{text-align:right;min-width:3.4ch;font:500 .78rem var(--font-mono)}
+.tf-tbl td.tf-m{color:var(--ink-3);text-align:center;background:var(--sunk)}
+.tf-tbl caption{text-align:left;color:var(--ink-3);font:600 .8rem var(--font-ui);padding:10px 0 4px}
+.tf-bars>div>span:last-child{text-align:right}
+.tf-tbl th{text-transform:none;letter-spacing:0}

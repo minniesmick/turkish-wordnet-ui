@@ -1,6 +1,7 @@
 // Harita: bir kavramın hiyerarşisi ve bağları ilişkisel bir ağaç olarak. Tıklayınca odak + bağlantı bilgisi, çift tıkla merkeze al.
 import {$, $$, esc, tr, lower, sub, w1, other, POS, DSNAME, REL, REL_FAMILY, FAMILY, relLabel, icon, state, G, api, urlSync, store, itemOf, toast, setView, registerView} from "./core.js";
 import {openConcept, closeSheet, openSheetRaw, relBtn} from "./ui.js";
+import {extBtn} from "./extra.js";
 
 const NW = 176, NH = 66, CW = 268, CH = 112, GX = 18;
 const LEFT = ["PART_HOLONYM","MEMBER_HOLONYM","SUBSTANCE_HOLONYM","DOMAIN_TOPIC","DOMAIN_REGION","DOMAIN_USAGE","ANTONYM","ALSO_SEE"];
@@ -360,10 +361,10 @@ async function linkInfo(n){
     const meter = (v, f) => `<div class="meter"><b style="font:700 1.05rem var(--font-ui);min-width:38px">${v.toFixed(2)}</b><i><b style="width:${Math.min(1, v) * 100}%"></b></i></div>`;
     $("#liMetrics").innerHTML = `<dl class="link-info" style="margin-top:6px">
       ${b.d != null ? `<dt>Yol</dt><dd>${b.d} kenar (hiyerarşide)</dd><dt>Path</dt><dd>${meter(b.sim)}</dd>` : ""}
-      ${b.wup != null ? `<dt lang="en">Wu-Palmer</dt><dd>${meter(b.wup)}</dd>` : ""}
-      ${b.ic ? `<dt lang="en">Lin (IC)</dt><dd>${meter(b.ic.lin)}</dd>` : ""}
+      ${b.wup != null ? `<dt lang="en" data-ext="sim">Wu-Palmer</dt><dd data-ext="sim">${meter(b.wup)}</dd>` : ""}
+      ${b.ic ? `<dt lang="en" data-ext="sim">Lin (IC)</dt><dd data-ext="sim">${meter(b.ic.lin)}</dd>` : ""}
       ${b.lcs ? `<dt>Ortak üst</dt><dd>${esc(b.lcs.lits.map(l => l.w).join(" / "))}</dd>` : ""}
-    </dl><p class="up" style="margin-top:6px">${b.sim >= .33 ? "Yakın kavramlar." : b.sim >= .15 ? "Orta uzaklıkta; ilişkili olabilir." : "Uzak; hiyerarşide pek yakın değil."}</p>`;
+    </dl>${b.wup != null || b.ic ? `<div style="margin-top:4px">${extBtn("sim", "Wu-Palmer ve Lin")}</div>` : ""}<p class="up" style="margin-top:6px">${b.sim >= .33 ? "Yakın kavramlar." : b.sim >= .15 ? "Orta uzaklıkta; ilişkili olabilir." : "Uzak; hiyerarşide pek yakın değil."}</p>`;
   }catch(_){}
 }
 function showFrame(n){

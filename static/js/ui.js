@@ -1,6 +1,7 @@
 // Kabuk: gezinti rayı, üst çubuk, kenar kâğıdı (bağlam), komut paleti, kısayollar + ortak çizim yardımcıları.
 import {$, $$, esc, tr, lower, hl, sub, w1, other, debounce, POS, DSNAME, REL, REL_ORDER, relLabel, REL_FAMILY, FAMILY, FUNC, CASEL, icon,
   VIEWS, VIEW_GROUPS, STUDENT_VIEWS, MODE, setMode, VIEW_LABEL, VIEW_ICON, VIEW_KEY, DS_VIEWS, state, G, store, itemOf, on, api, toast, copyText, views, setView, urlSync, act, setShellSync, buildURL} from "./core.js";
+import {isExt} from "./extra.js";
 
 // ───────────────────────── ortak çizim yardımcıları
 export const relBtn = (b, ds, extra = "") => `<button class="rel" data-open="${esc(b.id)}" data-ods="${ds}" title="${esc(b.d || "")}">${b.lits.map(l => esc(l.w) + sub(l.s)).join(", ")}${b.more ? ` <sub>+${b.more}</sub>` : ""}</button>${extra}`;
@@ -70,7 +71,10 @@ export function togglePresent(force){
 export function mountShell(){
   $("#tabs").innerHTML = VIEW_GROUPS.map((group, i) => {
     const onlyStudent = group.views.every(v => STUDENT_VIEWS.has(v));
-    return `<div class="tab-group${onlyStudent ? " stu" : ""}" role="group" aria-labelledby="tabGroup${i}"><h2 class="tab-group-title" id="tabGroup${i}">${group.label}</h2>${group.views.map(v => `<button class="tab${STUDENT_VIEWS.has(v) ? " stu" : ""}" data-view="${v}">${icon(VIEW_ICON[v])}<span>${VIEW_LABEL[v]}</span><span class="kb">g ${VIEW_KEY[v]}</span></button>`).join("")}</div>`;
+    const head = group.ext
+      ? `<h2 class="tab-group-title" id="tabGroup${i}"><button class="tab-group-toggle" type="button" data-ext-toggle="${group.ext}" aria-expanded="${isExt(group.ext)}" aria-controls="tabGroupBody${i}"><span class="ext-chev" aria-hidden="true"></span>${group.label}</button></h2>`
+      : `<h2 class="tab-group-title" id="tabGroup${i}">${group.label}</h2>`;
+    return `<div class="tab-group${onlyStudent ? " stu" : ""}${group.ext ? " tab-group-ext" : ""}" role="group" aria-labelledby="tabGroup${i}">${head}${group.ext ? `<div class="tab-group-body" id="tabGroupBody${i}">` : ""}${group.views.map(v => `<button class="tab${STUDENT_VIEWS.has(v) ? " stu" : ""}" data-view="${v}">${icon(VIEW_ICON[v])}<span>${VIEW_LABEL[v]}</span><span class="kb">g ${VIEW_KEY[v]}</span></button>`).join("")}${group.ext ? "</div>" : ""}</div>`;
   }).join("");
   $("#menuBtn").innerHTML = icon("menu");
   $("#omni").insertAdjacentHTML("afterbegin", icon("search"));
@@ -119,7 +123,8 @@ export function mountShell(){
 }
 export function syncShell(){
   $$("#tabs .tab").forEach(b => { if(b.dataset.view === state.v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
-  for(const v of VIEWS) $("#v-" + v).classList.toggle("hidden", v !== state.v);
+  $$("#tabs .tab-group-ext").forEach(g => g.classList.toggle("has-current", !!g.querySelector(".tab[aria-current]")));   // açık görünüm ek grubundaysa grup kapalı olsa da görünür kalır
+  for(const v of VIEWS) $("#v-" + v)?.classList.toggle("hidden", v !== state.v);   // eski önbellekli index.html yeni bir görünümü içermeyebilir: çökmesin
   const dsOn = DS_VIEWS.includes(state.v);
   $("#trailSection").classList.toggle("hidden", !dsOn);
   $("#favSection").classList.toggle("hidden", !dsOn);

@@ -1,5 +1,6 @@
 // Açılış: kabuk, görünümler, URL durumu.
 import {state, readURL, views, VIEW_LABEL, urlSync, setView, G, initMode} from "./core.js";
+import {initExt} from "./extra.js";
 const needSheet = () => state.c && !(state.v === "graph" && G.sel === state.c);   // haritada seçili düğümün kâğıdını graph.js açar (bağlantı bilgisiyle)
 import {mountShell, syncShell, initSheet, initPalette, initKeys, openConcept} from "./ui.js";
 import "./search.js";
@@ -26,7 +27,7 @@ import "./exportfig.js";
 import "./learn.js";
 
 async function boot(){
-  initMode();
+  initMode(); initExt();
   mountShell(); initSheet(); initPalette(); initKeys();
   readURL();
   syncShell();

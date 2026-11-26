@@ -14,7 +14,7 @@ function mount(){
   root = $("#v-wsd");
   root.innerHTML = `<div class="page">
     <h1 class="page-title">Bu cümlede hangi anlam?</h1>
-    <div class="row"><div class="seg" id="wMethod"><button data-v="lesk">Lesk · bilgi tabanlı</button><button data-v="nb">Naive Bayes · denetimli</button></div></div>
+    <div class="row"><div class="seg" id="wMethod"><button data-v="lesk">Lesk · bilgi tabanlı</button><button data-v="nb" data-ext="nb">Naive Bayes · denetimli</button></div>${extBtn("nb", "Denetimli yöntem: Naive Bayes")}</div>
     <p class="lesson-intro" id="wHint" style="margin:14px 0 0"></p>
     <textarea class="ta" id="wText" rows="2" placeholder="Bir cümle yaz…" style="margin-top:16px" spellcheck="false"></textarea>
     <div id="wLesk">
@@ -40,6 +40,7 @@ function mount(){
       <div class="chips" id="nbEx" style="margin-top:10px"></div>
     </div>
     <div id="wOut" aria-live="polite"></div></div>`;
+  root.addEventListener("click", e => { if(e.target.closest('[data-ext-toggle="nb"]')) setTimeout(() => { if(!isExt("nb") && NBS.method === "nb"){ NBS.method = "lesk"; view.enter(); urlSync(true); } }, 0); });   // ek kapanınca Lesk'e dön
   $("#wMethod", root).addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return; NBS.method = b.dataset.v; view.enter(); urlSync(true); });
   $("#wText", root).addEventListener("input", tokens);
   $("#wTarget", root).addEventListener("input", tokens);
@@ -61,6 +62,7 @@ function tokens(){
   $("#wTokens", root).innerHTML = ws.map(w => `<button class="tk" data-tk="${esc(w)}" aria-pressed="${w.toLowerCase() === cur}">${esc(w)}</button>`).join("");
 }
 function methodUI(){
+  if(NBS.method === "nb" && !isExt("nb")) setExt("nb", true);   // paylaşılan bağlantı Naive Bayes istiyorsa ek bölümü açılır
   $$("#wMethod button", root).forEach(b => b.setAttribute("aria-pressed", b.dataset.v === NBS.method));
   $("#wLesk", root).classList.toggle("hidden", NBS.method !== "lesk"); $("#wNb", root).classList.toggle("hidden", NBS.method !== "nb");
   $("#wHint", root).innerHTML = NBS.method === "lesk"

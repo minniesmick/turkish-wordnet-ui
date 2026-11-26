@@ -2,6 +2,7 @@
 // BOUN'un eğitim bölümünden taban çizgisi, karar listesi ve ortalama perceptron eğitilir; sınama bölümünde ve seçilen cümlede karşılaştırılır.
 // Hesap md.js içinde (test: node scripts/test_md.mjs); burada yalnızca arayüz var.
 import {$, $$, esc, api, registerView, setView, tr as num} from "./core.js";
+import {extBtn} from "./extra.js";
 import {loadCorpus} from "./corpusdata.js";
 import {split, train, evaluate, analyze, topRules, sentTags, tagOf, uposOf, featsOf, lc, METHODS} from "./md.js";
 import {zUpos, matchZ, newTally, tallySentence} from "./zmap.js";
@@ -287,12 +288,13 @@ function mount(){
     <h1 class="page-title">Morfolojik belirsizlik giderme</h1>
     <p class="lesson-intro" style="margin:0">Bir sözcüğün birden çok çözümlemesi olabilir; cümledeki bağlama bakarak doğrusunu seç. Çözümleme burada UD etiketidir (sözcük türü + çekim özellikleri). BOUN'un eğitim bölümünden üç yöntem eğitilir, sınama bölümünde ve istediğin cümlede karşılaştırılır.<span class="stu"> Lecture 2, slayt 31–32.</span></p>
     <div class="ng-expl stu" id="dmMeth"></div>
-    <h2 class="ng-h">1 · Doğruluk <small id="dmState">eğitiliyor…</small></h2>
+    <div style="margin:8px 0">${extBtn("md", "Yöntem doğrulukları (perceptron, karar listesi, Zemberek) ve karar listesi kuralları")}</div>
+    <h2 class="ng-h" data-ext="md">1 · Doğruluk <small id="dmState">eğitiliyor…</small></h2>
     <div id="dmBody" class="hidden">
-      <div id="dmStats"></div>
-      <div class="ng-ctl"><div class="seg" id="dmGran" role="group" aria-label="Ölçüt"><button data-gran="tag">Tam çözümleme</button><button data-gran="upos">Yalnızca sözcük türü</button><button data-gran="lemma">Kök (lemma)</button></div></div>
-      <div id="dmAcc" aria-live="polite"></div>
-      <div id="dmZem"></div>
+      <div id="dmStats" data-ext="md"></div>
+      <div class="ng-ctl" data-ext="md"><div class="seg" id="dmGran" role="group" aria-label="Ölçüt"><button data-gran="tag">Tam çözümleme</button><button data-gran="upos">Yalnızca sözcük türü</button><button data-gran="lemma">Kök (lemma)</button></div></div>
+      <div id="dmAcc" data-ext="md" aria-live="polite"></div>
+      <div id="dmZem" data-ext="md"></div>
       <h2 class="ng-h">2 · Cümlede belirsizlik giderme</h2>
       <div class="ng-ctl" style="margin-bottom:0"><div class="seg" id="dmSrc" role="group" aria-label="Cümle kaynağı"><button data-src="test">BOUN sınama cümlesi</button><button data-src="own">Kendi cümlem</button></div></div>
       <div id="dmCtl"></div>
@@ -301,7 +303,7 @@ function mount(){
       <div class="chips" id="dmBad"></div>
       <label class="field sm" style="margin-top:12px">Sözcük<input id="dmWord" type="text" autocomplete="off" spellcheck="false" placeholder="örn. bir"></label>
       <div id="dmWordOut"></div>
-      <div class="stu"><h2 class="ng-h">4 · Karar listesinin kuralları</h2><div id="dmRules"></div></div>
+      <div class="stu" data-ext="md"><h2 class="ng-h">4 · Karar listesinin kuralları</h2><div id="dmRules"></div></div>
       <div class="stu"><h2 class="ng-h">5 · Kendini sına <small>bağlama bakarak çözümlemeyi seç</small></h2><div id="dmQuiz"></div></div>
     </div>
     <div style="height:56px"></div></div>`;

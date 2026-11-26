@@ -1,5 +1,6 @@
 // Bağımlılık ağacı: Lecture 3 (Dependency Parsing), InClass 4. UD Turkish-BOUN cümlesi seç ya da CoNLL-U yapıştır; ok ve ağaç çizimi, özellik kontrolleri.
 import {$, $$, esc, api, registerView, MODE} from "./core.js";
+import {extBtn} from "./extra.js";
 import {scoreDeps, treeProblems} from "./depscore.js";
 import {oracle, trainParser, parse as parseLP, evalParser} from "./depparse.js";
 import {trainGraph, parseGraph, evalGraph} from "./depgraph.js";
@@ -264,8 +265,9 @@ function render(){
     <h3 class="ng-h3 stu">Özellikler <small>Lecture 3, bağımlılık ağacı</small></h3>${checksHTML(toks, c)}
     <h3 class="ng-h3 stu">Bu cümledeki ilişkiler</h3>${relsHTML(toks)}
     <h3 class="ng-h3 stu">Çekim grupları <small>IG, Zemberek</small></h3><div class="stu" id="dpIg">${igHTML(toks)}</div>
-    <h3 class="ng-h3 stu">Geçiş tabanlı ayrıştırma <small>arc-standard</small></h3><div class="stu" id="dpTr">${trHTML(toks)}</div>
-    <h3 class="ng-h3 stu">Öğrenen ayrıştırıcı <small>perceptron, BOUN</small></h3><div class="stu" id="dpLp">${lpHTML(toks)}</div>
+    <div class="stu" style="margin:14px 0 4px">${extBtn("dp", "Ayrıştırıcılar: geçiş tabanlı (arc-standard) ve öğrenen (perceptron)")}</div>
+    <h3 class="ng-h3 stu" data-ext="dp">Geçiş tabanlı ayrıştırma <small>arc-standard</small></h3><div class="stu" data-ext="dp" id="dpTr">${trHTML(toks)}</div>
+    <h3 class="ng-h3 stu" data-ext="dp">Öğrenen ayrıştırıcı <small>perceptron, BOUN</small></h3><div class="stu" data-ext="dp" id="dpLp">${lpHTML(toks)}</div>
     <h3 class="ng-h3 stu">Kendin ekle <small>ağacı kendin kur</small></h3><div class="stu" id="dpEx">${exHTML(toks)}</div>
     <h3 class="ng-h3">CoNLL-U tablosu</h3>${sent.mwt.length ? `<p class="ck-meta stu">${sent.mwt.length} çok sözcüklü belirteç var: yazıda bitişik görünen sözcük, ağaçta ayrı düğümlere bölünür (örn. <i>${esc(sent.mwt[0].form)}</i>). Ağaç bu bölünmüş parçalar üzerine kurulur.</p>` : ""}${tableHTML(toks, sent.mwt)}`;
 }
