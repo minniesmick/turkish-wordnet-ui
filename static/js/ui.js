@@ -2,6 +2,7 @@
 import {$, $$, esc, tr, lower, hl, sub, w1, other, debounce, POS, DSNAME, REL, REL_ORDER, relLabel, REL_FAMILY, FAMILY, FUNC, CASEL, icon,
   VIEWS, VIEW_GROUPS, STUDENT_VIEWS, MODE, setMode, VIEW_LABEL, VIEW_ICON, VIEW_KEY, DS_VIEWS, state, G, store, itemOf, on, api, toast, copyText, views, setView, urlSync, act, setShellSync, buildURL} from "./core.js";
 import {isExt} from "./extra.js";
+import {canReport, downloadReport, openReport} from "./report.js";
 
 // ───────────────────────── ortak çizim yardımcıları
 export const relBtn = (b, ds, extra = "") => `<button class="rel" data-open="${esc(b.id)}" data-ods="${ds}" title="${esc(b.d || "")}">${b.lits.map(l => esc(l.w) + sub(l.s)).join(", ")}${b.more ? ` <sub>+${b.more}</sub>` : ""}</button>${extra}`;
@@ -79,6 +80,8 @@ export function mountShell(){
   $("#menuBtn").innerHTML = icon("menu");
   $("#omni").insertAdjacentHTML("afterbegin", icon("search"));
   $("#linkBtn").innerHTML = icon("link");
+  const rb = $("#reportBtn"); if(rb) rb.innerHTML = icon("report");
+  const rd = $("#reportDlBtn"); if(rd) rd.innerHTML = icon("download");
   $("#presentBtn").innerHTML = icon("present");
   $("#palIcon").innerHTML = icon("search");
   $("#keysClose").innerHTML = icon("x");
@@ -111,6 +114,8 @@ export function mountShell(){
   $("#railKeys").addEventListener("click", openShortcuts);
   $("#presentBtn").addEventListener("click", () => togglePresent());
   $("#linkBtn").addEventListener("click", () => copyText(location.origin + buildURL(), "Bağlantı kopyalandı"));
+  $("#reportBtn")?.addEventListener("click", openReport);
+  $("#reportDlBtn")?.addEventListener("click", downloadReport);
   $("#favBtn").addEventListener("click", openFavs);
   $("#trail").addEventListener("click", e => { const b = e.target.closest("[data-open]"); if(b) openConcept(b.dataset.open, b.dataset.ods); });
   $("#keysClose").addEventListener("click", () => $("#shortcuts").close());
@@ -141,6 +146,7 @@ export function syncShell(){
   $("#trail").innerHTML = h.length ? h.map(x => `<li><button data-open="${esc(x.id)}" data-ods="${x.ds}" title="${esc(x.def)}"><span>${esc(x.w)}</span><em>${esc((POS[x.pos] || x.pos || "").toLocaleLowerCase("tr"))}</em></button></li>`).join("") : '<li class="empty" style="padding:0;text-align:left">Henüz bir kavrama bakmadın.</li>';
   $("#favLbl").innerHTML = `${icon("star")}<span>Çalışma listem</span><span class="iconbtn n" style="height:auto;min-width:0;padding:0">${store.favs().length || ""}</span>`;
   $("#app").dataset.view = state.v;
+  ["#reportBtn", "#reportDlBtn"].forEach(id => $(id)?.classList.toggle("hidden", !canReport(state.v)));
   $("#app").classList.toggle("sheet-open", !!sheet.mode);
   $("#sheet").setAttribute("aria-hidden", !sheet.mode);
 }

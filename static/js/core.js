@@ -92,6 +92,8 @@ const P = {
   emb:'<rect x="3" y="10" width="4" height="4" rx=".8"/><rect x="10" y="4" width="4" height="4" rx=".8"/><rect x="10" y="16" width="4" height="4" rx=".8"/><rect x="17" y="10" width="4" height="4" rx=".8"/><path d="M7 12h3M14 12h3M12 10V8M12 14v2"/>',
   rnn:'<rect x="3" y="8" width="5" height="8" rx="1"/><rect x="9.5" y="8" width="5" height="8" rx="1"/><rect x="16" y="8" width="5" height="8" rx="1"/><path d="M8 12h1.5M14.5 12H16M5.5 8V6M12 8V6M18.5 8V6"/><path d="M6.5 6a2 2 0 0 1 4 0M13 6a2 2 0 0 1 4 0"/>',
   eval:'<path d="M4 20V6M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/>',
+  download:'<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M5 19h14"/>',
+  report:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 15h6M9 18h4"/>',
   attn:'<path d="M4 12h16M4 8h10M4 16h7"/><circle cx="18" cy="8" r="2.5"/><path d="M18 10.5v3"/><circle cx="15" cy="16" r="2.5"/>'
 };
 export const icon = (n, cls = "") => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n] || ""}</svg>`;

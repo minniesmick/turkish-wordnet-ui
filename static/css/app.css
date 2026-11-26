@@ -975,3 +975,4 @@ body.ext-rail .tab-group-ext:not(.has-current) .tab-group-body{display:flex}
 .tf-tbl caption{text-align:left;color:var(--ink-3);font:600 .8rem var(--font-ui);padding:10px 0 4px}
 .tf-bars>div>span:last-child{text-align:right}
 .tf-tbl th{text-transform:none;letter-spacing:0}
+#reportBtn[aria-busy="true"],#reportDlBtn[aria-busy="true"]{opacity:.5;pointer-events:none}
