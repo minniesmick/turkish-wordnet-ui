@@ -20,6 +20,7 @@ import "./textrep.js";
 import "./embedding.js";
 import "./rnnlab.js";
 import "./attention.js";
+import "./transformer.js";
 import "./evallab.js";
 import "./tablab.js";
 import "./methodlab.js";

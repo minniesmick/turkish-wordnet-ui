@@ -970,11 +970,18 @@ body:not(.ext-md) [data-ext="md"], body:not(.ext-dp) [data-ext="dp"], body:not(.
 .tab-group-body{display:flex;flex-direction:column;gap:2px}
 .tab-group-ext:not(.has-current) .tab-group-body{display:none}
 body.ext-rail .tab-group-ext:not(.has-current) .tab-group-body{display:flex}
+
+/* Transformer bloğu: matris tabloları ve olasılık çubukları */
+.tf-tbl{font-variant-numeric:tabular-nums}
 .tf-tbl td{text-align:right;min-width:3.4ch;font:500 .78rem var(--font-mono)}
 .tf-tbl td.tf-m{color:var(--ink-3);text-align:center;background:var(--sunk)}
 .tf-tbl caption{text-align:left;color:var(--ink-3);font:600 .8rem var(--font-ui);padding:10px 0 4px}
+.tf-bars{display:grid;gap:6px;max-width:520px}
+.tf-bars>div{display:grid;grid-template-columns:7em 1fr 4em;gap:10px;align-items:center;font:500 .88rem var(--font-mono)}
 .tf-bars>div>span:last-child{text-align:right}
 .tf-tbl th{text-transform:none;letter-spacing:0}
+.tf-tbl td.tf-hit{cursor:pointer}
+.tf-tbl td.tf-hit:hover,.tf-tbl td.tf-hit:focus-visible{outline:2px solid var(--spot);outline-offset:-2px}
 #reportBtn[aria-busy="true"],#reportDlBtn[aria-busy="true"]{opacity:.5;pointer-events:none}
 .uml-svg{display:block;width:100%;min-width:820px;height:auto;font-family:var(--font-ui)}
 .uml-d{margin-top:28px;border-top:1px solid var(--rule);padding-top:10px}
