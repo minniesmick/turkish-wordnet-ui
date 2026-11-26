@@ -1,6 +1,8 @@
 // Anlam seçimi (WSD): bilgi tabanlı Lesk ve denetimli Naive Bayes.
 import {$, $$, esc, tr, sub, POS, icon, state, NBS, api, urlSync, registerView} from "./core.js";
 import {openConcept} from "./ui.js";
+import {nltkPanel, leskCode} from "./nltkcode.js";
+import {extBtn, isExt, setExt} from "./extra.js";
 
 const WSD_EX = {
   en: [["She pays 3% interest on the loan.","interest","S4 faiz"],["He showed a lot of interest in the painting.","interest","S1 ilgi"],["Microsoft purchased a controlling interest in Google.","interest","S6 hisse"],["It is in the national interest to invade the Bahamas.","interest","S3 çıkar"],["Playing chess is one of my interests.","interests","S5 uğraş"],["Business interests lobbied for the legislation.","interests","S7 grup"],["I withdrew the money from the bank.","bank","para bankası"],["The bank is constructed from red brick.","bank","bina"]],
@@ -93,7 +95,7 @@ async function runLesk(){
   out.innerHTML = `<div class="entry" style="margin-top:30px"><div class="entry-head"><h2 class="headword" style="font-size:clamp(2rem,4vw,3rem)">${esc(j.lemma)}</h2><div class="entry-meta">${j.n} aday anlam</div></div>
     <p class="up" style="margin:8px 0 0">bağlam sözcükleri: ${j.ctx.map(esc).join(" · ") || "—"}</p>
     ${j.best ? "" : '<div class="notice warn">Bağlam sözcükleriyle hiçbir aday tanımı örtüşmedi; Lesk karar veremedi (varsayılan: ilk aday). Bu yöntemin tipik sınırı: ortak sözcük yoksa sinyal yok.</div>'}
-    ${j.results.map(s => cand(s, s.id === j.best, s.score / mx, `skor ${s.score.toFixed(2)}`, `${s.overlap.length ? `ortak: <b style="color:var(--ink)">${s.overlap.map(esc).join(" · ")}</b>` : ""}${s.overlap_rel.length ? ` · ilişkili tanımlardan: ${s.overlap_rel.map(esc).join(" · ")}` : ""}`)).join("")}</div>`;
+    ${j.results.map(s => cand(s, s.id === j.best, s.score / mx, `skor ${s.score.toFixed(2)}`, `${s.overlap.length ? `ortak: <b style="color:var(--ink)">${s.overlap.map(esc).join(" · ")}</b>` : ""}${s.overlap_rel.length ? ` · ilişkili tanımlardan: ${s.overlap_rel.map(esc).join(" · ")}` : ""}`)).join("")}</div>${state.ds === "en" ? `<div style="margin-top:30px">${nltkPanel(leskCode(state.wtext, state.wtarget), "NLTK'nin lesk işlevi basitleştirilmiş Lesk'tir (tanım örtüşmesi); bu ekrandaki idf ağırlıklı ve ilişkili synset'li sürümle aynı seçimi vermeyebilir.")}</div>` : ""}`;
 }
 function cand(s, best, frac, left, right){
   return `<div class="cand ${best ? "best" : ""}"><div class="sense-line"><span class="pos-l">${esc((POS[s.pos] || s.pos).toLocaleLowerCase("tr"))}</span><span class="syn">${s.lits.slice(0, 5).map(l => `<button data-open="${esc(s.id)}" data-ods="${state.ds}">${esc(l.w)}${sub(l.s)}</button>`).join("<i>·</i>")}</span>${best ? '<span class="badge">seçilen anlam</span>' : ""}</div>

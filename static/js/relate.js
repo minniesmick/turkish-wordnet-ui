@@ -1,6 +1,8 @@
 // Benzerlik: iki sözcük arasındaki ilişki, ölçüler ve ortak üst kavramda buluşan çatal şema.
 import {$, $$, esc, tr, sub, w1, POS, REL, icon, state, api, urlSync, registerView} from "./core.js";
 import {openConcept} from "./ui.js";
+import {nltkPanel, relateCode} from "./nltkcode.js";
+import {extBtn} from "./extra.js";
 
 const EX = {
   en: [["vacation","holiday"],["couch","sofa"],["dog","animal"],["mango","fruit"],["polar bear","animal"],["remove","eliminate"],["hot","cold"],["car","bicycle"],["car","gasoline"],["snore","sleep"],["walk","stroll"],["dog","cat"],["nickel","dime"]],
@@ -74,6 +76,7 @@ export async function run(){
   if(b.path) h += fork(b);
   h += `<div class="row" style="margin-top:6px"><button class="btn pri sm" data-act="graph" data-id="${esc(b.a.id)}" data-ds="${state.ds}">${icon("graph")}${esc(w1(b.a))} haritada</button><button class="btn sm" data-act="graph" data-id="${esc(b.b.id)}" data-ds="${state.ds}">${icon("graph")}${esc(w1(b.b))} haritada</button></div>`;
   if(j.rows.length > 1) h += `<h3 class="lbl" style="margin:34px 0 4px">Diğer anlam çiftleri · ${j.nA} × ${j.nB} denendi</h3><div class="ck-scroll" role="region" tabindex="0" aria-label="Diğer anlam çiftleri tablosu"><table class="argtbl"><tr><th>1. sözcük anlamı</th><th>2. sözcük anlamı</th><th>İlişki</th><th>Benzerlik</th></tr>${j.rows.map(r => `<tr><td><button class="rel" data-open="${esc(r.a.id)}" data-ods="${state.ds}">${esc(w1(r.a))}</button> <span class="vt">${esc(r.a.d.slice(0, 54))}</span></td><td><button class="rel" data-open="${esc(r.b.id)}" data-ods="${state.ds}">${esc(w1(r.b))}</button> <span class="vt">${esc(r.b.d.slice(0, 54))}</span></td><td><span class="tag">${esc(RL[r.rel] || REL[r.rel] || r.rel)}</span></td><td>${r.sim.toFixed(2)}</td></tr>`).join("")}</table></div>`;
+  if(state.ds === "en") h += `<div style="margin-top:30px">${nltkPanel(relateCode(state.ra, state.rb, b.a.pos), "Yol, path ve Wu-Palmer aynı çıkar (dog / cat için doğrulandı). Resnik, Lin ve JCN değerleri farklıdır: NLTK burada Brown bilgi içeriğini kullanır, bu uygulama SemCor'dan sayar.")}</div>`;
   out.innerHTML = h;
 }
 

@@ -3,6 +3,7 @@
 import {$, $$, esc, registerView, setView, tr as num, toast} from "./core.js";
 import {BOS, EOS, SEP, buildModel, mapWord, padHist, prob, support, sample, seqProb, perplexity, defaultLam, learnLam, tuneD, pmiBuild, topPairs, collocates, similar} from "./lm.js";
 import {loadCorpus, tokensOf, CORPORA} from "./corpusdata.js";
+import {nltkPanel, ngramCode} from "./nltkcode.js";
 import {extBtn, isExt, setExt} from "./extra.js";
 
 const PRESETS = {
@@ -295,8 +296,15 @@ function renderAll(){
   renderPred(); renderSent(); renderMore();
   save();
 }
-const renderPred = () => { if(M){ $("#ngPredOut", root).innerHTML = predHTML(); save(); } };
-const renderSent = () => { if(M){ $("#ngSentOut", root).innerHTML = sentHTML(); save(); } };
+function renderNltk(){
+  const el = $("#ngNltk", root); if(!el || !M) return;
+  if(NG.src !== "text" || !S.length || S.length > 40){ el.innerHTML = ""; return; }   // büyük korpus NLTK'de aynı değil
+  const hist = (NG.hist || "").split(SEP).filter(Boolean);
+  el.innerHTML = nltkPanel(ngramCode({sents:S, n:M.n, smooth:NG.smooth, hist:hist.length ? hist : Array(Math.max(1, M.n - 1)).fill(BOS), sent:NG.sent.trim() ? words(NG.sent).join(" ") : null}),
+    "Aynı sayımlar ve olasılıklar NLTK ile. Geçmiş, yukarıda seçtiğin satır; cümle de 4. bölümdeki cümle.");
+}
+const renderPred = () => { if(M){ $("#ngPredOut", root).innerHTML = predHTML(); save(); renderNltk(); } };
+const renderSent = () => { if(M){ $("#ngSentOut", root).innerHTML = sentHTML(); save(); renderNltk(); } };
 // ───────────────────────── bigram tablosunu kendin doldur (öğrenci kipi): satır = önceki sözcük, sütun = sonraki sözcük
 const NF = {ans:{}, chk:false, sig:""};
 const parseFill = t => { t = String(t ?? "").trim().replace(",", "."); if(!t) return 0; const m = t.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/); if(m) return +m[2] ? +m[1] / +m[2] : NaN; return /^\d*\.?\d+$/.test(t) ? +t : NaN; };
@@ -398,6 +406,7 @@ function mount(){
     <div id="ngStats"></div>
     <h2 class="ng-h" id="ngSecCounts" tabindex="-1">2 · Sayımlar ve olasılıklar</h2>
     <div id="ngTables" aria-live="polite"></div>
+    <div id="ngNltk"></div>
     <h2 class="ng-h" id="ngSecNext" tabindex="-1">3 · Sonraki sözcük <small>“the cat X” tipi soru</small></h2>
     <label class="field sm">Geçmiş<input id="ngPred" type="text" autocomplete="off" spellcheck="false" placeholder="örn. the cat"></label>
     <div class="chips" id="ngPredEx" style="margin-top:10px"></div>

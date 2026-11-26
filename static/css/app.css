@@ -952,6 +952,10 @@ pre.ck-code{margin:8px 0;padding:12px 14px;background:var(--sunk);border:1px sol
 .mt-tk.c0{background:color-mix(in srgb,var(--k) 18%,var(--page))}.mt-tk.c1{background:color-mix(in srgb,var(--k) 34%,var(--page))}
 .mt-chart{width:100%;height:auto;color:var(--ink-3);overflow:visible}
 @media (prefers-reduced-motion:reduce){.mt-track i{transition:none}}
+.nl{margin-top:22px;border-top:1px solid var(--rule);padding-top:10px}
+.nl>summary{cursor:pointer;font:600 .92rem var(--font-ui);color:var(--ink);min-height:32px;display:flex;align-items:center;gap:8px}
+.nl>summary small{font:500 .72rem var(--font-mono);color:var(--ink-3);letter-spacing:.04em}
+.nl .mp-fsm{max-height:340px;overflow:auto}
 
 /* Ek (slayt dışı) içerik: varsayılan kapalı, düğmeyle açılır (bkz. js/extra.js) */
 body:not(.ext-sim) [data-ext="sim"], body:not(.ext-nb) [data-ext="nb"], body:not(.ext-ngx) [data-ext="ngx"], body:not(.ext-cpx) [data-ext="cpx"],
