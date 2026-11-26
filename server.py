@@ -1471,6 +1471,12 @@ def zem_call(cmd, *fields):
 
 # ------------------------------------------------------------------ HTTP katmanı
 class Handler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        # statik dosyalar her açılışta (Last-Modified ile ucuzca) doğrulansın: eski index.html + yeni js uyumsuzluğu çıkmasın
+        if not self.path.startswith("/api/"):
+            self.send_header("Cache-Control", "no-cache")
+        super().end_headers()
+
     def __init__(self, *a, **kw):
         super().__init__(*a, directory=STATIC, **kw)
 
