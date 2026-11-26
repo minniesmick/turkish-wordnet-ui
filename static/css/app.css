@@ -976,3 +976,7 @@ body.ext-rail .tab-group-ext:not(.has-current) .tab-group-body{display:flex}
 .tf-bars>div>span:last-child{text-align:right}
 .tf-tbl th{text-transform:none;letter-spacing:0}
 #reportBtn[aria-busy="true"],#reportDlBtn[aria-busy="true"]{opacity:.5;pointer-events:none}
+.uml-svg{display:block;width:100%;min-width:820px;height:auto;font-family:var(--font-ui)}
+.uml-d{margin-top:28px;border-top:1px solid var(--rule);padding-top:10px}
+.uml-d>summary{cursor:pointer;font:600 .92rem var(--font-ui);color:var(--ink);min-height:32px;display:flex;align-items:center;gap:8px}
+.uml-d>summary small{font:500 .72rem var(--font-mono);color:var(--ink-3);letter-spacing:.04em}

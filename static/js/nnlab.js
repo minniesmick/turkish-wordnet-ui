@@ -1,5 +1,7 @@
 // Sinir ağı eğitimi laboratuvarı — DL-1, DL-2 (Lecture 6). Arayüz modülü.
 import { $, $$, esc, registerView, icon } from "./core.js";
+import { umlSvg } from "./umlsvg.js";
+import { NN_UML } from "./diagrams.js";
 import {
   buildNetwork, forward, backward, trainBatch, predictGrid,
   generateDataset, mulberry32, numericalGrad, gradRelError,
@@ -370,6 +372,7 @@ function buildHTML() {
     <span id="nnPracticeFb" style="font-size:.9rem"></span>
   </div>
 </div>
+<details class="uml-d"><summary>Sınıf yapısı (UML) <small>nesne modeli</small></summary><div class="ng-scroll" role="region" tabindex="0" aria-label="nn-uml sınıf diyagramı, yatay kaydırılabilir">${umlSvg(NN_UML, {theme: "vars", idp: "nn-uml"})}</div></details>
 </div>`;
 }
 

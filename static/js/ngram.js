@@ -5,6 +5,8 @@ import {BOS, EOS, SEP, buildModel, mapWord, padHist, prob, support, sample, seqP
 import {loadCorpus, tokensOf, CORPORA} from "./corpusdata.js";
 import {nltkPanel, ngramCode} from "./nltkcode.js";
 import {extBtn, isExt, setExt} from "./extra.js";
+import {umlSvg} from "./umlsvg.js";
+import {NGRAM_UML} from "./diagrams.js";
 
 const PRESETS = {
   slayt: {stu:true, label:"Slayt 24 · I am Sam", text:"I am Sam\nSam I am\nI fly", n:2, pred:"I", sent:"I am Sam", extra:["I am fly", "Sam fly"]},
@@ -423,6 +425,7 @@ function mount(){
     <div id="ngPmi"></div>
     <div class="stu"><h2 class="ng-h" id="ngSecFill" tabindex="-1">9 · Bigram tablosunu kendin doldur <small>vize 2022, soru 1</small></h2><div id="ngFill"></div></div>
     <div class="stu"><h2 class="ng-h" id="ngSecQuiz" tabindex="-1">8 · Kendin hesapla <small>önce sen, sonra kontrol</small></h2><div id="ngQuiz"></div></div>
+    <details class="uml-d"><summary>Sınıf yapısı (UML) <small>nesne modeli</small></summary><div class="ng-scroll" role="region" tabindex="0" aria-label="ngram-uml sınıf diyagramı, yatay kaydırılabilir">${umlSvg(NGRAM_UML, {theme: "vars", idp: "ngram-uml"})}</div></details>
     <div style="height:56px"></div></div>`;
   root.addEventListener("click", e => { if(e.target.closest('[data-ext-toggle="ngx"]')) setTimeout(() => { if(!isExt("ngx") && (NG.smooth === "kn" || NG.smooth === "katz")){ NG.smooth = "laplace"; renderAll(); } }, 0); });   // ek kapanınca ek yumuşatmadan çık
   const text = $("#ngText", root);
