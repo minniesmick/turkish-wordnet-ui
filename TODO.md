@@ -27,7 +27,8 @@ Rakamlar 2026-10-23'te 500 gerçek BOUN sözcüğü ve 400 rastgele üretimle ö
 - **Sinir ağı (
 n)**: 2B oyuncak veri kümeleri (XOR, daireler, iki ay, spiral, doğrusal) üzerinde çok katmanlı algılayıcı (MLP) eğitimi; gerçek NLP görevi değildir. Karar sınırı ızgara tahminiyle (36×36) çizilir.
 - **Embedding (emb)**: BOUN test derlemi sözcük embedding'leri için küçüktür (~10k token); öğrenilen vektörler büyük modeller kadar kararlı değildir, analojiler küçük korpuslarda gürültülüdür.
-- **RNN (nn)**: Tarayıcıda saf JS karakter seviyesinde dil modeli; küçük model ve kısa eğitim süresi nedeniyle üretilen karakter dizileri dilbilgisel açıdan kusursuz olmayabilir; amaç BPTT ve gradyan kaybolmasını somutlaştırmaktır.
+- **RNN (
+nn)**: Tarayıcıda saf JS karakter seviyesinde dil modeli; küçük model ve kısa eğitim süresi nedeniyle üretilen karakter dizileri dilbilgisel açıdan kusursuz olmayabilir; amaç BPTT ve gradyan kaybolmasını somutlaştırmaktır.
 - **Attention (ttn)**: Ağırlıklar eğitilmediği için (rastgele veya elle girildiği için) dikkat örüntüleri semantik açıdan anlamlı değildir; laboratuvar mekanizmayı ve matris adımlarını (QK^T / √d_k, maske, softmax, ·V) göstermeyi hedefler.
 
 **Genel**
@@ -114,3 +115,75 @@ Kaynak: `InClass5.pdf` (PDF dolduruldu: `~/Downloads/InClass5_filled.pdf`). Sekm
 
 ## Haftalık ders: Colab-1 (vize kapsamı dışı, Güz 2026)
 - [x] Tablo verisi sekmesi: Colab-1 not defterlerinin (ikili sınıflandırma BCE + sigmoid, çok sınıflı CE + softmax, regresyon MSE) tarayıcı karşılığı; veri `static/colab1/*.csv`, çekirdek `tabnn.js`; BCE kaybı `nn.js`'e eklendi. Not defteri ayarlarıyla ikili görevde SGD lr 0,01 + 40 epoch neredeyse hiç öğrenmez (kayıp 0,694 → 0,691, accuracy ≈ 0,54); Adam ile 0,785. PyTorch'la birebir aynı sayı çıkmaz (başlatma ve bölme rastgeleliği).
+## NLTK karşılıkları
+
+- [x] "NLTK ile aynısı" paneli (`static/js/nltkcode.js`): N-gram (metin korpusu, ≤ 40 cümle; sayım, sonraki sözcük, cümle olasılığı; MLE ve Laplace), Benzerlik (İngilizce; path / Wu-Palmer / Resnik / Lin / JCN), Anlam seçimi (İngilizce; `nltk.wsd.lesk`). Kodlar `comp451-venv` ortamında çalıştırılıp uygulamadaki sayılarla karşılaştırıldı: n-gram ve path / Wu-Palmer birebir aynı, IC ölçüleri farklı (Brown IC ↔ SemCor IC), Lesk bu cümlede ikisinde de ilk adayı seçiyor.
+- [ ] Backoff / interpolation için `nltk.lm` karşılığı (şimdilik yalnızca yumuşatmasız kod ve not).
+- [ ] Türkçe sözcükler için NLTK karşılığı yok (NLTK'de KeNet yok); Türkçe WordNet için Starlang'ın kendi Python paketi ayrıca bakılacak.
+
+## Practice 2 türü sorular (Güz 2026)
+
+Kaynak: `Practice2.pdf` (doldurulmuş hâli `~/Downloads/Practice2_filled.pdf`, çalışma klasörü `~/PROJELER/comp451-practice2`).
+
+- [ ] N-gram sekmesine "sayımdan olasılık tablosu": `C(w | önceki) = k` satırları girilir, her geçmiş için toplam ve `P = C / toplam` hesaplanıp eksik hücreler doldurulur (PDF'teki 40 verilen değerle tutarlılık denetimi dahil).
+- [ ] "Rastgele cümle üret ve olasılığını göster": tablodan örnekleyerek yürüyüş, çarpanların adım adım gösterimi.
+- [ ] Part C hesabı: N sözcüklü korpus için `<s>` / `</s>` ile bigram sayısı = N + 1, trigram sayısı = N (k-gram: jeton − k + 1).
+
+## Derin öğrenme ve gömmeler (Word2Vec, Transformer, Project 1)
+
+Ders içeriği NLP ve derin öğrenme olduğundan, haftalık örneklerin mantığı araca da taşınabilir.
+
+- [ ] **Word2Vec sekmesi:** küçük korpusta skip-gram / CBOW eğitimi (gensim yerine tarayıcıda küçük bir uygulama ya da sunucuda gensim), en benzer sözcükler, vektör aritmetiği (kral − erkek + kadın), sabit tohum (`seed`) seçeneği. Kaynak: `Word2Vec.ipynb` (hocadan; örnek: 6 cümlelik korpus, vector_size 50, window 3, sg 1).
+- [ ] **WordNet ile karşılaştırma:** aynı sözcük çiftleri için Word2Vec kosinüs benzerliği ile Benzerlik sekmesindeki path / Wu-Palmer / Lin değerleri yan yana.
+- [ ] **Self-attention adım adım** (Illustrated Transformer): küçük cümle için Q, K, V, skor, softmax, ağırlıklı toplam görselleştirme; çok başlı dikkat, pozisyon kodlaması, maskeleme.
+- [ ] **Tokenizer gösterimi** (Project 1 Model Lab'daki karakter / BPE / WordPiece karşılaştırması gibi): bir cümlenin üç tokenizer ile bölünüşü; N-gram sekmesindeki sözcük bazlı bölme ile karşılaştırma.
+- [ ] **Project 1 bağlantısı:** Model Lab sonuçlarını (doğruluk, macro-F1, karışıklık matrisi) Method sekmesinde göster; eğitilmiş modeller Windows'tan geldikten sonra.
+- [ ] **NLTK karşılığı paneli:** Word2Vec, tokenizer ve POS / NER için de "NLTK / gensim ile aynısı" kodu.
+
+## Ek (slayt dışı) içerik, varsayılan kapalı
+
+Slaytlarda (L2-L5, DL) yalnızca adı geçen ya da hiç geçmeyen bölümler `static/js/extra.js` mekanizmasıyla kapalı gelir; açık/kapalı durumu tarayıcıda saklanır (`wn:ext`). Öğe `data-ext="anahtar"` taşır, düğme `extBtn(anahtar, ...)` ile üretilir.
+
+- [x] `rail`: Roller ve Çerçeveler, soldaki menüde "Ek · slayt dışı" grubu (açık görünüm bu gruptaysa grup görünür kalır).
+- [x] `nb`: Anlam seçimi → Naive Bayes (SemCor, SENSEVAL). Lesk ana akışta kalır.
+- [x] `sim`: Benzerlik → Wu-Palmer, Resnik, Lin, JCN; Harita kenar kâğıdındaki Wu-Palmer ve Lin.
+- [x] `ngx`: N-gram → perplexity (istatistik, cümle, bölüm 6), Katz, Kneser-Ney, λ ve D'yi korpustan öğrenme.
+- [x] `cpx`: Korpus → Zipf grafiği ve KWIC.
+- [x] `md`: Belirsizlik → yöntem doğrulukları (perceptron, karar listesi, Zemberek karşılaştırması) ve karar listesi kuralları.
+- [x] `dp`: Bağımlılık → geçiş tabanlı ve öğrenen ayrıştırıcı bölümleri (Öğrenci kipinde).
+- [x] `evx`: Değerlendirme → Cohen'in kappası. Karışıklık matrisi veri girişi olduğu için açık kaldı.
+- [ ] Araçta olmayan slayt konuları: FOL, CCG ve söylem semantiği (L4 slayt 37-45: yalnızca örnek formüller ve şekiller, tanım ya da algoritma yok; küçük bir örnek ekranı yeterli olabilir). Earley slaytta yalnızca yöntem adı (L3 slayt 20), eklemeye gerek yok.
+
+## Derin öğrenme sekmeleri: slaytlara göre sıradaki işler (Lecture 6)
+
+Sınav yok; amaç projelerde kullanılabilir ve anlatılabilir olmak. Kaynak: DL-1..7 slaytları (metin: `~/PROJELER/comp451-slides/`).
+
+- [x] **Transformer sekmesi** (`static/js/transformer.js`, hesap `tfm.js`, test `node scripts/test_tfm.mjs`, `g t`): embedding + konumsal kodlama, çok başlı dikkat, Add & LayerNorm (gerçek ortalama / varyans), FFN, decoder (maskeli dikkat, encoder-decoder dikkati), Linear + softmax. Ağırlıklar eğitilmemiş, sayfada belirtilir (DL-6 slayt 12–29).
+- [ ] **Kodlama (decoding) laboratuvarı** (DL-7 slayt 28–32): greedy, beam search, top-k ve temperature; sözcük olasılıkları N-gram modelinden (zincir kuralı bağı).
+- [ ] **CBOW** (DL-3 slayt 18–22): Embedding sekmesine skip-gram'ın yanına.
+- [ ] **LSTM kapıları, GRU, Deep RNN, BiRNN** (DL-5 slayt 16–25): RNN sekmesinde hücre adımları (modülde `stepLSTM` / `stepGRU` var, arayüzde ayrı gösterim yok).
+- [ ] **Geri yayılım sayısal örneği** (DL-2 slayt 28–31): slayttaki 2-2-1 ağı (x = 0.35, 0.7; δ = −0.0376) birebir; RMSprop (slayt 34).
+- [ ] **Ön işleme adımları ve WordPiece** (DL-4 slayt 4–11, 22).
+- [ ] **BERT sayfası** (DL-7 slayt 7–18), "ek" olarak kapalı: MLM %15, NSP, girdi embedding'i (token + segment + pozisyon), ince ayar; indirilen `bert-base-cased` sözlüğüyle WordPiece gösterimi.
+- [ ] **Proje bağlantısı:** `comp451-project1` modellerinin (char / BPE / DistilBERT) tokenizer ve dikkat gösterimi Model Lab ve Method sekmesiyle.
+
+## HTML rapor ve hesap kâğıdı
+
+- [x] **Rapor indir** düğmesi (üst çubukta belge simgesi; `static/js/report.js`, belge kabuğu `reportdoc.js`): açık laboratuvar görünümünün o anki hâlini (ayarlar kutusu, tablolar, şemalar, kapalı "ek" bölümler hariç) tek dosya olarak indirir; stil ve 14 yazı tipi dosyası (woff2) gömülüdür, internetsiz açılır (~450 KB). Ara, Harita ve Ders'te düğme yoktur.
+- [x] **Yeni sekmede aç:** üst çubukta iki düğme var: belge simgesi raporu indirmeden yeni sekmede açar (sayfada "Yazdır / PDF olarak kaydet" ve "Dosya olarak indir"), ok simgesi doğrudan indirir. Açılır pencere engellenirse (ya da gömülü tarayıcıda) otomatik indirmeye düşer.
+- [x] **Komut satırı:** `node scripts/report_tfm.mjs --src "öğrenci kitabı dikkatle okudu" --tgt "<s> the student read" --out rapor.html` (seçenekler: `--dmodel`, `--heads`, `--seed`, `--no-pos`, `--no-decoder`). Test: `node scripts/test_report.mjs`.
+- [x] **Hücre hesabı:** Transformer'da dikkat tablosundaki bir hücreye tıklayınca kenar kâğıdı q·k, ölçekleme, softmax ve ağırlıklı toplamı gösterir (encoder, maskeli decoder ve çapraz dikkat; maskeli hücreler tıklanamaz).
+- [x] Hücre hesabı N-gram bigram matrisinde de: hücreye tıklayınca sayımlar, formül ve rakamlar, satırın dağılımı ve ikilinin geçtiği cümleler (kenar kâğıdı).
+- [ ] Hücre hesabını embedding haritasına (nokta → en yakın komşular), Korpus sıklık tablosuna ve Benzerlik tablosuna yaymak. (Değerlendirme sekmesinde TP / FP / FN adımları zaten sınıf seçince açılıyor.)
+- [ ] Diğer sekmeler için komut satırı raporu (`report_ngram.mjs` vb.); şimdilik yalnızca Transformer (hesap modülleri DOM'dan bağımsız olduğundan eklenebilir).
+- [ ] Rapor indirme Ara ve Harita'da yok (kenar kâğıdı ve tuval tabanlı).
+- Sunucu artık statik dosyalara `Cache-Control: no-cache` gönderir (eski önbellekli `index.html` ile yeni JS uyumsuzluğunu önlemek için).
+
+## Diyagramlar (diagram-design skill'i)
+
+- [x] Stil profili `wordnet-ui` (`~/.diagram-design/profiles/wordnet-ui.md`, kopyası `docs/diagram-design-profile.md`): paper #f5f7fb, ink #0d1220, tek accent #2b3bd6 (koyu: #8f9cff), Schibsted Grotesk / Spectral / JetBrains Mono. Proje kökündeki `.diagram-design` dosyası (`profile: wordnet-ui`) bu profili otomatik seçtirir. Başka makinede: kopyayı `~/.diagram-design/profiles/wordnet-ui.md` olarak koy.
+- [x] `docs/diagrams/transformer-uml.html` (+ `.png`): Transformer bloğunun UML sınıf diyagramı. Skill denetimleri (`verify_geometry.py`, `self_check.py`) temiz. PNG: `~/.local/share/playwright-venv/bin/python ~/.claude/skills/diagram-design/scripts/export_png.py <html> <png> 2`.
+- [x] **Yapay zekâsız üretim:** `static/js/umlsvg.js` (saf JS) bildirimli tanımlardan (`static/js/diagrams.js`) UML sınıf diyagramı SVG'si üretir. Aynı tanım üç yerde kullanılır: Transformer sekmesinin son bölümünde (açık/koyu temaya uyar), Transformer HTML raporunda ve `node scripts/make_diagrams.mjs [--png]` ile `docs/diagrams/*.html|svg|png`. Test: `node scripts/test_uml.mjs` (bütçe, 4px ızgara, dik bağlantılar, renk kipleri, 14 gömülü yazı tipi).
+- Yeni bir sınıf diyagramı = `diagrams.js`'e bir tanım eklemek (sınıflar, konumlar, ilişkiler); sonra komut dosyayı üretir. Yeni diyagram TÜRÜ (sequence, architecture) için `umlsvg.js`'e çizici eklenmeli; şimdilik yalnızca sınıf diyagramı var.
+- [x] Tanımlar (`static/js/diagrams.js`): `transformer-uml` (Transformer sekmesinde ve raporunda açık), `ngram-uml` (N-gram sekmesinin sonunda, kapalı "Sınıf yapısı (UML)" bölümü), `nn-uml` (Sinir ağı sekmesinde, kapalı bölüm), `modules-uml` (rapor ve diyagram sistemi modül bağımlılıkları; yalnızca `docs/diagrams/`). Hepsi `node scripts/make_diagrams.mjs --png` ile dosyalanır.
+- [ ] Sıradaki tanımlar: Embedding (Trainer, NegSampler), RNN (hücre türleri: RNN, LSTM, GRU), N-gram yumuşatma stratejileri. Hücre tıklama akışı için sequence türü çizici gerekir.
