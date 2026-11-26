@@ -5,6 +5,7 @@ import {BOS, EOS, SEP, buildModel, mapWord, padHist, prob, support, sample, seqP
 import {loadCorpus, tokensOf, CORPORA} from "./corpusdata.js";
 import {nltkPanel, ngramCode} from "./nltkcode.js";
 import {extBtn, isExt, setExt} from "./extra.js";
+import {openSheetRaw} from "./ui.js";
 import {umlSvg} from "./umlsvg.js";
 import {NGRAM_UML} from "./diagrams.js";
 
@@ -104,8 +105,22 @@ function matrix(){
   const cf = cfg(), rows = [BOS, ...M.words].filter(h => M.orders[2].has(h)), how = howMode();
   return `<div class="ng-scroll" role="region" tabindex="0" aria-label="Bigram olasılık matrisi, yatay kaydırılabilir"><table class="ng-mx"><caption>Bigram tablosu · satır: önceki sözcük, sütun: sonraki sözcük${cf.smooth !== "none" ? " · " + SM[cf.smooth] : ""}</caption>
     <tr><th></th>${M.cols.map(c => `<th>${T(c)}</th>`).join("")}<th>Σ</th></tr>
-    ${rows.map(h => { let sum = 0; const cells = M.cols.map(c => { const r = prob(M, [h], c, cf); sum += r.p; return `<td class="${r.p ? "" : "z"}"><b>${how ? dec(r.p) : fr(r)}</b>${how ? "" : `<small>${dec(r.p)}</small>`}</td>`; }).join("");
+    ${rows.map(h => { let sum = 0; const cells = M.cols.map(c => { const r = prob(M, [h], c, cf); sum += r.p; return `<td class="${r.p ? "" : "z"} ng-cell" data-cw="${esc(c)}" title="Hesabı göster"><b>${how ? dec(r.p) : fr(r)}</b>${how ? "" : `<small>${dec(r.p)}</small>`}</td>`; }).join("");
       return `<tr class="${h === NG.hist ? "sel" : ""}" data-hist="${esc(h)}"><th>${T(h)}</th>${cells}<td class="sum">${dec(sum)}</td></tr>`; }).join("")}</table></div>`;
+}
+// matris hücresine tıklayınca: sayımlar, formül ve rakamlar, bu satırın tüm dağılımı, bigramın geçtiği cümleler (kenar kâğıdı)
+function cellSheet(h, c){
+  const cf = cfg(), r = prob(M, [h], c, cf), e = M.orders[2].get(h), cnt = e?.next.get(c) || 0, tot = e?.total || 0, how = howMode();
+  const dist = M.cols.map(w => ({w, p:prob(M, [h], w, cf)})).sort((a, b) => b.p.p - a.p.p).slice(0, 12);
+  const hit = []; for(const s of S){ const q = [BOS, ...s.map(w => mapWord(M, w)), EOS]; for(let i = 0; i + 1 < q.length; i++) if(q[i] === h && q[i + 1] === c){ hit.push(q.map((w, k) => k === i || k === i + 1 ? `<b>${esc(w)}</b>` : esc(w)).join(" ")); break; } }
+  const rows = dist.map(x => `<tr class="${x.w === c ? "now" : ""}"><th>${esc(x.w)}</th><td>${how ? "" : fr(x.p)}</td><td>${dec(x.p.p)}</td></tr>`).join("");
+  openSheetRaw({title:`P(${c} | ${h})`, sub:`${SM[NG.smooth]} · ${M.n}-gram`, body:`<div class="ss"><h3>Sayımlar</h3>
+    <p class="def">C(${esc(h)} ${esc(c)}) = <b>${cnt}</b> · C(${esc(h)}) = <b>${tot}</b></p>
+    <p class="up">${esc(formula(M))}</p>
+    <p class="def">P = ${how ? esc(r.how || "") + " = " : fr(r) + " = "}<b>${dec(r.p)}</b></p></div>
+    <div class="ss"><h3>“${esc(h)}” sözcüğünden sonra gelenler</h3><div class="ng-scroll"><table class="ng-tbl"><tr><th>Sonraki</th><th>${how ? "" : "Kesir"}</th><th>Olasılık</th></tr>${rows}</table></div>
+    <p class="up">Satırın toplamı 1 olmalı (görülmeyen sözcükler 0 ya da yumuşatma payı alır).</p></div>
+    <div class="ss"><h3>Bu ikilinin geçtiği cümleler</h3>${hit.length ? hit.slice(0, 6).map(x => `<p class="ex">${x}</p>`).join("") : '<p class="up">Korpusta hiç geçmiyor: sayım 0.</p>'}</div>`});
 }
 function tablesHTML(){
   if(!M.S) return '<div class="empty">Korpus boş: en az bir cümle gerekli.</div>';
@@ -466,6 +481,7 @@ function mount(){
       NG.lam[NG.n] = L.lam.map(v => +v.toFixed(3)); NG.learned = {...(NG.learned || {}), [NG.n]:{n:L.N, it:60}};
       refresh(); return;
     }
+    const cell = e.target.closest("td[data-cw]"); if(cell && M && M.n === 2){ const tr = cell.closest("tr[data-hist]"); if(tr) cellSheet(tr.dataset.hist, cell.dataset.cw); }
     const b = e.target.closest("[data-n],[data-sm],[data-src],[data-preset],[data-hist],[data-ex]"); if(!b) return;
     const d = b.dataset;
     if(d.n){ NG.n = +d.n; NG.hist = ""; }
