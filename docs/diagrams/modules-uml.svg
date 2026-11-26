@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100%" viewBox="0 0 980 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="modules-uml-t modules-uml-d" class="uml-svg">
+      <title id="modules-uml-t">Rapor ve diyagram sistemi · modül bağımlılıkları</title>
+      <desc id="modules-uml-d">transformer.js görünümü tfmview.js ile çizer. tfmview.js, reportdoc.js (kaçış ve belge kabuğu), umlsvg.js ve diagrams.js'e bağlıdır; umlsvg.js ve report.js de reportdoc.js'i kullanır. reportdoc.js, DOM'dan bağımsız ortak tabandır.</desc>
+      <defs>
+        <marker id="modules-uml-tri" markerWidth="16" markerHeight="12" refX="15" refY="6" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 0, 16 6, 0 12" fill="#f5f7fb" stroke="#0d1220" stroke-width="1"/></marker>
+        <marker id="modules-uml-dia-f" markerWidth="18" markerHeight="10" refX="0" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 5, 9 0, 18 5, 9 10" fill="#0d1220"/></marker>
+        <marker id="modules-uml-dia-h" markerWidth="18" markerHeight="10" refX="0" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 5, 9 0, 18 5, 9 10" fill="#f5f7fb" stroke="#0d1220" stroke-width="1"/></marker>
+        <marker id="modules-uml-open" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L9,4 L0,8" fill="none" stroke="#3b4357" stroke-width="1"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f5f7fb"/>
+      <path d="M 312,150 L 360,150" fill="none" stroke="#3b4357" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#modules-uml-open)"/>
+      <path d="M 632,150 L 680,150" fill="none" stroke="#3b4357" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#modules-uml-open)"/>
+      <path d="M 496,208 L 496,400" fill="none" stroke="#3b4357" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#modules-uml-open)"/>
+      <path d="M 600,208 L 600,322 Q 600,330 608,330 L 788,330 Q 796,330 796,338 L 796,400" fill="none" stroke="#3b4357" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#modules-uml-open)"/>
+      <path d="M 680,456 L 632,456" fill="none" stroke="#3b4357" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#modules-uml-open)"/>
+      <path d="M 312,456 L 360,456" fill="none" stroke="#3b4357" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#modules-uml-open)"/>
+      
+      <rect x="40" y="96" width="272" height="92" rx="6" fill="#ffffff" stroke="#0d1220" stroke-width="1"/>
+      <line x1="40" y1="136" x2="312" y2="136" stroke="rgba(13,18,32,0.22)" stroke-width="1"/>
+      <text x="176" y="110" fill="#3b4357" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">«view»</text>
+      <text x="176" y="124" fill="#0d1220" font-size="12" font-weight="600" font-family="'Schibsted Grotesk', system-ui, sans-serif" text-anchor="middle">transformer.js</text>
+      <text x="56" y="156" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ render()</text>
+      <text x="56" y="176" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ showCell(td)</text>
+      <rect x="360" y="96" width="272" height="112" rx="6" fill="#ffffff" stroke="#0d1220" stroke-width="1"/>
+      <line x1="360" y1="136" x2="632" y2="136" stroke="rgba(13,18,32,0.22)" stroke-width="1"/>
+      <text x="496" y="110" fill="#3b4357" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">«pure»</text>
+      <text x="496" y="124" fill="#0d1220" font-size="12" font-weight="600" font-family="'Schibsted Grotesk', system-ui, sans-serif" text-anchor="middle">tfmview.js</text>
+      <text x="376" y="156" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ tfmBody(R, S, opt): html</text>
+      <text x="376" y="176" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ cellDetail(R, kind, h, i, j)</text>
+      <text x="376" y="196" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ tfmSettings(S, R)</text>
+      <rect x="680" y="96" width="232" height="92" rx="6" fill="#ffffff" stroke="#0d1220" stroke-width="1"/>
+      <line x1="680" y1="136" x2="912" y2="136" stroke="rgba(13,18,32,0.22)" stroke-width="1"/>
+      <text x="796" y="110" fill="#3b4357" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">«data»</text>
+      <text x="796" y="124" fill="#0d1220" font-size="12" font-weight="600" font-family="'Schibsted Grotesk', system-ui, sans-serif" text-anchor="middle">diagrams.js</text>
+      <text x="696" y="156" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ TRANSFORMER_UML</text>
+      <text x="696" y="176" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ NGRAM_UML, NN_UML, MODULES_UML</text>
+      <rect x="40" y="400" width="272" height="132" rx="6" fill="#ffffff" stroke="#0d1220" stroke-width="1"/>
+      <line x1="40" y1="440" x2="312" y2="440" stroke="rgba(13,18,32,0.22)" stroke-width="1"/>
+      <text x="176" y="414" fill="#3b4357" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">«browser»</text>
+      <text x="176" y="428" fill="#0d1220" font-size="12" font-weight="600" font-family="'Schibsted Grotesk', system-ui, sans-serif" text-anchor="middle">report.js</text>
+      <text x="56" y="460" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ snapshot(section)</text>
+      <text x="56" y="480" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ buildReport(view): html</text>
+      <text x="56" y="500" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ openReport()</text>
+      <text x="56" y="520" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ downloadReport()</text>
+      <rect x="360" y="400" width="272" height="112" rx="6" fill="rgba(43,59,214,0.04)" stroke="#2b3bd6" stroke-width="1"/>
+      <path d="M 360,440 V 406 Q 360,400 366,400 H 626 Q 632,400 632,406 V 440 Z" fill="rgba(43,59,214,0.10)"/>
+      <line x1="360" y1="440" x2="632" y2="440" stroke="rgba(43,59,214,0.40)" stroke-width="1"/>
+      <text x="496" y="414" fill="#2b3bd6" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">«pure»</text>
+      <text x="496" y="428" fill="#0d1220" font-size="12" font-weight="600" font-family="'Schibsted Grotesk', system-ui, sans-serif" text-anchor="middle">reportdoc.js</text>
+      <text x="376" y="460" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ escH(s)</text>
+      <text x="376" y="480" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ inlineFonts(css, load)</text>
+      <text x="376" y="500" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ reportDocument(opts): html</text>
+      <rect x="680" y="400" width="232" height="72" rx="6" fill="#ffffff" stroke="#0d1220" stroke-width="1"/>
+      <line x1="680" y1="440" x2="912" y2="440" stroke="rgba(13,18,32,0.22)" stroke-width="1"/>
+      <text x="796" y="414" fill="#3b4357" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">«pure»</text>
+      <text x="796" y="428" fill="#0d1220" font-size="12" font-weight="600" font-family="'Schibsted Grotesk', system-ui, sans-serif" text-anchor="middle">umlsvg.js</text>
+      <text x="696" y="460" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ umlSvg(spec, opt): svg</text>
+      <line x1="40" y1="564" x2="940" y2="564" stroke="rgba(13,18,32,0.10)" stroke-width="0.8"/>
+      <text x="40" y="580" fill="#3b4357" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" letter-spacing="0.18em">LEGEND · İLİŞKİLER</text>
+      <line x1="40" y1="596" x2="68" y2="596" stroke="#0d1220" stroke-width="1" marker-end="url(#modules-uml-tri)"/><text x="76" y="600" fill="#3b4357" font-size="8.5" font-family="'Schibsted Grotesk', system-ui, sans-serif">Kalıtım</text>
+      <line x1="190" y1="596" x2="218" y2="596" stroke="#0d1220" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#modules-uml-tri)"/><text x="226" y="600" fill="#3b4357" font-size="8.5" font-family="'Schibsted Grotesk', system-ui, sans-serif">Gerçekleme</text>
+      <line x1="340" y1="596" x2="368" y2="596" stroke="#3b4357" stroke-width="1" marker-start="url(#modules-uml-dia-f)"/><text x="376" y="600" fill="#3b4357" font-size="8.5" font-family="'Schibsted Grotesk', system-ui, sans-serif">Bileşim · sahip olur</text>
+      <line x1="490" y1="596" x2="518" y2="596" stroke="#3b4357" stroke-width="1" marker-start="url(#modules-uml-dia-h)"/><text x="526" y="600" fill="#3b4357" font-size="8.5" font-family="'Schibsted Grotesk', system-ui, sans-serif">Toplama · içerir</text>
+      <line x1="640" y1="596" x2="668" y2="596" stroke="#3b4357" stroke-width="1" marker-end="url(#modules-uml-open)"/><text x="676" y="600" fill="#3b4357" font-size="8.5" font-family="'Schibsted Grotesk', system-ui, sans-serif">İlişki</text>
+      <line x1="790" y1="596" x2="818" y2="596" stroke="#3b4357" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#modules-uml-open)"/><text x="826" y="600" fill="#3b4357" font-size="8.5" font-family="'Schibsted Grotesk', system-ui, sans-serif">Bağımlılık · kullanır</text>
+    </svg>

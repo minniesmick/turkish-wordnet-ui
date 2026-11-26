@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100%" viewBox="0 0 980 740" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ngram-uml-t ngram-uml-d" class="uml-svg">
+      <title id="ngram-uml-t">N-gram dil modeli · UML sınıf diyagramı</title>
+      <desc id="ngram-uml-d">LanguageModel, her düzey için bir NgramTable'a sahiptir; tablo geçmiş başına bir Entry tutar (toplam ve sonraki sözcük sayımları). LanguageModel yumuşatma ayarını (Config) kullanır ve bir olasılık sonucu (Prob) döndürür.</desc>
+      <defs>
+        <marker id="ngram-uml-tri" markerWidth="16" markerHeight="12" refX="15" refY="6" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 0, 16 6, 0 12" fill="#f5f7fb" stroke="#0d1220" stroke-width="1"/></marker>
+        <marker id="ngram-uml-dia-f" markerWidth="18" markerHeight="10" refX="0" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 5, 9 0, 18 5, 9 10" fill="#0d1220"/></marker>
+        <marker id="ngram-uml-dia-h" markerWidth="18" markerHeight="10" refX="0" refY="5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 5, 9 0, 18 5, 9 10" fill="#f5f7fb" stroke="#0d1220" stroke-width="1"/></marker>
+        <marker id="ngram-uml-open" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L9,4 L0,8" fill="none" stroke="#3b4357" stroke-width="1"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f5f7fb"/>
+      <path d="M 296,208 L 330,208 Q 338,208 338,200 L 338,168 Q 338,160 346,160 L 380,160" fill="none" stroke="#3b4357" stroke-width="1" marker-start="url(#ngram-uml-dia-f)"/>
+      <path d="M 604,150 L 700,150" fill="none" stroke="#3b4357" stroke-width="1" marker-start="url(#ngram-uml-dia-f)"/>
+      <path d="M 296,330 L 330,330 Q 338,330 338,338 L 338,392 Q 338,400 346,400 L 380,400" fill="none" stroke="#3b4357" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ngram-uml-open)"/>
+      <path d="M 296,358 L 314,358 Q 322,358 322,366 L 322,560 Q 322,568 330,568 L 380,568" fill="none" stroke="#3b4357" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ngram-uml-open)"/>
+      <rect x="310" y="195" width="12" height="12" rx="2" fill="#f5f7fb"/><text x="316" y="204" fill="#0d1220" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" font-weight="600">1</text>
+      <rect x="348" y="147" width="24" height="12" rx="2" fill="#f5f7fb"/><text x="360" y="156" fill="#0d1220" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" font-weight="600">1..n</text>
+      <rect x="616" y="137" width="12" height="12" rx="2" fill="#f5f7fb"/><text x="622" y="146" fill="#0d1220" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" font-weight="600">1</text>
+      <rect x="674" y="137" width="24" height="12" rx="2" fill="#f5f7fb"/><text x="686" y="146" fill="#0d1220" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" font-weight="600">0..*</text>
+      <rect x="346" y="387" width="28" height="12" rx="2" fill="#f5f7fb"/><text x="360" y="396" fill="#0d1220" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" font-weight="600">USES</text>
+      <rect x="328" y="555" width="44" height="12" rx="2" fill="#f5f7fb"/><text x="350" y="564" fill="#0d1220" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" font-weight="600">RETURNS</text>
+      <rect x="40" y="168" width="256" height="204" rx="6" fill="rgba(43,59,214,0.04)" stroke="#2b3bd6" stroke-width="1"/>
+      <path d="M 40,208 V 174 Q 40,168 46,168 H 290 Q 296,168 296,174 V 208 Z" fill="rgba(43,59,214,0.10)"/>
+      <line x1="40" y1="208" x2="296" y2="208" stroke="rgba(43,59,214,0.40)" stroke-width="1"/>
+      <line x1="40" y1="300" x2="296" y2="300" stroke="rgba(43,59,214,0.40)" stroke-width="1"/>
+      <text x="168" y="196" fill="#0d1220" font-size="12" font-weight="600" font-family="'Schibsted Grotesk', system-ui, sans-serif" text-anchor="middle">LanguageModel</text>
+      <text x="56" y="228" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ n: int</text>
+      <text x="56" y="248" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ N: int  (sözcük sayısı)</text>
+      <text x="56" y="268" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ V: int  (sözlük boyu)</text>
+      <text x="56" y="288" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">- orders: NgramTable[]</text>
+      <text x="56" y="320" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ prob(hist, w, cfg): Prob</text>
+      <text x="56" y="340" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ perplexity(sents, cfg): float</text>
+      <text x="56" y="360" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ sample(cfg): string[]</text>
+      <rect x="380" y="96" width="224" height="92" rx="6" fill="#ffffff" stroke="#0d1220" stroke-width="1"/>
+      <line x1="380" y1="136" x2="604" y2="136" stroke="rgba(13,18,32,0.22)" stroke-width="1"/>
+      <text x="492" y="124" fill="#0d1220" font-size="12" font-weight="600" font-family="'Schibsted Grotesk', system-ui, sans-serif" text-anchor="middle">NgramTable</text>
+      <text x="396" y="156" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ order: int</text>
+      <text x="396" y="176" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">- entries: Map&lt;hist, Entry&gt;</text>
+      <rect x="700" y="96" width="224" height="92" rx="6" fill="#ffffff" stroke="#0d1220" stroke-width="1"/>
+      <line x1="700" y1="136" x2="924" y2="136" stroke="rgba(13,18,32,0.22)" stroke-width="1"/>
+      <text x="812" y="124" fill="#0d1220" font-size="12" font-weight="600" font-family="'Schibsted Grotesk', system-ui, sans-serif" text-anchor="middle">Entry</text>
+      <text x="716" y="156" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ total: int</text>
+      <text x="716" y="176" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ next: Map&lt;word, int&gt;</text>
+      <rect x="380" y="352" width="224" height="132" rx="6" fill="#ffffff" stroke="#0d1220" stroke-width="1"/>
+      <line x1="380" y1="392" x2="604" y2="392" stroke="rgba(13,18,32,0.22)" stroke-width="1"/>
+      <text x="492" y="380" fill="#0d1220" font-size="12" font-weight="600" font-family="'Schibsted Grotesk', system-ui, sans-serif" text-anchor="middle">Config</text>
+      <text x="396" y="412" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ smooth: Smoothing</text>
+      <text x="396" y="432" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ alpha: float</text>
+      <text x="396" y="452" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ lam: float[]</text>
+      <text x="396" y="472" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ D: float</text>
+      <rect x="380" y="520" width="224" height="132" rx="6" fill="#ffffff" stroke="#0d1220" stroke-width="1"/>
+      <line x1="380" y1="560" x2="604" y2="560" stroke="rgba(13,18,32,0.22)" stroke-width="1"/>
+      <text x="492" y="548" fill="#0d1220" font-size="12" font-weight="600" font-family="'Schibsted Grotesk', system-ui, sans-serif" text-anchor="middle">Prob</text>
+      <text x="396" y="580" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ num, den: int</text>
+      <text x="396" y="600" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ p: float</text>
+      <text x="396" y="620" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ order: int</text>
+      <text x="396" y="640" fill="#0d1220" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ how: string</text>
+      <line x1="40" y1="684" x2="940" y2="684" stroke="rgba(13,18,32,0.10)" stroke-width="0.8"/>
+      <text x="40" y="700" fill="#3b4357" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" letter-spacing="0.18em">LEGEND · İLİŞKİLER</text>
+      <line x1="40" y1="716" x2="68" y2="716" stroke="#0d1220" stroke-width="1" marker-end="url(#ngram-uml-tri)"/><text x="76" y="720" fill="#3b4357" font-size="8.5" font-family="'Schibsted Grotesk', system-ui, sans-serif">Kalıtım</text>
+      <line x1="190" y1="716" x2="218" y2="716" stroke="#0d1220" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#ngram-uml-tri)"/><text x="226" y="720" fill="#3b4357" font-size="8.5" font-family="'Schibsted Grotesk', system-ui, sans-serif">Gerçekleme</text>
+      <line x1="340" y1="716" x2="368" y2="716" stroke="#3b4357" stroke-width="1" marker-start="url(#ngram-uml-dia-f)"/><text x="376" y="720" fill="#3b4357" font-size="8.5" font-family="'Schibsted Grotesk', system-ui, sans-serif">Bileşim · sahip olur</text>
+      <line x1="490" y1="716" x2="518" y2="716" stroke="#3b4357" stroke-width="1" marker-start="url(#ngram-uml-dia-h)"/><text x="526" y="720" fill="#3b4357" font-size="8.5" font-family="'Schibsted Grotesk', system-ui, sans-serif">Toplama · içerir</text>
+      <line x1="640" y1="716" x2="668" y2="716" stroke="#3b4357" stroke-width="1" marker-end="url(#ngram-uml-open)"/><text x="676" y="720" fill="#3b4357" font-size="8.5" font-family="'Schibsted Grotesk', system-ui, sans-serif">İlişki</text>
+      <line x1="790" y1="716" x2="818" y2="716" stroke="#3b4357" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ngram-uml-open)"/><text x="826" y="720" fill="#3b4357" font-size="8.5" font-family="'Schibsted Grotesk', system-ui, sans-serif">Bağımlılık · kullanır</text>
+    </svg>
