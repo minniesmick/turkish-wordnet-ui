@@ -16,7 +16,7 @@ const S = {
   window: 2,
   negK: 3,
   lr: 0.05,
-  epochs: 15,
+  epochs: 100,
   seed: 42,
   running: false,
   curEpoch: 0,
@@ -48,7 +48,8 @@ function loadState() {
     if (Number.isFinite(v.window)) S.window = Math.max(1, Math.min(5, v.window | 0));
     if (Number.isFinite(v.negK)) S.negK = Math.max(1, Math.min(10, v.negK | 0));
     if (Number.isFinite(v.lr)) S.lr = Math.max(0.001, Math.min(0.5, v.lr));
-    if (Number.isFinite(v.epochs)) S.epochs = Math.max(1, Math.min(100, v.epochs | 0));
+    // 15 eski varsayılandı (oyuncak metinde vektörler ayrışmıyor); işaretsiz eski kayıttaki 15 yok sayılır
+    if (Number.isFinite(v.epochs) && (v.rev === 2 || v.epochs !== 15)) S.epochs = Math.max(1, Math.min(100, v.epochs | 0));
     if (Number.isFinite(v.seed)) S.seed = v.seed | 0;
     if (typeof v.queryWord === "string") S.queryWord = v.queryWord;
   } catch (_) {}
@@ -57,6 +58,7 @@ function loadState() {
 function saveState() {
   try {
     localStorage.setItem(KEY, JSON.stringify({
+      rev: 2,
       source: S.source,
       customText: S.customText,
       dim: S.dim,
