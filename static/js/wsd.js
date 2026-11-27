@@ -18,7 +18,7 @@ function mount(){
     <h1 class="page-title">Bu cümlede hangi anlam?</h1>
     <div class="row"><div class="seg" id="wMethod"><button data-v="lesk">Lesk · bilgi tabanlı</button><button data-v="nb" data-ext="nb">Naive Bayes · denetimli</button></div>${extBtn("nb", "Denetimli yöntem: Naive Bayes")}</div>
     <p class="lesson-intro" id="wHint" style="margin:14px 0 0"></p>
-    <textarea class="ta" id="wText" rows="2" placeholder="Bir cümle yaz…" style="margin-top:16px" spellcheck="false"></textarea>
+    <textarea class="ta" id="wText" rows="2" placeholder="Bir cümle yaz…" aria-label="Anlamı seçilecek sözcüğün geçtiği cümle" style="margin-top:16px" spellcheck="false"></textarea>
     <div id="wLesk">
       <div id="wTokens" class="chips" style="margin-top:12px"></div>
       <div class="row" style="margin-top:12px">

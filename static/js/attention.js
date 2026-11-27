@@ -312,11 +312,11 @@ function renderAll() {
 
 function buildHTML() {
   root.innerHTML = `
-    <div class="ng-h">Attention & Transformer Mekanizması <span class="stu">· DL-6, DL-7</span></div>
+    <h1 class="page-title">Attention & Transformer Mekanizması <span class="stu">· DL-6, DL-7</span></h1>
     <p>Scaled Dot-Product Attention ve çok başlıklı dikkat adımlarını görselleştir.
     <span class="stu">Q, K, V matris çarpımı, softmax, nedensel maskeleme ve konumsal kodlama adım adım incelenir.</span></p>
 
-    <div class="ng-h">1 · Cümle ve Vektör Kaynağı</div>
+    <h2 class="ng-h">1 · Cümle ve Vektör Kaynağı</h2>
     <div class="nn-controls" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
       <label style="flex:1;min-width:200px">Cümle (en çok 8 token):
         <input type="text" id="attnText" value="${esc(S.text)}" style="width:100%;box-sizing:border-box">
@@ -357,7 +357,7 @@ function buildHTML() {
       ℹ <strong>Önemli Bilgi:</strong> Model ağırlıkları eğitilmediği için (rastgele veya elle girildiği için) ortaya çıkan dikkat örüntüleri semantik açıdan anlamlı değildir; laboratuvarın amacı matematiksel transformasyon adımlarını somutlaştırmaktır.
     </div>
 
-    <div class="ng-h">2 · Dikkat Isı Haritası (Attention Heatmap)</div>
+    <h2 class="ng-h">2 · Dikkat Isı Haritası (Attention Heatmap)</h2>
     <p class="ck-meta" style="margin:4px 0">Satırlar = Sorgu (Query), Sütunlar = Anahtar (Key). Satıra veya hücreye tıklayarak ağırlıklı toplamı görün:</p>
     <div class="fig-box" style="margin:8px 0">
       <svg id="attnHeatmapSvg" class="attn-map" height="340" style="display:block;border:1px solid var(--rule);border-radius:var(--r);background:var(--page)"></svg>
@@ -367,21 +367,21 @@ function buildHTML() {
       </div>
     </div>
 
-    <div class="ng-h">3 · Seçili Sorgunun Ağırlıklı Toplamı (Context Vector)</div>
+    <h2 class="ng-h">3 · Seçili Sorgunun Ağırlıklı Toplamı (Context Vector)</h2>
     <div id="attnDetailBox"></div>
 
     <div class="stu">
-      <div class="ng-h">4 · Ara Matrisler ve Adım Adım Hesaplama</div>
+      <h2 class="ng-h">4 · Ara Matrisler ve Adım Adım Hesaplama</h2>
       <div id="attnStepsBox"></div>
 
-      <div class="ng-h">5 · Formüller ve Yöntemin Açıklaması</div>
+      <h2 class="ng-h">5 · Formüller ve Yöntemin Açıklaması</h2>
       <div class="nn-explain" style="line-height:1.6">
         <p><b>Scaled Dot-Product Attention (DL-6 slayt 13–16):</b> <code>Attention(Q, K, V) = softmax(Q Kᵀ / √d_k) · V</code>.</p>
         <p><b>Neden √d_k ile ölçeklenir?</b> d_k büyüdükçe iç çarpımların büyüklüğü artar, bu da softmax fonksiyonunu aşırı küçük gradyanlara (doygunluğa) iter. √d_k bölmesi varyansı 1'e normalize eder.</p>
         <p><b>Encoder vs Decoder (DL-7 slayt 4–32):</b> Encoder çift yönlü (tüm tokenlar birbirini görür); Decoder ise otoregresif / nedenseldir (causal mask ile gelecekteki tokenlara −∞ atanarak ağırlıkları 0 yapılır).</p>
       </div>
 
-      <div class="ng-h">6 · Kendin hesapla</div>
+      <h2 class="ng-h">6 · Kendin hesapla</h2>
       <div class="nn-practice">
         <div id="attnPracticeQ"></div>
         <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">

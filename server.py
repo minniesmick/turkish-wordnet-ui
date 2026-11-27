@@ -1498,7 +1498,25 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def local_host(self):
+        """Yalnız yerel adla gelen istek: başka bir sitenin DNS yönlendirmesiyle bu sunucuyu okuması engellenir."""
+        host = self.headers.get("Host") or ""
+        name = host[:host.rfind("]") + 1] if host.startswith("[") else host.split(":")[0]
+        return name.lower() in ("127.0.0.1", "localhost", "[::1]")
+
+    def send_head(self):
+        if not self.local_host():
+            self.send_error(403, "Forbidden host")
+            return None
+        return super().send_head()
+
+    def list_directory(self, path):
+        self.send_error(404, "File not found")
+        return None
+
     def do_GET(self):
+        if not self.local_host():
+            return self.send_error(403, "Forbidden host")
         u = urlparse(self.path)
         if not u.path.startswith("/api/"):
             return super().do_GET()
@@ -1594,8 +1612,13 @@ class Handler(SimpleHTTPRequestHandler):
                                              min(100, int(p.get("limit", ["30"])[0] or 30))))
             else:
                 self.send_json({"error": "not found"}, 404)
-        except (ValueError, BrokenPipeError) as e:
+        except (BrokenPipeError, ConnectionError):
+            pass                                          # tarayıcı isteği iptal etti
+        except ValueError as e:
             self.send_json({"error": str(e)}, 400)
+        except Exception as e:  # noqa: BLE001 - beklenmeyen hata bağlantıyı yanıtsız bırakmasın
+            self.log_error("%s: %r", u.path, e)
+            self.send_json({"error": "sunucu bu isteği işleyemedi"}, 500)
 
 
 if __name__ == "__main__":

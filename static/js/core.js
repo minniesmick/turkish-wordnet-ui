@@ -105,15 +105,15 @@ export const VIEW_GROUPS = [
   {label:"Lecture 3", views:["parse","deps"]},
   {label:"Lecture 5", views:["corpus","ngram"]},
   {label:"Sınıflandırma", views:["eval"]},
-  {label:"Lecture 6 · Derin öğrenme", views:["nn","tab","tok","emb","rnn","attn","tfm"]},
+  {label:"Lecture 6 · Derin öğrenme", views:["nn","tab","tok","emb","rnn","attn","tfm","decode"]},
   {label:"Proje 1", views:["method"]},
   {label:"Ders", views:["learn"]},
   {label:"Ek · slayt dışı", views:["roles","frames"], ext:"rail"}   // slaytlarda yalnızca adı geçen konular; varsayılan kapalı (bkz. extra.js)
 ];
 export const VIEWS = VIEW_GROUPS.flatMap(group => group.views);
-export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", morph:"Morfoloji", disamb:"Belirsizlik", parse:"Ayrıştırma", deps:"Bağımlılık", corpus:"Korpus", ngram:"N-gram", nn:"Sinir ağı", tok:"Metin temsili", emb:"Embedding", rnn:"RNN", attn:"Attention", tfm:"Transformer", tab:"Tablo verisi", eval:"Değerlendirme", method:"Metot", learn:"Ders"};
-export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"target", roles:"tag", frames:"frame", morph:"morph", disamb:"fork", parse:"tree", deps:"deps", corpus:"corpus", ngram:"list", nn:"nn", tok:"list", emb:"emb", rnn:"rnn", attn:"attn", tfm:"nn", tab:"corpus", eval:"eval", method:"tree", learn:"book"};
-export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", morph:"m", disamb:"z", parse:"c", deps:"k", corpus:"o", ngram:"n", nn:"i", tok:"x", emb:"e", rnn:"y", attn:"a", tfm:"t", tab:"j", eval:"v", method:"l", learn:"d"};
+export const VIEW_LABEL = {search:"Ara", graph:"Harita", relate:"Benzerlik", wsd:"Anlam seçimi", roles:"Roller", frames:"Çerçeveler", morph:"Morfoloji", disamb:"Belirsizlik", parse:"Ayrıştırma", deps:"Bağımlılık", corpus:"Korpus", ngram:"N-gram", nn:"Sinir ağı", tok:"Metin temsili", emb:"Embedding", rnn:"RNN", attn:"Attention", tfm:"Transformer", decode:"Kod çözme", tab:"Tablo verisi", eval:"Değerlendirme", method:"Metot", learn:"Ders"};
+export const VIEW_ICON = {search:"search", graph:"graph", relate:"scale", wsd:"target", roles:"tag", frames:"frame", morph:"morph", disamb:"fork", parse:"tree", deps:"deps", corpus:"corpus", ngram:"list", nn:"nn", tok:"list", emb:"emb", rnn:"rnn", attn:"attn", tfm:"nn", decode:"fork", tab:"corpus", eval:"eval", method:"tree", learn:"book"};
+export const VIEW_KEY = {search:"s", graph:"h", relate:"b", wsd:"w", roles:"r", frames:"f", morph:"m", disamb:"z", parse:"c", deps:"k", corpus:"o", ngram:"n", nn:"i", tok:"x", emb:"e", rnn:"y", attn:"a", tfm:"t", decode:"u", tab:"j", eval:"v", method:"l", learn:"d"};
 export const DS_VIEWS = ["search","graph","relate","wsd"];
 
 // Kullanım kipi: "Araç" (client) yalnızca sonuçları verir; "Öğrenci" ders bağlantılarını, formülleri, adım adım açıklamayı, alıştırma ve sınavı da açar.

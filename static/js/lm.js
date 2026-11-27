@@ -119,6 +119,12 @@ export function katzDiscounts(m, k, K = KATZ_K){
   }
   return m.gt[key] = {d, N};
 }
+// Bağlama göre değişen ama sözcüğe göre değişmeyen toplamlar bir kez hesaplanır; yoksa her görülmeyen sözcük tüm listeyi baştan toplar.
+function once(m, key, make){
+  m.mass = m.mass || new Map();
+  if(!m.mass.has(key)) m.mass.set(key, make());
+  return m.mass.get(key);
+}
 // P_katz(w | hist'), hist'= son k−1 sözcük; k. düzey tablosundan. Dönen: {p, k (cevabı veren düzey), c, h}
 function katzP(m, hist, w, k){
   const n = m.n, key = k === 1 ? "" : hist.slice(n - k).join(SEP), ent = m.orders[k].get(key), {d} = katzDiscounts(m, k);
@@ -129,16 +135,19 @@ function katzP(m, hist, w, k){
     if(!tot) return {p:1 / m.V, k, c:0, h:0};
     const c = ent.next.get(w) || 0;
     if(c > 0) return {p:disc(c) * c / tot, k, c, h:tot};
-    let seen = 0; for(const x of ent.next.values()) seen += disc(x) * x / tot;
+    const seen = once(m, "katz1", () => { let sum = 0; for(const x of ent.next.values()) sum += disc(x) * x / tot; return sum; });
     const unseen = m.V - ent.next.size;
     return {p:Math.max(0, 1 - seen) / (unseen > 0 ? unseen : m.V), k, c:0, h:tot};   // sözlük dışı sözcük (UNK kapalı): kalan kütle V sözcüğe eşit bölünür
   }
   if(!ent) return katzP(m, hist, w, k - 1);
   const c = ent.next.get(w) || 0;
   if(c > 0) return {p:disc(c) * c / ent.total, k, c, h:ent.total};
-  let seenHi = 0, seenLo = 0;
-  for(const [x, cx] of ent.next){ seenHi += disc(cx) * cx / ent.total; seenLo += katzP(m, hist, x, k - 1).p; }
-  const alpha = (1 - seenHi) / Math.max(1 - seenLo, 1e-12), low = katzP(m, hist, w, k - 1);
+  const alpha = once(m, "katz" + k + "|" + key, () => {
+    let seenHi = 0, seenLo = 0;
+    for(const [x, cx] of ent.next){ seenHi += disc(cx) * cx / ent.total; seenLo += katzP(m, hist, x, k - 1).p; }
+    return (1 - seenHi) / Math.max(1 - seenLo, 1e-12);
+  });
+  const low = katzP(m, hist, w, k - 1);
   return {p:Math.max(0, alpha) * low.p, k:low.k, c:0, h:ent.total, alpha};
 }
 function katzProb(m, hist, w){

@@ -1,5 +1,6 @@
 // N-gram laboratuvarı (Lecture 5): korpustan sayım, olasılık, Laplace / backoff / interpolation, UNK, cümle olasılığı, perplexity, rastgele üretim, PMI.
 // Hesap lm.js içinde; burada yalnızca arayüz var. Korpus: elle yazılan metin, BOUN (Türkçe) ya da Brown (İngilizce).
+import {restore} from "./safe.js";
 import {$, $$, esc, registerView, setView, tr as num, toast} from "./core.js";
 import {BOS, EOS, SEP, buildModel, mapWord, padHist, prob, support, sample, seqProb, perplexity, defaultLam, learnLam, tuneD, pmiBuild, topPairs, collocates, similar} from "./lm.js";
 import {loadCorpus, tokensOf, CORPORA} from "./corpusdata.js";
@@ -23,12 +24,17 @@ const cache = new Map();
 const memo = (k, f) => { if(!cache.has(k)){ if(cache.size > 30) cache.delete(cache.keys().next().value); cache.set(k, f()); } return cache.get(k); };
 
 const load = () => {
-  try{ Object.assign(NG, JSON.parse(localStorage.getItem(KEY)) || {}); }catch(_){}
-  if(NG.smooth === true) NG.smooth = "laplace";
+  try{
+    const saved = JSON.parse(localStorage.getItem(KEY));
+    if(saved?.smooth === true) saved.smooth = "laplace";
+    Object.assign(NG, restore(NG, saved, {limit:[100, 20000], n:[1, 3], unk:[0, 5], alpha:[0, 1], D:[.05, .95], pk:[1, 10], pmin:[1, 1000]}));
+    if(saved?.learned && typeof saved.learned === "object") NG.learned = saved.learned;
+  }catch(_){}
   if(!SM[NG.smooth]) NG.smooth = "none";
   if((NG.smooth === "kn" || NG.smooth === "katz") && !isExt("ngx")) setExt("ngx", true);   // kayıtlı seçim ek yöntemse ek bölüm açık başlar
   if(!["text", "boun", "brown"].includes(NG.src)) NG.src = "text";
-  if(!NG.lam || typeof NG.lam !== "object") NG.lam = {};
+  for(const [n, list] of Object.entries(NG.lam))
+    if(!Array.isArray(list) || !list.every(v => v >= 0 && v <= 1)) delete NG.lam[n];
 };
 const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(NG)); }catch(_){} };
 const lamFor = n => (NG.lam?.[n]?.length === n) ? NG.lam[n] : defaultLam(n);

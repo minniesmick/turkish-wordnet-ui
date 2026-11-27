@@ -159,7 +159,8 @@ Slaytlarda (L2-L5, DL) yalnızca adı geçen ya da hiç geçmeyen bölümler `st
 Sınav yok; amaç projelerde kullanılabilir ve anlatılabilir olmak. Kaynak: DL-1..7 slaytları (metin: `~/PROJELER/comp451-slides/`).
 
 - [x] **Transformer sekmesi** (`static/js/transformer.js`, hesap `tfm.js`, test `node scripts/test_tfm.mjs`, `g t`): embedding + konumsal kodlama, çok başlı dikkat, Add & LayerNorm (gerçek ortalama / varyans), FFN, decoder (maskeli dikkat, encoder-decoder dikkati), Linear + softmax. Ağırlıklar eğitilmemiş, sayfada belirtilir (DL-6 slayt 12–29).
-- [ ] **Kodlama (decoding) laboratuvarı** (DL-7 slayt 28–32): greedy, beam search, top-k ve temperature; sözcük olasılıkları N-gram modelinden (zincir kuralı bağı).
+- [x] **Kod çözme sekmesi** (`static/js/decodelab.js`, hesap `decode.js`, test `node scripts/test_decode.mjs`, `g u`): açgözlü, ışın, tam arama, top-k ve sıcaklık (DL-7 slayt 28–32; slayttaki ağaç birebir).
+- [ ] Kod çözme: top-p (nucleus) örnekleme (slayt 28'de yalnızca adı geçiyor); ağacı diyagram olarak çizmek.
 - [ ] **CBOW** (DL-3 slayt 18–22): Embedding sekmesine skip-gram'ın yanına.
 - [ ] **LSTM kapıları, GRU, Deep RNN, BiRNN** (DL-5 slayt 16–25): RNN sekmesinde hücre adımları (modülde `stepLSTM` / `stepGRU` var, arayüzde ayrı gösterim yok).
 - [ ] **Geri yayılım sayısal örneği** (DL-2 slayt 28–31): slayttaki 2-2-1 ağı (x = 0.35, 0.7; δ = −0.0376) birebir; RMSprop (slayt 34).
@@ -187,3 +188,11 @@ Sınav yok; amaç projelerde kullanılabilir ve anlatılabilir olmak. Kaynak: DL
 - Yeni bir sınıf diyagramı = `diagrams.js`'e bir tanım eklemek (sınıflar, konumlar, ilişkiler); sonra komut dosyayı üretir. Yeni diyagram TÜRÜ (sequence, architecture) için `umlsvg.js`'e çizici eklenmeli; şimdilik yalnızca sınıf diyagramı var.
 - [x] Tanımlar (`static/js/diagrams.js`): `transformer-uml` (Transformer sekmesinde ve raporunda açık), `ngram-uml` (N-gram sekmesinin sonunda, kapalı "Sınıf yapısı (UML)" bölümü), `nn-uml` (Sinir ağı sekmesinde, kapalı bölüm), `modules-uml` (rapor ve diyagram sistemi modül bağımlılıkları; yalnızca `docs/diagrams/`). Hepsi `node scripts/make_diagrams.mjs --png` ile dosyalanır.
 - [ ] Sıradaki tanımlar: Embedding (Trainer, NegSampler), RNN (hücre türleri: RNN, LSTM, GRU), N-gram yumuşatma stratejileri. Hücre tıklama akışı için sequence türü çizici gerekir.
+
+## Sertleştirme (2026-11-27)
+
+- [x] Sunucu: yalnız yerel `Host` adı kabul edilir, dizin listelenmez, beklenmeyen hata JSON 500 döner (864 kötü girdili istekte çökme yoktu).
+- [x] Sayı kutuları sınır dışı ya da boş değeri düzeltir; N-gram, Korpus, Bağımlılık kayıtlı ayarları sınır denetiminden geçer (`static/js/safe.js`, test `node scripts/test_safe.mjs`).
+- [x] Katz yumuşatmada tekrarlanan toplamlar önbelleğe alındı (aynı sonuç, Brown örneğinde yaklaşık 16 kat hızlı).
+- [x] Telefonda tema ve rapor düğmeleri ekran dışında kalmıyor; dört laboratuvarda gerçek başlık etiketleri; eksik form etiketleri.
+- [ ] N-gram, büyük korpusta (Brown, trigram, test karşılaştırması açık) birkaç saniye arayüzü bekletiyor: karşılaştırma tablosunu ertelemek ya da işçiye (Web Worker) taşımak.

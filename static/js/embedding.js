@@ -413,11 +413,11 @@ function checkPractice() {
 
 function buildHTML() {
   root.innerHTML = `
-    <div class="ng-h">Word Embedding <span class="stu">· DL-3, DL-4 Part 3</span></div>
+    <h1 class="page-title">Word Embedding <span class="stu">· DL-3, DL-4 Part 3</span></h1>
     <p>Sözcükleri yoğun vektörlerle temsil et; benzer bağlamlarda geçen sözcüklerin yakınlaştığını gözlemle.
     <span class="stu">Skip-gram ve CBOW, negatif örnekleme ve PCA izdüşümü gerçek hesapla işletilir.</span></p>
 
-    <div class="ng-h">1 · Korpus ve hiperparametreler</div>
+    <h2 class="ng-h">1 · Korpus ve hiperparametreler</h2>
     <div class="nn-controls" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
       <label>Kaynak:
         <select id="embSource">
@@ -463,12 +463,12 @@ function buildHTML() {
       <span id="embStatus" style="font-size:.88rem;color:var(--ink-2)">Hazır</span>
     </div>
 
-    <div class="ng-h">2 · Kayıp eğrisi</div>
+    <h2 class="ng-h">2 · Kayıp eğrisi</h2>
     <div class="fig-box" style="margin:8px 0">
       <svg id="embLossSvg" class="emb-pca" viewBox="0 0 320 100" width="320" height="100" style="display:block;border:1px solid var(--rule);border-radius:var(--r)"></svg>
     </div>
 
-    <div class="ng-h">3 · En yakın komşular (Word2Vec vs PPMI)</div>
+    <h2 class="ng-h">3 · En yakın komşular (Word2Vec vs PPMI)</h2>
     <div style="display:flex;gap:8px;align-items:center;margin:8px 0">
       <label>Sözcük:
         <input type="text" id="embQueryWord" value="${esc(S.queryWord)}" style="width:140px">
@@ -477,7 +477,7 @@ function buildHTML() {
     </div>
     <div id="embNeighborsBox"></div>
 
-    <div class="ng-h">4 · Sözcük analojisi (a − b + c)</div>
+    <h2 class="ng-h">4 · Sözcük analojisi (a − b + c)</h2>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0">
       <input type="text" id="embAnaA" value="${esc(S.analogyA)}" style="width:100px" title="a">
       <span>−</span>
@@ -488,7 +488,7 @@ function buildHTML() {
     </div>
     <div id="embAnalogyBox"></div>
 
-    <div class="ng-h">5 · 2B Vektör haritası (PCA)</div>
+    <h2 class="ng-h">5 · 2B Vektör haritası (PCA)</h2>
     <div class="fig-box" style="margin:8px 0">
       <svg id="embPcaSvg" class="emb-pca" viewBox="0 0 480 300" width="100%" style="max-width:520px;height:auto;display:block;border:1px solid var(--rule);border-radius:var(--r)"></svg>
       <div style="margin-top:6px;display:flex;gap:8px">
@@ -498,7 +498,7 @@ function buildHTML() {
     </div>
 
     <div class="stu">
-      <div class="ng-h">6 · Formüller ve yöntemin açıklaması</div>
+      <h2 class="ng-h">6 · Formüller ve yöntemin açıklaması</h2>
       <div class="nn-explain" style="line-height:1.6">
         <p><b>CBOW (DL-3 slayt 18–23):</b> penceredeki bağlam sözcüklerinin vektörleri ortalanır, <code>h = (1/2m) Σ v_c</code>, ve bu ortalama merkez sözcüğü tahmin eder. Her konum tek örnek verir; skip-gram ise her (merkez, bağlam) çiftini ayrı örnek sayar. Bu sayfada ikisi de negatif örneklemeyle eğitilir (slaytlardaki softmax yerine).</p>
         <p><b>Skip-gram (DL-3 slayt 24):</b> Merkez sözcük <code>w</code> verildiğinde bağlam sözcüğü <code>c</code>'nin olasılığı: <code>P(c|w) = exp(u_cᵀ v_w) / Σ exp(u_w'ᵀ v_w)</code>.</p>
@@ -508,7 +508,7 @@ function buildHTML() {
         <p class="ck-meta"><b>Bilinen sınırlar:</b> BOUN korpusu derlem kümesi için küçüktür (birkaç bin token); öğrenilen vektörler büyük modeller (Word2Vec GoogleNews vb.) kadar kararlı değildir. Analojiler küçük verilerde çoğunlukla gürültülü sonuç verir.</p>
       </div>
 
-      <div class="ng-h">7 · Kendin hesapla</div>
+      <h2 class="ng-h">7 · Kendin hesapla</h2>
       <div class="nn-practice">
         <div id="embPracticeQ"></div>
         <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">

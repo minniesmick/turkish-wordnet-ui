@@ -356,11 +356,11 @@ function generateSample() {
 
 function buildHTML() {
   root.innerHTML = `
-    <div class="ng-h">Özyinelemeli Sinir Ağı (RNN) <span class="stu">· DL-5</span></div>
+    <h1 class="page-title">Özyinelemeli Sinir Ağı (RNN) <span class="stu">· DL-5</span></h1>
     <p>Sıralı dizi verisini zaman adımlarında açarak (unroll) işle; zamanda geri yayılım (BPTT) ve gradyan kaybolmasını gözlemle.
     <span class="stu">Vanilla RNN, LSTM ve GRU hesapları gerçek döngüyle işletilir.</span></p>
 
-    <div class="ng-h">1 · Korpus ve hiperparametreler</div>
+    <h2 class="ng-h">1 · Korpus ve hiperparametreler</h2>
     <div class="nn-controls" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
       <label>Korpus:
         <select id="rnnSource">
@@ -397,7 +397,7 @@ function buildHTML() {
       <span id="rnnStatus" style="font-size:.88rem;color:var(--ink-2)">Hazır</span>
     </div>
 
-    <div class="ng-h">2 · Zamanda açılım (Unrolled RNN)</div>
+    <h2 class="ng-h">2 · Zamanda açılım (Unrolled RNN)</h2>
     <p class="ck-meta" style="margin:4px 0">Girdi x_t (altta) → Gizli durum h_t (ortada, ortalama değer) → Çıktı y_t (en olası tahmin üstte):</p>
     <div class="fig-box" style="margin:8px 0;overflow-x:auto">
       <svg id="rnnUnrollSvg" class="rnn-unroll" height="220" style="display:block;border:1px solid var(--rule);border-radius:var(--r);background:var(--page)"></svg>
@@ -407,13 +407,13 @@ function buildHTML() {
       </div>
     </div>
 
-    <div class="ng-h">3 · Kaybolan / Patlayan Gradyanlar (‖∂L/∂h_t‖)</div>
+    <h2 class="ng-h">3 · Kaybolan / Patlayan Gradyanlar (‖∂L/∂h_t‖)</h2>
     <div class="fig-box" style="margin:8px 0">
       <svg id="rnnNormSvg" class="rnn-unroll" viewBox="0 0 360 140" width="360" height="140" style="display:block;border:1px solid var(--rule);border-radius:var(--r);background:var(--page)"></svg>
       <p class="ck-meta" style="margin:4px 0">Zaman adımları geriye gittikçe gradyan normunun nasıl küçüldüğünü (kaybolduğunu) inceleyin.</p>
     </div>
 
-    <div class="ng-h">4 · Kayıp eğrisi ve Metin Üretimi</div>
+    <h2 class="ng-h">4 · Kayıp eğrisi ve Metin Üretimi</h2>
     <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin:8px 0">
       <div class="fig-box">
         <svg id="rnnLossSvg" class="rnn-unroll" viewBox="0 0 320 100" width="320" height="100" style="display:block;border:1px solid var(--rule);border-radius:var(--r)"></svg>
@@ -431,7 +431,7 @@ function buildHTML() {
     </div>
 
     <div class="stu">
-      <div class="ng-h">5 · Formüller ve Yöntemin Açıklaması</div>
+      <h2 class="ng-h">5 · Formüller ve Yöntemin Açıklaması</h2>
       <div class="nn-explain" style="line-height:1.6">
         <p><b>Vanilla RNN hücresi (DL-5 slayt 10–15):</b> <code>h_t = tanh(W_xh · x_t + W_hh · h_{t−1} + b_h)</code>.</p>
         <p><b>Çıktı katmanı:</b> <code>y_t = softmax(W_hy · h_t + b_y)</code>.</p>
@@ -440,7 +440,7 @@ function buildHTML() {
         <p class="ck-meta"><b>Bilinen sınırlar:</b> Küçük tarayıcı modeli ve kısa eğitim süresi nedeniyle üretilen karakter dizileri dilbilgisel açıdan kusursuz olmayabilir; amaç mekanizmayı adım adım göstermektir.</p>
       </div>
 
-      <div class="ng-h">6 · Kendin hesapla</div>
+      <h2 class="ng-h">6 · Kendin hesapla</h2>
       <div class="nn-practice">
         <div id="rnnPracticeQ"></div>
         <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">

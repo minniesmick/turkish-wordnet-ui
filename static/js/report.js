@@ -4,7 +4,7 @@ import {$, $$, state, VIEW_LABEL, toast} from "./core.js";
 import {inlineFonts, reportDocument} from "./reportdoc.js";
 
 // Veri/laboratuvar görünümleri. Ara ve Harita (kenar kâğıdı, tuval) ile Ders kapsam dışı.
-export const REPORT_VIEWS = new Set(["relate", "wsd", "roles", "frames", "morph", "disamb", "parse", "deps", "corpus", "ngram", "nn", "tab", "tok", "emb", "rnn", "attn", "tfm", "eval", "method"]);
+export const REPORT_VIEWS = new Set(["relate", "wsd", "roles", "frames", "morph", "disamb", "parse", "deps", "corpus", "ngram", "nn", "tab", "tok", "emb", "rnn", "attn", "tfm", "decode", "eval", "method"]);
 export const canReport = v => REPORT_VIEWS.has(v);
 
 let CSS_CACHE = null;

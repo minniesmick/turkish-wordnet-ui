@@ -1,4 +1,5 @@
 // Bağımlılık ağacı: Lecture 3 (Dependency Parsing), InClass 4. UD Turkish-BOUN cümlesi seç ya da CoNLL-U yapıştır; ok ve ağaç çizimi, özellik kontrolleri.
+import {clampNumber} from "./safe.js";
 import {$, $$, esc, api, registerView, MODE} from "./core.js";
 import {extBtn} from "./extra.js";
 import {scoreDeps, treeProblems} from "./depscore.js";
@@ -77,7 +78,7 @@ function lpHTML(toks){
 const lcw = s => s.toLocaleLowerCase("tr");
 let root = null, sent = null;
 
-const load = () => { try{ const v = JSON.parse(localStorage.getItem(KEY)) || {}; for(const k of ["q", "min", "max", "id", "conllu", "view"]) if(v[k] != null) DS[k] = v[k]; }catch(_){} };
+const load = () => { try{ const v = JSON.parse(localStorage.getItem(KEY)) || {}; for(const k of ["q", "min", "max", "id", "conllu", "view"]) if(v[k] != null) DS[k] = v[k]; DS.min = clampNumber(DS.min, 1, 60, 5); DS.max = clampNumber(DS.max, DS.min, 60, 12); }catch(_){} };
 const save = () => { try{ localStorage.setItem(KEY, JSON.stringify({q:DS.q, min:DS.min, max:DS.max, id:DS.id, conllu:DS.paste ? DS.conllu : "", view:DS.view})); }catch(_){} };
 
 // ───────────────────────── CoNLL-U
@@ -296,7 +297,7 @@ function mount(){
     <p class="lesson-intro" style="margin:0">UD Turkish-BOUN treebank'inden bir cümle seç ya da kendi CoNLL-U'nu yapıştır: sözcükler arası baş–bağımlı ilişkileri ok ve ağaç olarak çizilir.<span class="stu"> Ağaç özellikleri (tek kök, bağlı, tek başlı, döngüsüz, projektif) kontrol edilir, ilişkiler açıklanır (InClass 4).</span></p>
     <h2 class="ng-h">1 · Cümle seç <small id="dpCount"></small></h2>
     <div class="ng-ctl" style="margin-top:0"><label class="field sm" style="flex:1 1 260px">${""}<input id="dpQ" type="text" placeholder="Cümlede ara (örn. kitap)" autocomplete="off" spellcheck="false"></label>
-      <label class="muted" style="font-size:.88rem">en az <input id="dpMin" class="dp-num" type="number" min="1" max="60"> en çok <input id="dpMax" class="dp-num" type="number" min="1" max="60"> sözcük</label>
+      <label class="muted" style="font-size:.88rem">en az <input id="dpMin" aria-label="En az sözcük sayısı" class="dp-num" type="number" min="1" max="60"> en çok <input id="dpMax" aria-label="En çok sözcük sayısı" class="dp-num" type="number" min="1" max="60"> sözcük</label>
       <button class="btn sm" id="dpRand">Rastgele cümle</button><button class="btn sm ghost" id="dpPaste">CoNLL-U yapıştır</button></div>
     <div id="dpPasteBox" class="hidden"><textarea class="ta" id="dpTa" rows="8" spellcheck="false" placeholder="# text = ...&#10;1&#9;Ali&#9;Ali&#9;PROPN&#9;_&#9;_&#9;2&#9;nsubj&#9;_&#9;_" style="font:500 .85rem/1.5 var(--font-mono)"></textarea>
       <p class="ng-formula" style="margin:6px 0 0">10 sütunlu CoNLL-U (sekme ya da boşlukla ayrılmış, en az 8 sütun). Çok sözcüklü belirteçler (1-2) atlanır.</p></div>

@@ -1,4 +1,5 @@
 // Korpus gezgini: Lecture 5'in korpus kısmı. BOUN (Türkçe) ya da Brown (İngilizce) üzerinde sıklık listesi, Zipf grafiği, KWIC ve korpus istatistikleri.
+import {restore} from "./safe.js";
 import {$, $$, esc, tr as num, registerView, setView, MODE} from "./core.js";
 import {extBtn} from "./extra.js";
 import {CORPORA, loadCorpus, tokensOf} from "./corpusdata.js";
@@ -7,7 +8,7 @@ const CS = {name:"boun", n:5000, unit:"form", lower:true, punct:false, ngram:1, 
 const KEY = "wn:corpus";
 let root = null, C = null, T = null, FREQ = null, busy = 0;
 
-const load = () => { try{ Object.assign(CS, JSON.parse(localStorage.getItem(KEY)) || {}); }catch(_){} };
+const load = () => { try{ Object.assign(CS, restore(CS, JSON.parse(localStorage.getItem(KEY)), {n:[100, 40000], ngram:[1, 3], minf:[1, 1000], win:[1, 12]})); }catch(_){} };
 const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(CS)); }catch(_){} };
 const lowerOf = s => CS.name === "boun" ? s.toLocaleLowerCase("tr") : s.toLowerCase();
 const cmp = s => (a, b) => a.localeCompare(b, CS.name === "boun" ? "tr" : "en");

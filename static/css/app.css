@@ -517,7 +517,7 @@ body.present .rail:hover,body.present .topbar:hover{opacity:1;pointer-events:aut
   .pair.pair-one,.pair.pair-actions{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:520px){
-  .topbar{height:auto;min-height:var(--top-h);display:grid;grid-template-columns:40px minmax(0,1fr) max-content max-content 40px;grid-template-areas:"menu search search search actions" "dict dict mode mode actions";gap:4px;padding:6px 10px}
+  .topbar{height:auto;min-height:var(--top-h);display:grid;grid-template-columns:40px minmax(0,1fr) max-content;grid-template-areas:"menu search actions" "dict dict mode";gap:4px;padding:6px 10px}
   .menu-btn{grid-area:menu}
   .omni{grid-area:search;min-width:0;width:100%;height:40px;padding:0 10px}
   .omni #omniTxt{display:none}.omni .kbd{display:none}

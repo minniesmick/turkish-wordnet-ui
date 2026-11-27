@@ -134,6 +134,7 @@ ode scripts/test_emb.mjs).
 - **RNN** (Lecture 6, DL-5): karakter düzeyinde dil modeli için zamanda açılım (unrolled RNN) SVG çizimi; zamanda geri yayılım (BPTT), gradyan kırpma, kaybolan gradyan norm grafiği, LSTM ve GRU adımları (
 ode scripts/test_rnn.mjs).
 - **Attention** (Lecture 6, DL-6/7): Scaled Dot-Product Attention ara matrisleri (^T \to /\sqrt{d_k} \to \text{mask} \to \text{softmax} \to \cdot V$), etkileşimli dikkat ısı haritası, çift yönlü (encoder / BERT) ve nedensel maskeli (decoder / GPT) karşılaştırması, çok başlıklı dikkat ve konumsal kodlama (
+- **Kod çözme** (Lecture 6, DL-7): açgözlü, ışın ve tam (MAP) arama, sıcaklıklı top-k örnekleme; slayttaki ağaçta ya da kendi metninden sayılan bigram / trigram modelinde (`node scripts/test_decode.mjs`).
 ode scripts/test_attn.mjs; toplam 13 test betiği).
 - **Kullanım kipi**: üst çubuktaki **Araç / Öğrenci** anahtarı normal kullanımı çalışmadan ayırır. Araç kipi yalnızca sonuç verir; Öğrenci kipi ders bağlantıları,
   formüller, adım adım açıklama, kural izi, alıştırma ve sınavları (ve Ders sekmesini) açar: CKY tablosunu kendin doldurup hücre hücre kontrol ettir, n-gram olasılıklarını ve tablo satırlarını elle hesapla, etiketleri gizleyerek bağımlılık ağacını dene. Öğretici öğeler `.stu` sınıfıyla işaretlidir.

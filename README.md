@@ -74,6 +74,7 @@ ode scripts/test_emb.mjs, DL-3). |
 | **RNN** | Unrolled recurrent neural network visualization for character-level language modeling, Backpropagation Through Time (BPTT), gradient clipping, vanishing/exploding gradient analysis, and LSTM/GRU cell steps (
 ode scripts/test_rnn.mjs, DL-5). |
 | **Attention** | Scaled Dot-Product Attention step-by-step (^T \to /\sqrt{d_k} \to \text{mask} \to \text{softmax} \to \cdot V$), attention heatmap, bidirectional (encoder / BERT) vs causal mask (decoder / GPT), multi-head attention, and positional encoding (
+| **Decoding** | Greedy, beam and exact (MAP) search, top-k sampling with temperature, on the slide tree or a bigram / trigram model counted from your own text (DL-7; `node scripts/test_decode.mjs`) |
 ode scripts/test_attn.mjs, DL-6/7; 13 test scripts total). |
 | **Lesson** | Student mode only. Lecture 1–6 study pages: every slide concept next to a button that opens the matching tool with a ready example (Lecture 4 with live WordNet / PropBank / FrameNet queries), plus 42 sourced multiple-choice questions for Lecture 6, explained questions for Lectures 1, 2, 3 and 5, and data-generated quizzes for Lecture 4. |
 

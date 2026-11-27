@@ -11,6 +11,7 @@ function mount(){
   if(root) return;
   root = $("#v-search");
   root.innerHTML = `<div class="page">
+    <h1 class="sr">Sözlükte ara</h1>
     <div class="runhead"><span class="gw" id="gwL"></span><span class="mid" id="gwMid"></span><span class="gw" id="gwR"></span></div>
     <div class="row nowrap-sm" style="margin-top:18px">
       <label class="field" style="flex:1">${icon("search")}<input id="sq" type="text" placeholder="Sözcük, tanım ya da kimlik yaz…" autocomplete="off" spellcheck="false" aria-label="Sözlükte ara"><button class="iconbtn hidden" id="sClear" aria-label="Temizle" style="height:28px;min-width:28px">${icon("x")}</button></label>

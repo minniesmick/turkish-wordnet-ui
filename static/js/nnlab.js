@@ -272,11 +272,11 @@ function layerEditorHTML() {
 // ─── ana HTML oluştur
 function buildHTML() {
   root.innerHTML = `
-<div class="ng-h">Sinir ağı eğitimi <span class="stu">· DL-1, DL-2</span></div>
+<h1 class="page-title">Sinir ağı eğitimi <span class="stu">· DL-1, DL-2</span></h1>
 <p>Oyuncak bir veri kümesinde çok katmanlı algılayıcı (MLP) eğitimini gerçek hesapla takip et.
 <span class="stu">Aktivasyon işlevleri, kayıp ve geri yayılım DL-1–2 slaytlarındaki yöntemlerdir.</span></p>
 
-<div class="ng-h">1 · Veri kümesi ve ağ</div>
+<h2 class="ng-h">1 · Veri kümesi ve ağ</h2>
 <div class="nn-controls">
   <label>Veri kümesi:
     <select id="nnDataset">
@@ -294,7 +294,7 @@ function buildHTML() {
   <button class="btn sm" id="nnRegenData">Veriyi yenile</button>
 </div>
 
-<div class="ng-h">1b · Ağ mimarisi</div>
+<h2 class="ng-h">1b · Ağ mimarisi</h2>
 <div id="nnLayers">${layerEditorHTML()}</div>
 <div style="display:flex;gap:8px;margin:8px 0">
   ${S.layers.length < LAYER_MAX ? `<button class="btn sm" id="nnAddLayer">${icon("plus")} Katman ekle</button>` : ""}
@@ -305,7 +305,7 @@ function buildHTML() {
   </label>
 </div>
 
-<div class="ng-h">2 · Eğitim</div>
+<h2 class="ng-h">2 · Eğitim</h2>
 <div class="nn-controls">
   <label>Öğrenme oranı: <input type="number" id="nnLr" value="${S.lr}" min="0.0001" max="1" step="0.001" style="width:80px"></label>
   <label>Optimizer:
@@ -333,7 +333,7 @@ function buildHTML() {
   <span id="nnStatus" style="font-size:.88rem;color:var(--ink-2)">—</span>
 </div>
 
-<div class="ng-h">3 · Karar sınırı ve kayıp eğrisi</div>
+<h2 class="ng-h">3 · Karar sınırı ve kayıp eğrisi</h2>
 <div class="fig-box" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
   <div>
     <canvas id="nnCanvas" width="260" height="260" style="border:1px solid var(--rule);border-radius:var(--r);display:block"
@@ -348,11 +348,11 @@ function buildHTML() {
   </div>
 </div>
 
-<div class="ng-h">4 · Ağırlık görünümü</div>
+<h2 class="ng-h">4 · Ağırlık görünümü</h2>
 <div id="nnWeights"><p class="muted">Ağ başlatılmadı.</p></div>
 
 <div class="stu">
-<div class="ng-h">5 · Formüller ve yöntemin açıklaması</div>
+<h2 class="ng-h">5 · Formüller ve yöntemin açıklaması</h2>
 <div class="nn-explain">
   <p><b>İleri yayılım (DL-1 slayt 14):</b> a⁽ˡ⁾ = g(W⁽ˡ⁾·a⁽ˡ⁻¹⁾ + b⁽ˡ⁾)</p>
   <p><b>Kayıp — MSE (DL-2 slayt 5):</b> L = Σ(ŷ−y)²/n · <b>Çapraz entropi:</b> L = −Σ y·log(ŷ)</p>
@@ -362,7 +362,7 @@ function buildHTML() {
   <p class="nn-limit"><b>Sınırlar:</b> oyuncak 2B veri; küçük ağ; gerçek NLP görevi değil. Spiral gibi zor kümeler daha derin ağ veya çok epoch ister.</p>
 </div>
 
-<div class="ng-h">6 · Kendin hesapla</div>
+<h2 class="ng-h">6 · Kendin hesapla</h2>
 <div class="nn-practice">
   <div id="nnPracticeQ"></div>
   <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
