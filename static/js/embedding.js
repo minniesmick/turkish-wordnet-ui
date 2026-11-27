@@ -11,6 +11,7 @@ const PRESET_TEXT = "kedi süt içer ve uyur. köpek kemik yer ve koşar. araba 
 
 const S = {
   source: "preset", // "preset" | "boun" | "custom"
+  mode: "skipgram", // "skipgram" | "cbow"
   customText: PRESET_TEXT,
   dim: 16,
   window: 2,
@@ -43,6 +44,7 @@ function loadState() {
     const v = JSON.parse(localStorage.getItem(KEY) || "null");
     if (!v || typeof v !== "object") return;
     if (["preset", "boun", "custom"].includes(v.source)) S.source = v.source;
+    if (["skipgram", "cbow"].includes(v.mode)) S.mode = v.mode;
     if (typeof v.customText === "string") S.customText = v.customText.slice(0, 50000);
     if (Number.isFinite(v.dim)) S.dim = Math.max(4, Math.min(64, v.dim | 0));
     if (Number.isFinite(v.window)) S.window = Math.max(1, Math.min(5, v.window | 0));
@@ -60,6 +62,7 @@ function saveState() {
     localStorage.setItem(KEY, JSON.stringify({
       rev: 2,
       source: S.source,
+      mode: S.mode,
       customText: S.customText,
       dim: S.dim,
       window: S.window,
@@ -110,7 +113,8 @@ function initModel() {
     window: S.window,
     negK: S.negK,
     lr: S.lr,
-    seed: S.seed
+    seed: S.seed,
+    mode: S.mode
   });
 }
 
@@ -266,7 +270,7 @@ function renderNeighbors() {
       <table class="ng-tbl">
         <thead>
           <tr>
-            <th colspan="2">Word2Vec (Skip-Gram Kosinüs)</th>
+            <th colspan="2">Word2Vec (${S.mode === "cbow" ? "CBOW" : "Skip-Gram"} Kosinüs)</th>
             <th colspan="2">PPMI Benzerliği (lm.js)</th>
           </tr>
           <tr>
@@ -411,7 +415,7 @@ function buildHTML() {
   root.innerHTML = `
     <div class="ng-h">Word Embedding <span class="stu">· DL-3, DL-4 Part 3</span></div>
     <p>Sözcükleri yoğun vektörlerle temsil et; benzer bağlamlarda geçen sözcüklerin yakınlaştığını gözlemle.
-    <span class="stu">Skip-gram, negatif örnekleme ve PCA izdüşümü gerçek hesapla işletilir.</span></p>
+    <span class="stu">Skip-gram ve CBOW, negatif örnekleme ve PCA izdüşümü gerçek hesapla işletilir.</span></p>
 
     <div class="ng-h">1 · Korpus ve hiperparametreler</div>
     <div class="nn-controls" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
@@ -420,6 +424,12 @@ function buildHTML() {
           <option value="preset"${S.source === "preset" ? " selected" : ""}>Küçük oyuncak metin (hayvanlar/araçlar)</option>
           <option value="boun"${S.source === "boun" ? " selected" : ""}>BOUN Korpusu (UD Türkçe)</option>
           <option value="custom"${S.source === "custom" ? " selected" : ""}>Özel metin</option>
+        </select>
+      </label>
+      <label>Mimari:
+        <select id="embMode">
+          <option value="skipgram"${S.mode === "skipgram" ? " selected" : ""}>Skip-gram (merkez → bağlam)</option>
+          <option value="cbow"${S.mode === "cbow" ? " selected" : ""}>CBOW (bağlam → merkez)</option>
         </select>
       </label>
       <label>Boyut (dim):
@@ -490,6 +500,7 @@ function buildHTML() {
     <div class="stu">
       <div class="ng-h">6 · Formüller ve yöntemin açıklaması</div>
       <div class="nn-explain" style="line-height:1.6">
+        <p><b>CBOW (DL-3 slayt 18–23):</b> penceredeki bağlam sözcüklerinin vektörleri ortalanır, <code>h = (1/2m) Σ v_c</code>, ve bu ortalama merkez sözcüğü tahmin eder. Her konum tek örnek verir; skip-gram ise her (merkez, bağlam) çiftini ayrı örnek sayar. Bu sayfada ikisi de negatif örneklemeyle eğitilir (slaytlardaki softmax yerine).</p>
         <p><b>Skip-gram (DL-3 slayt 24):</b> Merkez sözcük <code>w</code> verildiğinde bağlam sözcüğü <code>c</code>'nin olasılığı: <code>P(c|w) = exp(u_cᵀ v_w) / Σ exp(u_w'ᵀ v_w)</code>.</p>
         <p><b>Negatif Örnekleme (DL-3 slayt 26):</b> Softmax paydasındaki toplam pahalıdır; bunun yerine ikili lojistik hedef kullanılır: <code>L = −log σ(u_cᵀ v_w) − Σᵢ₌₁ᵏ log σ(−u_{n_i}ᵀ v_w)</code>.</p>
         <p><b>Kosinüs benzerliği (DL-3 slayt 7):</b> <code>cos(u, v) = (u · v) / (‖u‖ ‖v‖)</code>.</p>
@@ -533,6 +544,7 @@ function bindEvents() {
     }
   });
 
+  q("#embMode")?.addEventListener("change", e => { S.mode = e.target.value; initModel(); renderStatus(); renderLoss(); renderOutputs(); saveState(); });
   q("#embDim")?.addEventListener("change", e => { S.dim = +e.target.value; initModel(); saveState(); });
   q("#embWindow")?.addEventListener("change", e => { S.window = +e.target.value; initModel(); saveState(); });
   q("#embNegK")?.addEventListener("change", e => { S.negK = +e.target.value; initModel(); saveState(); });

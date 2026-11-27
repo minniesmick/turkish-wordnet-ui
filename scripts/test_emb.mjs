@@ -2,7 +2,7 @@
 import {
   mulberry32, tokenize, buildVocab, cosine,
   initEmbeddings, skipGramStep, buildPairs, buildNegSampler,
-  createTrainer, nearest, analogy, pca2d, numericalGradCheck
+  createTrainer, nearest, analogy, pca2d, numericalGradCheck, cbowStep, buildCbowExamples
 } from "../static/js/emb.js";
 
 let failures = 0;
@@ -53,6 +53,29 @@ const gradResults = numericalGradCheck(Wg, Cg, 0, 2, [1, 3], 4, 1e-5);
 check("Sayısal gradyan denetimi: tüm boyutlarda göreli hata < 1e-4",
   gradResults.every(r => r.relErr < 1e-4),
   gradResults.map(r => `d=${r.d}: relErr=${r.relErr.toExponential(3)}`).join(", "));
+
+// ─── 4b. CBOW: sayısal gradyan ve örnek üretimi
+console.log("\n── 4b. CBOW ──");
+{
+  const V = 6, dim = 4, r = mulberry32(11), W0 = new Float64Array(V * dim).map(() => r() - 0.5), C0 = new Float64Array(V * dim).map(() => r() - 0.5);
+  const ctx = [0, 1, 3], center = 2, negs = [4, 5];
+  const loss = (W, C) => cbowStep(W.slice(), C.slice(), ctx, center, negs, dim, 0);
+  const lr = 1e-3, W1 = W0.slice(), C1 = C0.slice();
+  cbowStep(W1, C1, ctx, center, negs, dim, lr);
+  let worst = 0;
+  for (const [M0, M1, isW] of [[W0, W1, true], [C0, C1, false]]) {
+    for (let i = 0; i < M0.length; i++) {
+      const analytic = (M0[i] - M1[i]) / lr;
+      const plus = M0.slice(), minus = M0.slice(); plus[i] += 1e-5; minus[i] -= 1e-5;
+      const numeric = (loss(isW ? plus : W0, isW ? C0 : plus) - loss(isW ? minus : W0, isW ? C0 : minus)) / 2e-5;
+      worst = Math.max(worst, Math.abs(analytic - numeric));
+    }
+  }
+  check("CBOW sayısal gradyan (tüm W ve C)", worst < 1e-6, `en büyük fark=${worst.toExponential(2)}`);
+  const ex = buildCbowExamples([7, 8, 9], 1);
+  check("CBOW örnekleri: bağlam → merkez", JSON.stringify(ex) === JSON.stringify([[[8], 7], [[7, 9], 8], [[8], 9]]));
+  check("CBOW bağlamsız tek sözcük örnek vermez", buildCbowExamples([1], 2).length === 0);
+}
 
 // ─── 5. Küçük korpus eğitimi — benzer bağlam sözcükleri yakın olmalı
 console.log("\n── 5. Küçük korpus eğitim testi ──");
@@ -111,6 +134,17 @@ check("tek sözcük vocab", sv.size === 1);
 // PCA boş
 const emptyPts = pca2d(new Float64Array(0), 4, 0, 0);
 check("PCA boş vocab", emptyPts.length === 0);
+
+// ─── 9. CBOW eğitimi: oyuncak metinde kayıp düşer, aynı bağlamdaki sözcükler yaklaşır
+console.log("\n── 9. CBOW eğitimi ──");
+{
+  const toks = tokenize("kedi süt içer. köpek süt içer. araba yolda gider. tren rayda gider. ".repeat(30));
+  const v = buildVocab(toks);
+  const t = createTrainer({ tokens: toks, vocab: v.vocab, ivocab: v.ivocab, freq: v.freq, dim: 8, window: 2, negK: 3, lr: 0.05, seed: 42, mode: "cbow" });
+  const losses = [];
+  while (t.getEpoch() < 40) { const r = t.step(64); if (r.epochDone) losses.push(r.loss); }
+  check("CBOW kaybı düşer", losses.at(-1) < losses[0], `${losses[0].toFixed(3)} → ${losses.at(-1).toFixed(3)}`);
+}
 
 // ─── Özet
 console.log(`\n${"─".repeat(40)}`);

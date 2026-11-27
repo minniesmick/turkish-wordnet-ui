@@ -3063,5 +3063,267 @@
         ]
       }
     }
-  ]
+  ],
+  "baseline": {
+    "chosen": "skipgram",
+    "variants": {
+      "cbow": {
+        "val_macro_f1": 0.5844,
+        "metrics": {
+          "accuracy": 0.648,
+          "macro_precision": 0.6321,
+          "macro_recall": 0.6116,
+          "macro_f1": 0.6194,
+          "weighted_f1": 0.6452,
+          "per_class": {
+            "negative": {
+              "precision": 0.55,
+              "recall": 0.4681,
+              "f1": 0.5057,
+              "support": 47
+            },
+            "neutral": {
+              "precision": 0.6462,
+              "recall": 0.7304,
+              "f1": 0.6857,
+              "support": 115
+            },
+            "positive": {
+              "precision": 0.7,
+              "recall": 0.6364,
+              "f1": 0.6667,
+              "support": 88
+            }
+          },
+          "confusion_matrix": {
+            "rows": "gold",
+            "cols": "pred",
+            "labels": [
+              "negative",
+              "neutral",
+              "positive"
+            ],
+            "matrix": [
+              [
+                22,
+                20,
+                5
+              ],
+              [
+                12,
+                84,
+                19
+              ],
+              [
+                6,
+                26,
+                56
+              ]
+            ]
+          }
+        }
+      },
+      "skipgram": {
+        "val_macro_f1": 0.5907,
+        "metrics": {
+          "accuracy": 0.644,
+          "macro_precision": 0.6265,
+          "macro_recall": 0.603,
+          "macro_f1": 0.6113,
+          "weighted_f1": 0.6397,
+          "per_class": {
+            "negative": {
+              "precision": 0.5556,
+              "recall": 0.4255,
+              "f1": 0.4819,
+              "support": 47
+            },
+            "neutral": {
+              "precision": 0.6457,
+              "recall": 0.713,
+              "f1": 0.6777,
+              "support": 115
+            },
+            "positive": {
+              "precision": 0.6782,
+              "recall": 0.6705,
+              "f1": 0.6743,
+              "support": 88
+            }
+          },
+          "confusion_matrix": {
+            "rows": "gold",
+            "cols": "pred",
+            "labels": [
+              "negative",
+              "neutral",
+              "positive"
+            ],
+            "matrix": [
+              [
+                20,
+                19,
+                8
+              ],
+              [
+                13,
+                82,
+                20
+              ],
+              [
+                3,
+                26,
+                59
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "neighbours": {
+      "good": [
+        [
+          "bad",
+          0.667
+        ],
+        [
+          "daft",
+          0.615
+        ],
+        [
+          "luck",
+          0.562
+        ],
+        [
+          "great",
+          0.561
+        ],
+        [
+          "#proud",
+          0.561
+        ],
+        [
+          "uptown",
+          0.561
+        ]
+      ],
+      "bad": [
+        [
+          "blood",
+          0.698
+        ],
+        [
+          "hombres",
+          0.698
+        ],
+        [
+          "good",
+          0.667
+        ],
+        [
+          "reciting",
+          0.653
+        ],
+        [
+          "swift's",
+          0.628
+        ],
+        [
+          "voty",
+          0.628
+        ]
+      ],
+      "happy": [
+        [
+          "birthday",
+          0.658
+        ],
+        [
+          "belated",
+          0.65
+        ],
+        [
+          "liam's",
+          0.63
+        ],
+        [
+          "#princegeorge",
+          0.627
+        ],
+        [
+          "bday",
+          0.617
+        ],
+        [
+          "aww",
+          0.617
+        ]
+      ],
+      "love": [
+        [
+          "#nsn",
+          0.667
+        ],
+        [
+          "appreciate",
+          0.664
+        ],
+        [
+          "dyslexic",
+          0.642
+        ],
+        [
+          "xxx",
+          0.638
+        ],
+        [
+          "oppa",
+          0.624
+        ],
+        [
+          "quirky",
+          0.62
+        ]
+      ],
+      "worst": [
+        [
+          "dumbest",
+          0.684
+        ],
+        [
+          "best",
+          0.653
+        ],
+        [
+          "wrecker",
+          0.621
+        ],
+        [
+          "coolest",
+          0.618
+        ],
+        [
+          "excluding",
+          0.616
+        ],
+        [
+          "stupidest",
+          0.616
+        ]
+      ]
+    },
+    "context": {
+      "word": "sick",
+      "sentences": [
+        "i feel sick today and i am staying in bed",
+        "that new trailer is sick, i love it"
+      ],
+      "word2vec": 1.0,
+      "transformers": {
+        "model1_char": 0.0003,
+        "model2_bpe": 0.6594,
+        "model3_distilbert": -0.1799
+      }
+    }
+  }
 }

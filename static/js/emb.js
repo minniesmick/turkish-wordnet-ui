@@ -102,6 +102,44 @@ export function skipGramStep(W, C, center, context, negatives, dim, lr) {
   return lossPos + lossNeg;
 }
 
+// ─────────────────────────── CBOW + negatif örnekleme (DL-3 slayt 18–23)
+// h = bağlam vektörlerinin ortalaması; h merkez sözcüğü tahmin eder. Gradyan ortalamadan geçtiği için her bağlam sözcüğüne 1/n payı gider.
+export function cbowStep(W, C, context, center, negatives, dim, lr) {
+  const n = context.length;
+  if (!n) return 0;
+  const h = new Float64Array(dim);
+  for (const w of context) for (let d = 0; d < dim; d++) h[d] += W[w * dim + d] / n;
+  const dh = new Float64Array(dim);
+  let loss = 0;
+  const update = (word, label) => {
+    const o = word * dim;
+    let s = 0;
+    for (let d = 0; d < dim; d++) s += h[d] * C[o + d];
+    const p = sigmoid(s);
+    loss += label ? -Math.log(p + 1e-15) : -Math.log(1 - p + 1e-15);
+    const g = p - label;
+    for (let d = 0; d < dim; d++) {
+      dh[d] += g * C[o + d];
+      C[o + d] -= lr * g * h[d];
+    }
+  };
+  update(center, 1);
+  for (const neg of negatives) if (neg !== center) update(neg, 0);
+  for (const w of context) for (let d = 0; d < dim; d++) W[w * dim + d] -= lr * dh[d] / n;
+  return loss;
+}
+
+// CBOW örnekleri: her konum için (penceredeki sözcükler, merkez)
+export function buildCbowExamples(tokenIds, window) {
+  const out = [];
+  for (let i = 0; i < tokenIds.length; i++) {
+    const context = [];
+    for (let j = Math.max(0, i - window); j <= Math.min(tokenIds.length - 1, i + window); j++) if (j !== i) context.push(tokenIds[j]);
+    if (context.length) out.push([context, tokenIds[i]]);
+  }
+  return out;
+}
+
 // Negatif örnekleme dağılımı (3/4 güç — DL-3 slayt 26)
 export function buildNegSampler(freq, vocab, seed) {
   const ivocab = [...vocab.keys()];
@@ -136,7 +174,8 @@ export function buildPairs(tokenIds, window) {
 
 // ─────────────────────────── kademeli eğitim oluşturucu
 // Döndürür: {step, getVectors, getLoss, epoch}
-export function createTrainer({ tokens, vocab, ivocab, freq, dim, window, negK, lr, seed }) {
+export function createTrainer({ tokens, vocab, ivocab, freq, dim, window, negK, lr, seed, mode = "skipgram" }) {
+  const cbow = mode === "cbow";
   const tokenIds = tokens.map(t => vocab.get(t) ?? -1).filter(i => i >= 0);
   const { W, C } = initEmbeddings(ivocab.length, dim, seed);
   const negSampler = buildNegSampler(freq, vocab, seed + 1);
@@ -146,7 +185,7 @@ export function createTrainer({ tokens, vocab, ivocab, freq, dim, window, negK, 
   let pairs = [];
 
   function shufflePairs() {
-    pairs = buildPairs(tokenIds, window);
+    pairs = cbow ? buildCbowExamples(tokenIds, window) : buildPairs(tokenIds, window);
     // Fisher-Yates karıştır (tohumlu)
     for (let i = pairs.length - 1; i > 0; i--) {
       const j = Math.floor(rng() * (i + 1));
@@ -167,9 +206,9 @@ export function createTrainer({ tokens, vocab, ivocab, freq, dim, window, negK, 
         done = true;
         break;
       }
-      const [center, ctx] = pairs[pairIdx++];
+      const [x, y] = pairs[pairIdx++];        // skip-gram: (merkez, bağlam) · CBOW: (bağlam listesi, merkez)
       const negs = negSampler(negK);
-      const loss = skipGramStep(W, C, center, ctx, negs, dim, lr);
+      const loss = cbow ? cbowStep(W, C, x, y, negs, dim, lr) : skipGramStep(W, C, x, y, negs, dim, lr);
       lossBuf += loss; lossCnt++;
     }
     const avgLoss = lossCnt > 0 ? lossBuf / lossCnt : 0;

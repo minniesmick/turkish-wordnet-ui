@@ -20,10 +20,10 @@ const mdl = k => D.models.find(m => m.key === k);
 const bar = (v, color) => `<div class="mt-track"><i style="width:${(v * 100).toFixed(1)}%;background:${color}"></i></div>`;
 
 function resultsHTML(){
-  const rows = (key, title) => `<div class="mt-grp"><h4>${title}</h4>${D.models.map(m => {
-    const v = key === "accuracy" || key === "macro_f1" || key === "weighted_f1" ? m.metrics[key] : m.metrics.per_class[key].f1;
-    return `<div class="mt-row"><span>${NAMES[m.key]}</span>${bar(v, STYLE[m.key].c)}<b>${f3(v)}</b></div>`;
-  }).join("")}</div>`;
+  const val = (x, key) => key === "accuracy" || key === "macro_f1" || key === "weighted_f1" ? x[key] : x.per_class[key].f1;
+  const base = D.baseline?.variants[D.baseline.chosen].metrics;
+  const line = (name, v, color) => `<div class="mt-row"><span>${name}</span>${bar(v, color)}<b>${f3(v)}</b></div>`;
+  const rows = (key, title) => `<div class="mt-grp"><h4>${title}</h4>${D.models.map(m => line(NAMES[m.key], val(m.metrics, key), STYLE[m.key].c)).join("")}${base ? line("Taban · Word2Vec", val(base, key), "var(--ink-3)") : ""}</div>`;
   const best = [...D.models].sort((a, b) => b.metrics.macro_f1 - a.metrics.macro_f1);
   return `<div class="mt-two"><div>${rows("accuracy", "Accuracy")}${rows("macro_f1", "Macro-F1")}${rows("weighted_f1", "Weighted-F1")}</div>
     <div>${CLS.map(c => rows(c, `F1 · ${c} (n=${D.models[0].metrics.per_class[c].support})`)).join("")}</div></div>
@@ -126,8 +126,21 @@ function takeHTML(){
     <p class="ck-meta">Çalıştırma: <code>bash run.sh</code> veri hazırlığı, iki eğitim, ince ayar, üç pipeline ve özeti sırayla yürütür; tüm yollar göreli. Proje klasörü: <code>comp451-project1</code>.</p>`;
 }
 
+function baseHTML(){
+  const b = D.baseline;
+  if(!b) return `<p class="ck-meta">Taban çizgisi verisi yok. <code>python tools/word2vec_baseline.py</code>, ardından <code>tools/export_app_data.py</code>.</p>`;
+  const chosen = b.variants[b.chosen].metrics, sg = b.variants.skipgram, cb = b.variants.cbow;
+  const nb = w => (b.neighbours[w] || []).slice(0, 5).map(([n, s]) => `${esc(n)} <span class="num muted">${s.toFixed(2)}</span>`).join(", ");
+  const c = b.context;
+  return `<p class="ck-meta">Ödevin üç modeline ek, statik vektörlü bir karşılaştırma: Word2Vec vektörleri yalnızca eğitim bölümünden öğrenilir, tweet vektörü kelime vektörlerinin ortalamasıdır, üstünde küçük bir ağ sınıflandırır. Doğrulama macro-F1: Skip-gram ${f3(sg.val_macro_f1)}, CBOW ${f3(cb.val_macro_f1)}; seçilen ${b.chosen === "cbow" ? "CBOW" : "Skip-gram"}. Testte macro-F1 <b>${f3(chosen.macro_f1)}</b>.</p>
+    <table class="ng-tbl"><caption>En yakın komşular (kosinüs)</caption><tr><th>Sözcük</th><th>Komşular</th></tr>${["good", "bad"].map(w => `<tr><td lang="en">${w}</td><td lang="en">${nb(w)}</td></tr>`).join("")}</table>
+    <h3>Aynı sözcük, iki cümle: "${esc(c.word)}"</h3><ul class="mt-ul">${c.sentences.map(s => `<li lang="en">${esc(s)}</li>`).join("")}</ul>
+    <table class="ng-tbl"><caption>İki cümledeki "${esc(c.word)}" vektörlerinin kosinüsü</caption><tr><th>Temsil</th><th>Kosinüs</th></tr><tr><td>Word2Vec (statik)</td><td class="num">${c.word2vec.toFixed(2)}</td></tr>${Object.entries(c.transformers).map(([k, v]) => `<tr><td>${NAMES[k]} (bağlamsal)</td><td class="num">${v.toFixed(2)}</td></tr>`).join("")}</table>
+    <div class="stu"><p>Statik gömmede her sözcüğün tek vektörü vardır, bu yüzden kosinüs 1 çıkar (DL-4: statik ve dinamik gömme). Transformer'da vektör cümleye bağlıdır. Sayıları modeller arasında karşılaştırma: her modelin uzayı farklı. <b>good</b> ile <b>bad</b> yakın çıkar, çünkü zıt anlamlılar aynı bağlamlarda geçer; ortalama almak sözcük sırasını da siler.</p></div>`;
+}
+
 const SEC = [["1 · Veri", dataHTML], ["2 · Sonuçlar", resultsHTML], ["3 · Üç tokenizer", tokHTML], ["4 · Sıfırdan transformer (Model 1 ve 2)", archHTML], ["5 · Eğitim eğrileri", trainHTML],
-  ["6 · Hazır modelin ince ayarı (Model 3)", ftHTML], ["7 · Pipeline ve değerlendirme", evalHTML], ["8 · Çıkarımlar", takeHTML]];
+  ["6 · Hazır modelin ince ayarı (Model 3)", ftHTML], ["7 · Pipeline ve değerlendirme", evalHTML], ["8 · Çıkarımlar", takeHTML], ["9 · Ek: statik vektör taban çizgisi", baseHTML]];
 
 function paint(){
   if(!D) return;
